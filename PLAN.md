@@ -8,9 +8,9 @@ Work one phase at a time. Each phase ends with a "Done when" check. Phase 4 is a
 
 - [ ] Unzip the prototype into a new repo, `git init`, and commit it as "Prototype baseline". (Deferred. `.gitignore` is already in place.)
 - [x] Re-add the shadcn components with the CLI so they match what `npx shadcn add` produces:
-  `npx shadcn add alert avatar badge breadcrumb button button-group card collapsible command dialog dropdown-menu empty field input input-group item kbd label popover progress scroll-area select separator sheet sidebar skeleton spinner switch table tabs textarea toast toggle toggle-group tooltip --overwrite`
+      `npx shadcn add alert avatar badge breadcrumb button button-group card collapsible command dialog dropdown-menu empty field input input-group item kbd label popover progress scroll-area select separator sheet sidebar skeleton spinner switch table tabs textarea toast toggle toggle-group tooltip --overwrite`
 - [x] Review the diff. Expect formatting differences only. Investigate anything else, then reapply the `viewportClassName` change to `Toaster` in `toast.tsx`.
-  Result: class order and wrapping only, plus duplicate classes dropped. The compiled CSS is identical to the baseline. The CLI now imports `cn` from the `cn` package (pinned to 0.5.0) and adds an unused `React` import to `scroll-area.tsx`, which strict mode rejects, so that import is removed.
+      Result: class order and wrapping only, plus duplicate classes dropped. The compiled CSS is identical to the baseline. The CLI now imports `cn` from the `cn` package (pinned to 0.5.0) and adds an unused `React` import to `scroll-area.tsx`, which strict mode rejects, so that import is removed.
 - [x] Add `CLAUDE.md`, this file, and `docs/decisions/0000-foundations.md`.
 
 **Done when:** `npm run dev` and `npm run typecheck` pass and the app looks the same as the published prototype.

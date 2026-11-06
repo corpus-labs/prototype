@@ -1,4 +1,4 @@
-import * as React from "react"
+import * as React from "react";
 import {
   BotIcon,
   BlocksIcon,
@@ -20,9 +20,9 @@ import {
   SunIcon,
   SwatchBookIcon,
   ExternalLinkIcon,
-} from "lucide-react"
+} from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -30,8 +30,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandDialog,
@@ -42,7 +42,7 @@ import {
   CommandList,
   CommandSeparator,
   CommandShortcut,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,9 +53,9 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Kbd } from "@/components/ui/kbd"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/dropdown-menu";
+import { Kbd } from "@/components/ui/kbd";
+import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
   SidebarContent,
@@ -73,31 +73,52 @@ import {
   SidebarRail,
   SidebarTrigger,
   useSidebar,
-} from "@/components/ui/sidebar"
-import { toast } from "@/components/ui/toast"
-import { copyText } from "@/components/common"
-import { CorpusLogo, CorpusMark } from "@/components/corpus-logo"
-import { components, guidelineFiles, handbook, questions, tokens, workspace } from "@/data/workspace"
-import { KIND_LABEL, foldersOf, projectOf, useCurrentProject, useProjects, type ProjectSummary } from "@/lib/projects"
-import { navigate } from "@/lib/router"
-import { useDocDrafts, withDraft } from "@/lib/docs-drafts"
-import { useStore, type Base, type Theme } from "@/lib/store"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/sidebar";
+import { toast } from "@/components/ui/toast";
+import { copyText } from "@/components/common";
+import { CorpusLogo, CorpusMark } from "@/components/corpus-logo";
+import {
+  components,
+  guidelineFiles,
+  handbook,
+  questions,
+  tokens,
+  workspace,
+} from "@/data/workspace";
+import {
+  KIND_LABEL,
+  foldersOf,
+  projectOf,
+  useCurrentProject,
+  useProjects,
+  type ProjectSummary,
+} from "@/lib/projects";
+import { navigate } from "@/lib/router";
+import { useDocDrafts, withDraft } from "@/lib/docs-drafts";
+import { useStore, type Base, type Theme } from "@/lib/store";
+import { cn } from "@/lib/utils";
 
-type NavKey = "overview" | "components" | "tokens" | "guidelines" | "agents" | "integrations" | "workspace"
+type NavKey =
+  | "overview"
+  | "components"
+  | "tokens"
+  | "guidelines"
+  | "agents"
+  | "integrations"
+  | "workspace";
 
 export function sectionOf(route: string): NavKey {
-  if (route === "components" || route.startsWith("component-")) return "components"
-  if (route === "tokens") return "tokens"
-  if (route === "guidelines" || route.startsWith("guide-")) return "guidelines"
+  if (route === "components" || route.startsWith("component-")) return "components";
+  if (route === "tokens") return "tokens";
+  if (route === "guidelines" || route.startsWith("guide-")) return "guidelines";
   if (route.startsWith("edit-")) {
-    const id = route.slice(5)
-    return guidelineFiles.some((g) => g.id === id) ? "guidelines" : "components"
+    const id = route.slice(5);
+    return guidelineFiles.some((g) => g.id === id) ? "guidelines" : "components";
   }
-  if (route === "agents") return "agents"
-  if (route === "integrations") return "integrations"
-  if (route === "workspace") return "workspace"
-  return "overview"
+  if (route === "agents") return "agents";
+  if (route === "integrations") return "integrations";
+  if (route === "workspace") return "workspace";
+  return "overview";
 }
 
 const NAV: { key: NavKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
@@ -106,24 +127,33 @@ const NAV: { key: NavKey; label: string; icon: React.ComponentType<{ className?:
   { key: "tokens", label: "Tokens", icon: SwatchBookIcon },
   { key: "guidelines", label: "Guidelines", icon: BookOpenIcon },
   { key: "agents", label: "Agents", icon: BotIcon },
-]
+];
 
 const SETUP: typeof NAV = [
   { key: "integrations", label: "Integrations", icon: BlocksIcon },
   { key: "workspace", label: "Settings", icon: Settings2Icon },
-]
+];
 
 /** ⌘ on Apple devices, Ctrl everywhere else. */
-const MOD_KEY = typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? "⌘" : "Ctrl "
+const MOD_KEY =
+  typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.userAgent)
+    ? "⌘"
+    : "Ctrl ";
 
 /**
  * The current project’s name, which opens a menu to switch projects or go to
  * all of them. In the desktop breadcrumb it looks like any other crumb plus a
  * chevron. On phones it’s the page title.
  */
-function ProjectMenu({ variant, current }: { variant: "crumb" | "title"; current: ProjectSummary }) {
-  const title = variant === "title"
-  const projects = useProjects()
+function ProjectMenu({
+  variant,
+  current,
+}: {
+  variant: "crumb" | "title";
+  current: ProjectSummary;
+}) {
+  const title = variant === "title";
+  const projects = useProjects();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -131,19 +161,24 @@ function ProjectMenu({ variant, current }: { variant: "crumb" | "title"; current
           // The same hover grey as the sidebar items. It stays while the menu is open.
           "group/workspace flex min-w-0 items-center gap-1 rounded-md px-1.5 transition-colors outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground",
           // Negative margins keep the name where the text sits, so only the grey reaches past it.
-          title ? "-ml-1.5 h-9 text-[15px] font-semibold tracking-tight" : "-mx-1.5 h-7"
+          title ? "-ml-1.5 h-9 text-[15px] font-semibold tracking-tight" : "-mx-1.5 h-7",
         )}
       >
         <span className="truncate">{current.name}</span>
         <ChevronDownIcon
           className={cn(
             "shrink-0 transition-transform duration-200 group-data-popup-open/workspace:rotate-180",
-            title ? "size-4 text-muted-foreground" : "size-3.5"
+            title ? "size-4 text-muted-foreground" : "size-3.5",
           )}
         />
       </DropdownMenuTrigger>
       {/* Offsets line the menu’s text up with the name above it. */}
-      <DropdownMenuContent className="min-w-56" align="start" alignOffset={-4} sideOffset={title ? 4 : 6}>
+      <DropdownMenuContent
+        className="min-w-56"
+        align="start"
+        alignOffset={-4}
+        sideOffset={title ? 4 : 6}
+      >
         <DropdownMenuGroup>
           <DropdownMenuLabel>Projects</DropdownMenuLabel>
           {projects.map((p) => (
@@ -175,37 +210,42 @@ function ProjectMenu({ variant, current }: { variant: "crumb" | "title"; current
         )}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
 
 export function useOpenGaps() {
-  const { resolved } = useStore()
-  return questions.filter((q) => q.status === "gap" && !resolved.includes(q.id))
+  const { resolved } = useStore();
+  return questions.filter((q) => q.status === "gap" && !resolved.includes(q.id));
 }
 
 function crumbs(route: string): { label: string; route?: string }[] {
-  if (route === "handbook") return [{ label: "Pages" }]
+  if (route === "handbook") return [{ label: "Pages" }];
   if (route.startsWith("handbook-")) {
-    return [{ label: "Pages", route: "handbook" }, { label: handbook.pages.find((p) => `handbook-${p.id}` === route)?.title ?? "" }]
+    return [
+      { label: "Pages", route: "handbook" },
+      { label: handbook.pages.find((p) => `handbook-${p.id}` === route)?.title ?? "" },
+    ];
   }
-  const section = sectionOf(route)
-  const label = [...NAV, ...SETUP].find((n) => n.key === section)?.label ?? "Overview"
-  const out: { label: string; route?: string }[] = [{ label, route: section }]
-  if (route.startsWith("component-")) out.push({ label: components.find((c) => `component-${c.id}` === route)?.name ?? "" })
-  if (route.startsWith("guide-")) out.push({ label: guidelineFiles.find((g) => `guide-${g.id}` === route)?.title ?? "" })
+  const section = sectionOf(route);
+  const label = [...NAV, ...SETUP].find((n) => n.key === section)?.label ?? "Overview";
+  const out: { label: string; route?: string }[] = [{ label, route: section }];
+  if (route.startsWith("component-"))
+    out.push({ label: components.find((c) => `component-${c.id}` === route)?.name ?? "" });
+  if (route.startsWith("guide-"))
+    out.push({ label: guidelineFiles.find((g) => `guide-${g.id}` === route)?.title ?? "" });
   if (route.startsWith("edit-")) {
-    const id = route.slice(5)
-    const g = guidelineFiles.find((x) => x.id === id)
-    const c = components.find((x) => x.id === id)
-    if (g) out.push({ label: g.title, route: `guide-${g.id}` })
-    if (c) out.push({ label: c.name, route: `component-${c.id}` })
-    out.push({ label: "Edit" })
+    const id = route.slice(5);
+    const g = guidelineFiles.find((x) => x.id === id);
+    const c = components.find((x) => x.id === id);
+    if (g) out.push({ label: g.title, route: `guide-${g.id}` });
+    if (c) out.push({ label: c.name, route: `component-${c.id}` });
+    out.push({ label: "Edit" });
   }
-  return out
+  return out;
 }
 
 function ThemeRadio() {
-  const { theme, setTheme, base, setBase } = useStore()
+  const { theme, setTheme, base, setBase } = useStore();
   return (
     <>
       <DropdownMenuGroup>
@@ -222,21 +262,24 @@ function ThemeRadio() {
         <DropdownMenuRadioGroup value={base} onValueChange={(v: Base) => setBase(v)}>
           {(["neutral", "zinc", "stone", "slate", "gray"] as const).map((b) => (
             <DropdownMenuRadioItem key={b} value={b} className="capitalize">
-              <span className="size-3 rounded-full border" style={{ background: `var(--color-${b}-400)` }} />
+              <span
+                className="size-3 rounded-full border"
+                style={{ background: `var(--color-${b}-400)` }}
+              />
               {b}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>
       </DropdownMenuGroup>
     </>
-  )
+  );
 }
 
 function AppSidebar({ route }: { route: string }) {
-  const section = sectionOf(route)
-  const { setOpenMobile } = useSidebar()
-  const { setCommandOpen } = useStore()
-  const gaps = useOpenGaps()
+  const section = sectionOf(route);
+  const { setOpenMobile } = useSidebar();
+  const { setCommandOpen } = useStore();
+  const gaps = useOpenGaps();
   const counts: Partial<Record<NavKey, React.ReactNode>> = {
     components: components.length,
     tokens: tokens.length,
@@ -247,7 +290,7 @@ function AppSidebar({ route }: { route: string }) {
         {gaps.length}
       </span>
     ) : undefined,
-  }
+  };
 
   const item = (n: (typeof NAV)[number]) => (
     <SidebarMenuItem key={n.key}>
@@ -260,12 +303,14 @@ function AppSidebar({ route }: { route: string }) {
         <span>{n.label}</span>
       </SidebarMenuButton>
       {counts[n.key] !== undefined && (
-        <SidebarMenuBadge className="text-muted-foreground tabular">{counts[n.key]}</SidebarMenuBadge>
+        <SidebarMenuBadge className="text-muted-foreground tabular">
+          {counts[n.key]}
+        </SidebarMenuBadge>
       )}
     </SidebarMenuItem>
-  )
+  );
 
-  const project = projectOf(route)
+  const project = projectOf(route);
 
   return (
     <Sidebar collapsible="icon">
@@ -285,13 +330,15 @@ function AppSidebar({ route }: { route: string }) {
               tooltip="Search"
               className="text-muted-foreground"
               onClick={() => {
-                setOpenMobile(false)
-                setCommandOpen(true)
+                setOpenMobile(false);
+                setCommandOpen(true);
               }}
             >
               <SearchIcon />
               <span>Search</span>
-              <Kbd className="ml-auto group-data-[collapsible=icon]:hidden max-md:hidden">{MOD_KEY}K</Kbd>
+              <Kbd className="ml-auto group-data-[collapsible=icon]:hidden max-md:hidden">
+                {MOD_KEY}K
+              </Kbd>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -346,23 +393,26 @@ function AppSidebar({ route }: { route: string }) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }
 
 /** On the projects dashboard, the sidebar lists the projects themselves. */
 function ProjectsNav() {
-  const { setOpenMobile } = useSidebar()
-  const projects = useProjects()
+  const { setOpenMobile } = useSidebar();
+  const projects = useProjects();
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Projects</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {projects.map((p) => {
-            const Icon = p.kind === "docs" ? BookOpenIcon : ComponentIcon
+            const Icon = p.kind === "docs" ? BookOpenIcon : ComponentIcon;
             return (
               <SidebarMenuItem key={p.id}>
-                <SidebarMenuButton tooltip={p.name} render={<a href={`#${p.home}`} onClick={() => setOpenMobile(false)} />}>
+                <SidebarMenuButton
+                  tooltip={p.name}
+                  render={<a href={`#${p.home}`} onClick={() => setOpenMobile(false)} />}
+                >
                   <Icon />
                   <span>{p.name}</span>
                 </SidebarMenuButton>
@@ -375,19 +425,19 @@ function ProjectsNav() {
                   </SidebarMenuBadge>
                 )}
               </SidebarMenuItem>
-            )
+            );
           })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  )
+  );
 }
 
 /** A docs project’s sidebar is its page tree: one group per folder, like a notes app. */
 function DocsNav({ route }: { route: string }) {
-  const { setOpenMobile } = useSidebar()
-  const drafts = useDocDrafts()
-  const link = (to: string) => <a href={`#${to}`} onClick={() => setOpenMobile(false)} />
+  const { setOpenMobile } = useSidebar();
+  const drafts = useDocDrafts();
+  const link = (to: string) => <a href={`#${to}`} onClick={() => setOpenMobile(false)} />;
   return (
     <>
       <SidebarGroup>
@@ -395,7 +445,11 @@ function DocsNav({ route }: { route: string }) {
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive={route === "handbook"} tooltip="Overview" render={link("handbook")}>
+              <SidebarMenuButton
+                isActive={route === "handbook"}
+                tooltip="Overview"
+                render={link("handbook")}
+              >
                 <HouseIcon />
                 <span>Overview</span>
               </SidebarMenuButton>
@@ -411,7 +465,11 @@ function DocsNav({ route }: { route: string }) {
             <SidebarMenu>
               {pages.map((p) => (
                 <SidebarMenuItem key={p.id}>
-                  <SidebarMenuButton isActive={route === `handbook-${p.id}`} tooltip={p.title} render={link(`handbook-${p.id}`)}>
+                  <SidebarMenuButton
+                    isActive={route === `handbook-${p.id}`}
+                    tooltip={p.title}
+                    render={link(`handbook-${p.id}`)}
+                  >
                     <FileTextIcon />
                     <span>{p.title}</span>
                   </SidebarMenuButton>
@@ -422,11 +480,11 @@ function DocsNav({ route }: { route: string }) {
         </SidebarGroup>
       ))}
     </>
-  )
+  );
 }
 
 function ThemeToggle({ className }: { className?: string }) {
-  const { dark, setTheme } = useStore()
+  const { dark, setTheme } = useStore();
   return (
     <Button
       variant="ghost"
@@ -437,13 +495,13 @@ function ThemeToggle({ className }: { className?: string }) {
     >
       {dark ? <SunIcon /> : <MoonIcon />}
     </Button>
-  )
+  );
 }
 
 function DesktopTopbar({ route }: { route: string }) {
-  const { setCommandOpen } = useStore()
-  const project = useCurrentProject(route)
-  const trail = project ? crumbs(route) : []
+  const { setCommandOpen } = useStore();
+  const project = useCurrentProject(route);
+  const trail = project ? crumbs(route) : [];
   return (
     <header className="sticky top-0 z-20 hidden h-12 shrink-0 items-center gap-2 border-b bg-background/85 px-3 backdrop-blur-md md:flex">
       <SidebarTrigger className="text-muted-foreground" />
@@ -453,7 +511,11 @@ function DesktopTopbar({ route }: { route: string }) {
       <Breadcrumb className="min-w-0">
         <BreadcrumbList className="flex-nowrap gap-2">
           <BreadcrumbItem className="min-w-0 shrink-0">
-            {project ? <ProjectMenu variant="crumb" current={project} /> : <BreadcrumbPage>Projects</BreadcrumbPage>}
+            {project ? (
+              <ProjectMenu variant="crumb" current={project} />
+            ) : (
+              <BreadcrumbPage>Projects</BreadcrumbPage>
+            )}
           </BreadcrumbItem>
           {trail.map((c, i) => (
             <React.Fragment key={i}>
@@ -488,12 +550,12 @@ function DesktopTopbar({ route }: { route: string }) {
         <ThemeToggle />
       </div>
     </header>
-  )
+  );
 }
 
 function MobileTopbar({ route }: { route: string }) {
-  const { setCommandOpen } = useStore()
-  const project = useCurrentProject(route)
+  const { setCommandOpen } = useStore();
+  const project = useCurrentProject(route);
   return (
     <header className="sticky top-[env(safe-area-inset-top,0px)] z-30 flex h-13 shrink-0 items-center gap-2 border-b bg-background/90 px-3 backdrop-blur-md md:hidden">
       <a
@@ -509,56 +571,91 @@ function MobileTopbar({ route }: { route: string }) {
         <span className="text-[15px] font-semibold tracking-tight">Projects</span>
       )}
       <div className="ml-auto flex items-center">
-        <Button variant="ghost" size="icon-lg" className="text-muted-foreground" aria-label="Search" onClick={() => setCommandOpen(true)}>
+        <Button
+          variant="ghost"
+          size="icon-lg"
+          className="text-muted-foreground"
+          aria-label="Search"
+          onClick={() => setCommandOpen(true)}
+        >
           <SearchIcon />
         </Button>
         <ThemeToggle className="size-9" />
       </div>
     </header>
-  )
+  );
 }
 
 type Tab = {
-  key: string
-  label: string
-  icon: React.ComponentType<{ className?: string }>
+  key: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
   /** Tabs without a route run an action instead: open search or the sidebar sheet. */
-  action?: "search" | "more"
-  active: boolean
-  dot?: boolean
-}
+  action?: "search" | "more";
+  active: boolean;
+  dot?: boolean;
+};
 
-const COLS: Record<number, string> = { 3: "grid-cols-3", 4: "grid-cols-4", 5: "grid-cols-5" }
+const COLS: Record<number, string> = { 3: "grid-cols-3", 4: "grid-cols-4", 5: "grid-cols-5" };
 
 /** Phone tabs follow the context: the dashboard, a design system, or a docs project. */
 function MobileTabbar({ route }: { route: string }) {
-  const section = sectionOf(route)
-  const project = projectOf(route)
-  const { setOpenMobile } = useSidebar()
-  const { setCommandOpen } = useStore()
-  const gaps = useOpenGaps()
-  const search: Tab = { key: "search", label: "Search", icon: SearchIcon, action: "search", active: false }
+  const section = sectionOf(route);
+  const project = projectOf(route);
+  const { setOpenMobile } = useSidebar();
+  const { setCommandOpen } = useStore();
+  const gaps = useOpenGaps();
+  const search: Tab = {
+    key: "search",
+    label: "Search",
+    icon: SearchIcon,
+    action: "search",
+    active: false,
+  };
   const tabs: Tab[] =
     project === "charged-ui"
       ? [
           { key: "overview", label: "Overview", icon: HouseIcon, active: section === "overview" },
-          { key: "components", label: "Components", icon: ComponentIcon, active: section === "components" },
+          {
+            key: "components",
+            label: "Components",
+            icon: ComponentIcon,
+            active: section === "components",
+          },
           { key: "tokens", label: "Tokens", icon: SwatchBookIcon, active: section === "tokens" },
-          { key: "agents", label: "Agents", icon: BotIcon, active: section === "agents", dot: gaps.length > 0 },
-          { key: "more", label: "More", icon: EllipsisIcon, action: "more", active: ["guidelines", "integrations", "workspace"].includes(section) },
+          {
+            key: "agents",
+            label: "Agents",
+            icon: BotIcon,
+            active: section === "agents",
+            dot: gaps.length > 0,
+          },
+          {
+            key: "more",
+            label: "More",
+            icon: EllipsisIcon,
+            action: "more",
+            active: ["guidelines", "integrations", "workspace"].includes(section),
+          },
         ]
       : project === "handbook"
         ? [
             { key: "handbook", label: "Overview", icon: HouseIcon, active: route === "handbook" },
             search,
             { key: "projects", label: "Projects", icon: LayoutGridIcon, active: false },
-            { key: "more", label: "Pages", icon: FileTextIcon, action: "more", active: route.startsWith("handbook-") },
+            {
+              key: "more",
+              label: "Pages",
+              icon: FileTextIcon,
+              action: "more",
+              active: route.startsWith("handbook-"),
+            },
           ]
         : [
             { key: "projects", label: "Projects", icon: LayoutGridIcon, active: true },
             search,
             { key: "more", label: "More", icon: EllipsisIcon, action: "more", active: false },
-          ]
+          ];
   return (
     <nav
       aria-label="Primary"
@@ -570,15 +667,17 @@ function MobileTabbar({ route }: { route: string }) {
             <>
               <span className="relative">
                 <t.icon className="size-5" />
-                {t.dot && <span className="absolute -top-0.5 -right-1 size-2 rounded-full bg-bad ring-2 ring-background" />}
+                {t.dot && (
+                  <span className="absolute -top-0.5 -right-1 size-2 rounded-full bg-bad ring-2 ring-background" />
+                )}
               </span>
               <span className="text-[11px] leading-none">{t.label}</span>
             </>
-          )
+          );
           const cls = cn(
             "flex flex-col items-center justify-center gap-1 outline-none focus-visible:bg-muted",
-            t.active ? "text-foreground" : "text-muted-foreground"
-          )
+            t.active ? "text-foreground" : "text-muted-foreground",
+          );
           return t.action ? (
             <button
               key={t.key}
@@ -589,38 +688,43 @@ function MobileTabbar({ route }: { route: string }) {
               {content}
             </button>
           ) : (
-            <a key={t.key} href={`#${t.key}`} className={cls} aria-current={t.active ? "page" : undefined}>
+            <a
+              key={t.key}
+              href={`#${t.key}`}
+              className={cls}
+              aria-current={t.active ? "page" : undefined}
+            >
               {content}
             </a>
-          )
+          );
         })}
       </div>
     </nav>
-  )
+  );
 }
 
 function CommandMenu() {
-  const { commandOpen, setCommandOpen, setTheme, dark, setPendingDraft } = useStore()
-  const gaps = useOpenGaps()
-  const projects = useProjects()
+  const { commandOpen, setCommandOpen, setTheme, dark, setPendingDraft } = useStore();
+  const gaps = useOpenGaps();
+  const projects = useProjects();
 
   React.useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
         // Inside the docs editor, ⌘K makes a link instead.
-        if (e.target instanceof Element && e.target.closest("[data-docs-editor]")) return
-        e.preventDefault()
-        setCommandOpen(true)
+        if (e.target instanceof Element && e.target.closest("[data-docs-editor]")) return;
+        e.preventDefault();
+        setCommandOpen(true);
       }
-    }
-    document.addEventListener("keydown", on)
-    return () => document.removeEventListener("keydown", on)
-  }, [setCommandOpen])
+    };
+    document.addEventListener("keydown", on);
+    return () => document.removeEventListener("keydown", on);
+  }, [setCommandOpen]);
 
   const go = (route: string) => {
-    setCommandOpen(false)
-    navigate(route)
-  }
+    setCommandOpen(false);
+    navigate(route);
+  };
 
   return (
     <CommandDialog
@@ -637,7 +741,9 @@ function CommandMenu() {
       <Command>
         <CommandInput placeholder="Search components, guidelines, tokens…" />
         <CommandList className="max-h-(--command-list)">
-          <CommandEmpty>Nothing matches. Agents asking the same thing would hit a gap too.</CommandEmpty>
+          <CommandEmpty>
+            Nothing matches. Agents asking the same thing would hit a gap too.
+          </CommandEmpty>
           {gaps.length > 0 && (
             <CommandGroup heading="Unanswered agent questions">
               {gaps.map((q) => (
@@ -645,8 +751,8 @@ function CommandMenu() {
                   key={q.id}
                   value={`gap ${q.text}`}
                   onSelect={() => {
-                    setPendingDraft(q.id)
-                    go(`edit-${q.fileId}`)
+                    setPendingDraft(q.id);
+                    go(`edit-${q.fileId}`);
                   }}
                 >
                   <PenLineIcon />
@@ -671,7 +777,11 @@ function CommandMenu() {
           </CommandGroup>
           <CommandGroup heading="Components">
             {components.map((c) => (
-              <CommandItem key={c.id} value={`component ${c.name} ${c.machine}`} onSelect={() => go(`component-${c.id}`)}>
+              <CommandItem
+                key={c.id}
+                value={`component ${c.name} ${c.machine}`}
+                onSelect={() => go(`component-${c.id}`)}
+              >
                 <ComponentIcon />
                 {c.name}
                 <CommandShortcut className="font-mono">{c.machine}</CommandShortcut>
@@ -680,7 +790,11 @@ function CommandMenu() {
           </CommandGroup>
           <CommandGroup heading="Guidelines">
             {guidelineFiles.map((g) => (
-              <CommandItem key={g.id} value={`guideline ${g.title}`} onSelect={() => go(`guide-${g.id}`)}>
+              <CommandItem
+                key={g.id}
+                value={`guideline ${g.title}`}
+                onSelect={() => go(`guide-${g.id}`)}
+              >
                 <BookOpenIcon />
                 {g.title}
               </CommandItem>
@@ -688,7 +802,11 @@ function CommandMenu() {
           </CommandGroup>
           <CommandGroup heading={handbook.name}>
             {handbook.pages.map((p) => (
-              <CommandItem key={p.id} value={`page ${p.title} ${p.folder}`} onSelect={() => go(`handbook-${p.id}`)}>
+              <CommandItem
+                key={p.id}
+                value={`page ${p.title} ${p.folder}`}
+                onSelect={() => go(`handbook-${p.id}`)}
+              >
                 <FileTextIcon />
                 {p.title}
                 <CommandShortcut>{p.folder}</CommandShortcut>
@@ -699,7 +817,11 @@ function CommandMenu() {
             {tokens
               .filter((t) => t.group === "color")
               .map((t) => (
-                <CommandItem key={t.id} value={`token ${t.id} ${t.value}`} onSelect={() => go("tokens")}>
+                <CommandItem
+                  key={t.id}
+                  value={`token ${t.id} ${t.value}`}
+                  onSelect={() => go("tokens")}
+                >
                   <span className="size-3.5 rounded-[4px] border" style={{ background: t.value }} />
                   <span className="font-mono text-[13px]">{t.id}</span>
                   <CommandShortcut className="font-mono">{t.value}</CommandShortcut>
@@ -711,8 +833,9 @@ function CommandMenu() {
             <CommandItem
               value="copy mcp endpoint url"
               onSelect={async () => {
-                setCommandOpen(false)
-                if (await copyText(workspace.mcp)) toast.add({ title: "MCP endpoint copied", description: workspace.mcp })
+                setCommandOpen(false);
+                if (await copyText(workspace.mcp))
+                  toast.add({ title: "MCP endpoint copied", description: workspace.mcp });
               }}
             >
               <CopyIcon />
@@ -725,8 +848,8 @@ function CommandMenu() {
             <CommandItem
               value="toggle theme dark light"
               onSelect={() => {
-                setTheme(dark ? "light" : "dark")
-                setCommandOpen(false)
+                setTheme(dark ? "light" : "dark");
+                setCommandOpen(false);
               }}
             >
               {dark ? <SunIcon /> : <MoonIcon />}
@@ -740,7 +863,7 @@ function CommandMenu() {
         </CommandList>
       </Command>
     </CommandDialog>
-  )
+  );
 }
 
 export function AppShell({ route, children }: { route: string; children: React.ReactNode }) {
@@ -755,5 +878,5 @@ export function AppShell({ route, children }: { route: string; children: React.R
       </SidebarInset>
       <CommandMenu />
     </SidebarProvider>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import type { Options } from "remark-stringify"
+import type { Options } from "remark-stringify";
 
 /**
  * The one way Corpus writes Markdown. The docs editor and normalizeMarkdown()
@@ -19,4 +19,4 @@ export const markdownStyle: Options = {
   setext: false,
   closeAtx: false,
   quote: '"',
-}
+};

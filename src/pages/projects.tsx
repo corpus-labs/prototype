@@ -1,22 +1,25 @@
-import { FileTextIcon, FolderIcon, PlusIcon } from "lucide-react"
+import { FileTextIcon, FolderIcon, PlusIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { toast } from "@/components/ui/toast"
-import { ComponentThumb, CuiScope } from "@/components/charged-ui"
-import { Dot, Facts, PageHeader, Section } from "@/components/common"
-import { handbook, questions, workspace } from "@/data/workspace"
-import { KIND_LABEL, foldersOf, useProjects, type ProjectSummary } from "@/lib/projects"
-import { navigate } from "@/lib/router"
-import { useStore } from "@/lib/store"
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
+import { ComponentThumb, CuiScope } from "@/components/charged-ui";
+import { Dot, Facts, PageHeader, Section } from "@/components/common";
+import { handbook, questions, workspace } from "@/data/workspace";
+import { KIND_LABEL, foldersOf, useProjects, type ProjectSummary } from "@/lib/projects";
+import { navigate } from "@/lib/router";
+import { useStore } from "@/lib/store";
 
 /** A design system previews as its own components. */
 function SystemPreview({ dark }: { dark: boolean }) {
   return (
-    <CuiScope dark={dark} className="pointer-events-none flex h-44 flex-col items-center justify-center gap-4 bg-(--cui-subtle) p-6">
+    <CuiScope
+      dark={dark}
+      className="pointer-events-none flex h-44 flex-col items-center justify-center gap-4 bg-(--cui-subtle) p-6"
+    >
       <ComponentThumb id="button" />
       <ComponentThumb id="badge" />
     </CuiScope>
-  )
+  );
 }
 
 /** A docs project previews as its page tree. */
@@ -44,7 +47,7 @@ function DocsPreview() {
           ))}
       </div>
     </div>
-  )
+  );
 }
 
 function ProjectCard({ p, dark }: { p: ProjectSummary; dark: boolean }) {
@@ -62,7 +65,9 @@ function ProjectCard({ p, dark }: { p: ProjectSummary; dark: boolean }) {
           </div>
           <p className="mt-1 text-sm text-muted-foreground">{p.description}</p>
         </div>
-        <Facts items={[...p.counts, ["Agent requests", `${p.requests.toLocaleString()} this week`]]} />
+        <Facts
+          items={[...p.counts, ["Agent requests", `${p.requests.toLocaleString()} this week`]]}
+        />
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
           {p.open ? (
             <Dot tone="bad" className="text-bad">
@@ -75,14 +80,14 @@ function ProjectCard({ p, dark }: { p: ProjectSummary; dark: boolean }) {
         </div>
       </div>
     </a>
-  )
+  );
 }
 
 export function Projects() {
-  const { dark, resolved, setPendingDraft } = useStore()
-  const projects = useProjects()
-  const requests = projects.reduce((n, p) => n + p.requests, 0).toLocaleString()
-  const open = projects.reduce((n, p) => n + p.open, 0)
+  const { dark, resolved, setPendingDraft } = useStore();
+  const projects = useProjects();
+  const requests = projects.reduce((n, p) => n + p.requests, 0).toLocaleString();
+  const open = projects.reduce((n, p) => n + p.open, 0);
   // Unanswered questions from every project, most asked first.
   const gaps = [
     ...questions
@@ -93,12 +98,20 @@ export function Projects() {
         count: q.count,
         project: workspace.name,
         write: () => {
-          setPendingDraft(q.id)
-          navigate(`edit-${q.fileId}`)
+          setPendingDraft(q.id);
+          navigate(`edit-${q.fileId}`);
         },
       })),
-    ...handbook.questions.filter((q) => q.status === "gap").map((q) => ({ id: q.id, text: q.text, count: q.count, project: handbook.name, write: undefined })),
-  ].sort((a, b) => b.count - a.count)
+    ...handbook.questions
+      .filter((q) => q.status === "gap")
+      .map((q) => ({
+        id: q.id,
+        text: q.text,
+        count: q.count,
+        project: handbook.name,
+        write: undefined,
+      })),
+  ].sort((a, b) => b.count - a.count);
 
   return (
     <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-12">
@@ -115,7 +128,8 @@ export function Projects() {
             onClick={() =>
               toast.add({
                 title: "Adding projects isn’t part of this prototype",
-                description: "A new project points Corpus at another content repository, for a design system or a docs space.",
+                description:
+                  "A new project points Corpus at another content repository, for a design system or a docs space.",
               })
             }
           >
@@ -132,10 +146,17 @@ export function Projects() {
       </div>
 
       {gaps.length > 0 && (
-        <Section title="Unanswered questions" className="mt-16" aside={<span className="tabular">Across all projects</span>}>
+        <Section
+          title="Unanswered questions"
+          className="mt-16"
+          aside={<span className="tabular">Across all projects</span>}
+        >
           <ul className="divide-y border-y">
             {gaps.map((q) => (
-              <li key={q.id} className="grid gap-x-6 gap-y-3 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+              <li
+                key={q.id}
+                className="grid gap-x-6 gap-y-3 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+              >
                 <div className="min-w-0">
                   <p className="text-[15px] text-pretty">{q.text}</p>
                   <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
@@ -144,7 +165,12 @@ export function Projects() {
                   </p>
                 </div>
                 {q.write ? (
-                  <Button size="sm" variant="outline" className="justify-self-start sm:justify-self-end" onClick={q.write}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="justify-self-start sm:justify-self-end"
+                    onClick={q.write}
+                  >
                     Write the answer
                   </Button>
                 ) : (
@@ -156,5 +182,5 @@ export function Projects() {
         </Section>
       )}
     </div>
-  )
+  );
 }

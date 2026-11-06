@@ -1,47 +1,47 @@
 // Sample content for the prototype. The workspace documents Charged UI,
 // the first design system planned to live in Corpus.
-import { handbookPages } from "@/data/handbook-pages"
+import { handbookPages } from "@/data/handbook-pages";
 
-export type Status = "stable" | "beta" | "deprecated"
-export type Source = "sdc" | "block" | "storybook"
+export type Status = "stable" | "beta" | "deprecated";
+export type Source = "sdc" | "block" | "storybook";
 
 export type PropDef = {
-  name: string
-  type: string
-  default?: string
-  required?: boolean
-  description: string
-}
+  name: string;
+  type: string;
+  default?: string;
+  required?: boolean;
+  description: string;
+};
 
 export type ExamplePair = {
-  key: string
-  do: { title: string; caption: string; preview: string; code: string }
-  dont: { title: string; caption: string; preview: string; code: string }
-  rule: string
-}
+  key: string;
+  do: { title: string; caption: string; preview: string; code: string };
+  dont: { title: string; caption: string; preview: string; code: string };
+  rule: string;
+};
 
 export type ComponentDoc = {
-  id: string
-  name: string
-  status: Status
-  source: Source
-  machine: string
-  file: string
-  category: "Actions" | "Content" | "Feedback" | "Navigation" | "Forms" | "Layout"
-  summary: string
-  props: PropDef[]
-  slots?: { name: string; description: string }[]
-  whenToUse?: string[]
-  whenNotToUse?: string[]
-  agentRules?: { key: "usage" | "a11y"; text: string }[]
-  examples?: ExamplePair[]
-  a11y?: string[]
-  tokens?: string[]
-  related?: string[]
-  requests: number
-  updated: string
-  replacedBy?: string
-}
+  id: string;
+  name: string;
+  status: Status;
+  source: Source;
+  machine: string;
+  file: string;
+  category: "Actions" | "Content" | "Feedback" | "Navigation" | "Forms" | "Layout";
+  summary: string;
+  props: PropDef[];
+  slots?: { name: string; description: string }[];
+  whenToUse?: string[];
+  whenNotToUse?: string[];
+  agentRules?: { key: "usage" | "a11y"; text: string }[];
+  examples?: ExamplePair[];
+  a11y?: string[];
+  tokens?: string[];
+  related?: string[];
+  requests: number;
+  updated: string;
+  replacedBy?: string;
+};
 
 export const workspace = {
   name: "Charged UI",
@@ -51,7 +51,7 @@ export const workspace = {
   branch: "main",
   mcp: "https://docs.charged.dev/mcp",
   llms: "https://docs.charged.dev/llms.txt",
-}
+};
 
 export const components: ComponentDoc[] = [
   {
@@ -65,14 +65,48 @@ export const components: ComponentDoc[] = [
     summary:
       "Starts an action or moves someone to the next step of a flow. Use one primary button per view.",
     props: [
-      { name: "label", type: "string", required: true, description: "Verb first, sentence case, three words or fewer." },
-      { name: "variant", type: "primary | secondary | ghost | danger", default: "secondary", description: "Primary is for the one action that completes the view." },
-      { name: "size", type: "sm | md | lg", default: "md", description: "Use md or lg on touch screens." },
-      { name: "href", type: "uri", description: "Renders a link with button styling. Use it when the action navigates." },
+      {
+        name: "label",
+        type: "string",
+        required: true,
+        description: "Verb first, sentence case, three words or fewer.",
+      },
+      {
+        name: "variant",
+        type: "primary | secondary | ghost | danger",
+        default: "secondary",
+        description: "Primary is for the one action that completes the view.",
+      },
+      {
+        name: "size",
+        type: "sm | md | lg",
+        default: "md",
+        description: "Use md or lg on touch screens.",
+      },
+      {
+        name: "href",
+        type: "uri",
+        description: "Renders a link with button styling. Use it when the action navigates.",
+      },
       { name: "icon", type: "icon name", description: "Optional icon from the Charged icon set." },
-      { name: "icon_position", type: "start | end", default: "start", description: "Put the icon after the label only for directional actions." },
-      { name: "disabled", type: "boolean", default: "false", description: "Explain nearby why the action is unavailable." },
-      { name: "loading", type: "boolean", default: "false", description: "Shows a spinner and blocks repeat clicks." },
+      {
+        name: "icon_position",
+        type: "start | end",
+        default: "start",
+        description: "Put the icon after the label only for directional actions.",
+      },
+      {
+        name: "disabled",
+        type: "boolean",
+        default: "false",
+        description: "Explain nearby why the action is unavailable.",
+      },
+      {
+        name: "loading",
+        type: "boolean",
+        default: "false",
+        description: "Shows a spinner and blocks repeat clicks.",
+      },
     ],
     whenToUse: [
       "To start an action in place, like saving, sending, or deleting.",
@@ -144,7 +178,14 @@ export const components: ComponentDoc[] = [
       "Use disabled sparingly, and say nearby why the action is unavailable.",
       "Sizes md and lg meet the 40px touch target. Use sm only with a pointer.",
     ],
-    tokens: ["color.action.primary", "color.action.primary-hover", "color.focus", "radius.control", "space.control-x", "font.label"],
+    tokens: [
+      "color.action.primary",
+      "color.action.primary-hover",
+      "color.focus",
+      "radius.control",
+      "space.control-x",
+      "font.label",
+    ],
     related: ["link", "menu", "form-field"],
     requests: 312,
     updated: "3 days ago",
@@ -159,9 +200,19 @@ export const components: ComponentDoc[] = [
     category: "Content",
     summary: "Groups content and actions about a single subject, like an article or a program.",
     props: [
-      { name: "title", type: "string", required: true, description: "Becomes the link text when href is set." },
+      {
+        name: "title",
+        type: "string",
+        required: true,
+        description: "Becomes the link text when href is set.",
+      },
       { name: "href", type: "uri", description: "Makes the whole card a link." },
-      { name: "variant", type: "outline | elevated | plain", default: "outline", description: "Elevated is for cards that float over imagery." },
+      {
+        name: "variant",
+        type: "outline | elevated | plain",
+        default: "outline",
+        description: "Elevated is for cards that float over imagery.",
+      },
       { name: "media", type: "image", description: "Optional image above the title." },
     ],
     slots: [
@@ -177,7 +228,9 @@ export const components: ComponentDoc[] = [
       { key: "usage", text: "SHOULD use Card only inside a grid of comparable items." },
       { key: "a11y", text: "MUST NOT add a second link inside a card that has href." },
     ],
-    a11y: ["When href is set, the title is the link text. Don’t add a second link inside the card."],
+    a11y: [
+      "When href is set, the title is the link text. Don’t add a second link inside the card.",
+    ],
     tokens: ["radius.card", "color.line", "space.6"],
     related: ["hero", "badge"],
     requests: 148,
@@ -193,14 +246,29 @@ export const components: ComponentDoc[] = [
     category: "Feedback",
     summary: "Draws attention to information that changes what someone does next.",
     props: [
-      { name: "tone", type: "info | success | warning | danger", default: "info", description: "Match the tone to the consequence, not to decoration." },
+      {
+        name: "tone",
+        type: "info | success | warning | danger",
+        default: "info",
+        description: "Match the tone to the consequence, not to decoration.",
+      },
       { name: "title", type: "string", description: "Name the consequence in a few words." },
-      { name: "dismissible", type: "boolean", default: "false", description: "Only for tips that never return once dismissed." },
+      {
+        name: "dismissible",
+        type: "boolean",
+        default: "false",
+        description: "Only for tips that never return once dismissed.",
+      },
     ],
     slots: [{ name: "body", description: "One or two sentences." }],
-    whenToUse: ["To warn about a consequence before someone acts.", "To confirm that something worked when the page doesn’t change."],
+    whenToUse: [
+      "To warn about a consequence before someone acts.",
+      "To confirm that something worked when the page doesn’t change.",
+    ],
     whenNotToUse: ["For general page introductions. Use body text."],
-    agentRules: [{ key: "a11y", text: "MUST use role=alert only for callouts that appear after an action." }],
+    agentRules: [
+      { key: "a11y", text: "MUST use role=alert only for callouts that appear after an action." },
+    ],
     examples: [
       {
         key: "stacking",
@@ -235,11 +303,26 @@ export const components: ComponentDoc[] = [
     category: "Forms",
     summary: "A labeled input with help text and validation.",
     props: [
-      { name: "label", type: "string", required: true, description: "Always visible. Never use the placeholder as the label." },
-      { name: "type", type: "text | email | password | number", default: "text", description: "Matches the input type." },
+      {
+        name: "label",
+        type: "string",
+        required: true,
+        description: "Always visible. Never use the placeholder as the label.",
+      },
+      {
+        name: "type",
+        type: "text | email | password | number",
+        default: "text",
+        description: "Matches the input type.",
+      },
       { name: "help", type: "string", description: "Format hints, shown under the input." },
       { name: "error", type: "string", description: "Says what happened and how to fix it." },
-      { name: "required", type: "boolean", default: "false", description: "Marks the label, not the placeholder." },
+      {
+        name: "required",
+        type: "boolean",
+        default: "false",
+        description: "Marks the label, not the placeholder.",
+      },
     ],
     whenToUse: ["For every text input in a form."],
     agentRules: [{ key: "usage", text: "MUST stack form fields with space.4." }],
@@ -247,8 +330,18 @@ export const components: ComponentDoc[] = [
       {
         key: "labels",
         rule: "MUST NOT use the placeholder as the only label.",
-        do: { title: "Visible label", caption: "The label stays put while typing.", preview: "field-good", code: "{{ include('charged_ui:form_field', { label: 'Email', type: 'email' }) }}" },
-        dont: { title: "Placeholder as label", caption: "It disappears as soon as someone types.", preview: "field-bad", code: '<input placeholder="Email">' },
+        do: {
+          title: "Visible label",
+          caption: "The label stays put while typing.",
+          preview: "field-good",
+          code: "{{ include('charged_ui:form_field', { label: 'Email', type: 'email' }) }}",
+        },
+        dont: {
+          title: "Placeholder as label",
+          caption: "It disappears as soon as someone types.",
+          preview: "field-bad",
+          code: '<input placeholder="Email">',
+        },
       },
     ],
     a11y: ["Errors are linked with aria-describedby and announced on submit."],
@@ -266,9 +359,24 @@ export const components: ComponentDoc[] = [
     category: "Navigation",
     summary: "Site navigation where each item is its own page.",
     props: [
-      { name: "items", type: "menu tree", required: true, description: "Passed from a Drupal menu." },
-      { name: "orientation", type: "horizontal | vertical", default: "horizontal", description: "Vertical inside sidebars." },
-      { name: "active_trail", type: "boolean", default: "true", description: "Marks the current page." },
+      {
+        name: "items",
+        type: "menu tree",
+        required: true,
+        description: "Passed from a Drupal menu.",
+      },
+      {
+        name: "orientation",
+        type: "horizontal | vertical",
+        default: "horizontal",
+        description: "Vertical inside sidebars.",
+      },
+      {
+        name: "active_trail",
+        type: "boolean",
+        default: "true",
+        description: "Marks the current page.",
+      },
     ],
     whenToUse: ["For links between pages that each have their own URL."],
     whenNotToUse: ["To switch views on one page. Use Tabs."],
@@ -276,8 +384,18 @@ export const components: ComponentDoc[] = [
       {
         key: "active",
         rule: "MUST NOT mark a parent and a child active at the same time.",
-        do: { title: "One active item", caption: "The current page is the only one marked.", preview: "menu-good", code: "{{ include('charged_ui:menu', { items: menu }) }}" },
-        dont: { title: "Two active items", caption: "Readers can’t tell where they are.", preview: "menu-bad", code: "{# parent and child both active #}" },
+        do: {
+          title: "One active item",
+          caption: "The current page is the only one marked.",
+          preview: "menu-good",
+          code: "{{ include('charged_ui:menu', { items: menu }) }}",
+        },
+        dont: {
+          title: "Two active items",
+          caption: "Readers can’t tell where they are.",
+          preview: "menu-bad",
+          code: "{# parent and child both active #}",
+        },
       },
     ],
     a11y: ["The current page gets aria-current=page."],
@@ -296,8 +414,18 @@ export const components: ComponentDoc[] = [
     category: "Navigation",
     summary: "Switches between views of the same content without leaving the page.",
     props: [
-      { name: "items", type: "array<{ label, panel }>", required: true, description: "Two to six tabs." },
-      { name: "selected", type: "integer", default: "0", description: "Index of the tab shown first." },
+      {
+        name: "items",
+        type: "array<{ label, panel }>",
+        required: true,
+        description: "Two to six tabs.",
+      },
+      {
+        name: "selected",
+        type: "integer",
+        default: "0",
+        description: "Index of the tab shown first.",
+      },
     ],
     requests: 61,
     updated: "3 weeks ago",
@@ -314,7 +442,12 @@ export const components: ComponentDoc[] = [
     summary: "A short status or category label.",
     props: [
       { name: "label", type: "string", required: true, description: "One or two words." },
-      { name: "tone", type: "neutral | info | success | warning | danger", default: "neutral", description: "Use tone for status, not decoration." },
+      {
+        name: "tone",
+        type: "neutral | info | success | warning | danger",
+        default: "neutral",
+        description: "Use tone for status, not decoration.",
+      },
     ],
     whenToUse: ["To show status or category next to a title."],
     agentRules: [{ key: "usage", text: "SHOULD keep badge labels to one or two words." }],
@@ -331,8 +464,18 @@ export const components: ComponentDoc[] = [
     category: "Content",
     summary: "Stacked sections that expand to show more detail.",
     props: [
-      { name: "items", type: "array<{ heading, body }>", required: true, description: "Each heading should make sense on its own." },
-      { name: "multiple", type: "boolean", default: "false", description: "Allows more than one open section." },
+      {
+        name: "items",
+        type: "array<{ heading, body }>",
+        required: true,
+        description: "Each heading should make sense on its own.",
+      },
+      {
+        name: "multiple",
+        type: "boolean",
+        default: "false",
+        description: "Allows more than one open section.",
+      },
     ],
     requests: 33,
     updated: "1 month ago",
@@ -350,7 +493,12 @@ export const components: ComponentDoc[] = [
       { name: "heading", type: "string", required: true, description: "One line on desktop." },
       { name: "subheading", type: "string", description: "One or two sentences." },
       { name: "cta_label", type: "string", description: "Rendered with Button, variant primary." },
-      { name: "align", type: "start | center", default: "start", description: "Center only without media." },
+      {
+        name: "align",
+        type: "start | center",
+        default: "start",
+        description: "Center only without media.",
+      },
     ],
     requests: 22,
     updated: "1 month ago",
@@ -366,16 +514,36 @@ export const components: ComponentDoc[] = [
     category: "Navigation",
     summary: "Shows where a page sits in the site hierarchy.",
     props: [
-      { name: "items", type: "array<{ label, href }>", required: true, description: "From the home page down." },
-      { name: "show_current", type: "boolean", default: "true", description: "Shows the current page as plain text." },
+      {
+        name: "items",
+        type: "array<{ label, href }>",
+        required: true,
+        description: "From the home page down.",
+      },
+      {
+        name: "show_current",
+        type: "boolean",
+        default: "true",
+        description: "Shows the current page as plain text.",
+      },
     ],
     whenToUse: ["On pages three or more levels deep."],
     examples: [
       {
         key: "depth",
         rule: "SHOULD NOT show Breadcrumb on top-level pages.",
-        do: { title: "Deep pages", caption: "Show the path on a third-level page.", preview: "crumb-good", code: "{{ include('charged_ui:breadcrumb', { items: trail }) }}" },
-        dont: { title: "Top-level pages", caption: "A one-item trail adds nothing.", preview: "crumb-bad", code: "{# Home > About #}" },
+        do: {
+          title: "Deep pages",
+          caption: "Show the path on a third-level page.",
+          preview: "crumb-good",
+          code: "{{ include('charged_ui:breadcrumb', { items: trail }) }}",
+        },
+        dont: {
+          title: "Top-level pages",
+          caption: "A one-item trail adds nothing.",
+          preview: "crumb-bad",
+          code: "{# Home > About #}",
+        },
       },
     ],
     requests: 19,
@@ -399,8 +567,18 @@ export const components: ComponentDoc[] = [
       {
         key: "range",
         rule: "SHOULD show at most seven page numbers.",
-        do: { title: "Short range", caption: "Collapse long ranges with an ellipsis.", preview: "pages-good", code: "{{ include('charged_ui:pagination', { current: 4, total: 12 }) }}" },
-        dont: { title: "Every page", caption: "Twelve numbers wrap on phones.", preview: "pages-bad", code: "{# 1 2 3 4 5 6 7 8 9 10 11 12 #}" },
+        do: {
+          title: "Short range",
+          caption: "Collapse long ranges with an ellipsis.",
+          preview: "pages-good",
+          code: "{{ include('charged_ui:pagination', { current: 4, total: 12 }) }}",
+        },
+        dont: {
+          title: "Every page",
+          caption: "Twelve numbers wrap on phones.",
+          preview: "pages-bad",
+          code: "{# 1 2 3 4 5 6 7 8 9 10 11 12 #}",
+        },
       },
     ],
     requests: 12,
@@ -423,36 +601,129 @@ export const components: ComponentDoc[] = [
     requests: 9,
     updated: "2 days ago",
   },
-]
+];
 
 export type Token = {
-  id: string
-  group: "color" | "type" | "space" | "radius"
-  value: string
-  note: string
-  usedBy: number
-  changed?: string
-}
+  id: string;
+  group: "color" | "type" | "space" | "radius";
+  value: string;
+  note: string;
+  usedBy: number;
+  changed?: string;
+};
 
 export const tokens: Token[] = [
   { id: "color.ink", group: "color", value: "#171717", note: "Body text and icons", usedBy: 11 },
-  { id: "color.muted", group: "color", value: "#737373", note: "Secondary text and metadata", usedBy: 8 },
+  {
+    id: "color.muted",
+    group: "color",
+    value: "#737373",
+    note: "Secondary text and metadata",
+    usedBy: 8,
+  },
   { id: "color.line", group: "color", value: "#E5E5E5", note: "Borders and dividers", usedBy: 9 },
-  { id: "color.surface", group: "color", value: "#FFFFFF", note: "Page and card background", usedBy: 10 },
-  { id: "color.surface-dark", group: "color", value: "#0A0A0A", note: "Dark sections and code", usedBy: 4 },
-  { id: "color.action.primary", group: "color", value: "#2563EB", note: "Primary buttons, links, selection", usedBy: 7 },
-  { id: "color.action.primary-hover", group: "color", value: "#1D4ED8", note: "Hover and pressed for primary", usedBy: 3, changed: "#1E40AF" },
-  { id: "color.action.soft", group: "color", value: "#DBEAFE", note: "Selected rows and info callouts", usedBy: 4 },
-  { id: "color.focus", group: "color", value: "#93C5FD", note: "Focus rings, 2px", usedBy: 12, changed: "#BFDBFE" },
-  { id: "color.status.success", group: "color", value: "#16A34A", note: "Success callouts and badges", usedBy: 2 },
+  {
+    id: "color.surface",
+    group: "color",
+    value: "#FFFFFF",
+    note: "Page and card background",
+    usedBy: 10,
+  },
+  {
+    id: "color.surface-dark",
+    group: "color",
+    value: "#0A0A0A",
+    note: "Dark sections and code",
+    usedBy: 4,
+  },
+  {
+    id: "color.action.primary",
+    group: "color",
+    value: "#2563EB",
+    note: "Primary buttons, links, selection",
+    usedBy: 7,
+  },
+  {
+    id: "color.action.primary-hover",
+    group: "color",
+    value: "#1D4ED8",
+    note: "Hover and pressed for primary",
+    usedBy: 3,
+    changed: "#1E40AF",
+  },
+  {
+    id: "color.action.soft",
+    group: "color",
+    value: "#DBEAFE",
+    note: "Selected rows and info callouts",
+    usedBy: 4,
+  },
+  {
+    id: "color.focus",
+    group: "color",
+    value: "#93C5FD",
+    note: "Focus rings, 2px",
+    usedBy: 12,
+    changed: "#BFDBFE",
+  },
+  {
+    id: "color.status.success",
+    group: "color",
+    value: "#16A34A",
+    note: "Success callouts and badges",
+    usedBy: 2,
+  },
   { id: "color.status.warning", group: "color", value: "#D97706", note: "Warnings", usedBy: 2 },
-  { id: "color.status.danger", group: "color", value: "#DC2626", note: "Errors and destructive actions", usedBy: 3 },
-  { id: "font.display", group: "type", value: "Geist 700, 48/52, -0.035em", note: "Hero headings", usedBy: 1 },
-  { id: "font.heading", group: "type", value: "Geist 700, 30/36, -0.035em", note: "Page and section headings", usedBy: 4 },
-  { id: "font.subhead", group: "type", value: "Geist 400, 20/28", note: "Intros under headings, in color.muted", usedBy: 2 },
-  { id: "font.body", group: "type", value: "Geist 400, 16/27", note: "Body copy, about 60 characters per line", usedBy: 9 },
-  { id: "font.label", group: "type", value: "Geist 500, 14/20", note: "Buttons, menus, form labels", usedBy: 6, changed: "Geist 500, 14/18" },
-  { id: "font.mono", group: "type", value: "Geist Mono 400, 13/20", note: "Code, labels, metadata", usedBy: 2 },
+  {
+    id: "color.status.danger",
+    group: "color",
+    value: "#DC2626",
+    note: "Errors and destructive actions",
+    usedBy: 3,
+  },
+  {
+    id: "font.display",
+    group: "type",
+    value: "Geist 700, 48/52, -0.035em",
+    note: "Hero headings",
+    usedBy: 1,
+  },
+  {
+    id: "font.heading",
+    group: "type",
+    value: "Geist 700, 30/36, -0.035em",
+    note: "Page and section headings",
+    usedBy: 4,
+  },
+  {
+    id: "font.subhead",
+    group: "type",
+    value: "Geist 400, 20/28",
+    note: "Intros under headings, in color.muted",
+    usedBy: 2,
+  },
+  {
+    id: "font.body",
+    group: "type",
+    value: "Geist 400, 16/27",
+    note: "Body copy, about 60 characters per line",
+    usedBy: 9,
+  },
+  {
+    id: "font.label",
+    group: "type",
+    value: "Geist 500, 14/20",
+    note: "Buttons, menus, form labels",
+    usedBy: 6,
+    changed: "Geist 500, 14/18",
+  },
+  {
+    id: "font.mono",
+    group: "type",
+    value: "Geist Mono 400, 13/20",
+    note: "Code, labels, metadata",
+    usedBy: 2,
+  },
   { id: "space.1", group: "space", value: "4px", note: "Icon to label", usedBy: 6 },
   { id: "space.2", group: "space", value: "8px", note: "Inside compact controls", usedBy: 8 },
   { id: "space.3", group: "space", value: "12px", note: "Between related items", usedBy: 5 },
@@ -460,21 +731,34 @@ export const tokens: Token[] = [
   { id: "space.6", group: "space", value: "24px", note: "Card padding and grid gaps", usedBy: 6 },
   { id: "space.8", group: "space", value: "32px", note: "Between groups in a section", usedBy: 4 },
   { id: "space.16", group: "space", value: "64px", note: "Between page sections", usedBy: 3 },
-  { id: "space.control-x", group: "space", value: "14px", note: "Horizontal padding in buttons", usedBy: 2, changed: "12px" },
-  { id: "radius.control", group: "radius", value: "8px", note: "Buttons, inputs, callouts", usedBy: 6 },
+  {
+    id: "space.control-x",
+    group: "space",
+    value: "14px",
+    note: "Horizontal padding in buttons",
+    usedBy: 2,
+    changed: "12px",
+  },
+  {
+    id: "radius.control",
+    group: "radius",
+    value: "8px",
+    note: "Buttons, inputs, callouts",
+    usedBy: 6,
+  },
   { id: "radius.card", group: "radius", value: "12px", note: "Cards and dialogs", usedBy: 3 },
   { id: "radius.pill", group: "radius", value: "999px", note: "Badges and avatars", usedBy: 2 },
-]
+];
 
 export type Question = {
-  id: string
-  text: string
-  count: number
-  status: "answered" | "gap"
-  source?: { label: string; route: string }
-  fileId?: string
-  resolves?: { label: string; route: string }
-}
+  id: string;
+  text: string;
+  count: number;
+  status: "answered" | "gap";
+  source?: { label: string; route: string };
+  fileId?: string;
+  resolves?: { label: string; route: string };
+};
 
 export const questions: Question[] = [
   {
@@ -485,7 +769,13 @@ export const questions: Question[] = [
     fileId: "button",
     resolves: { label: "Button: Loading state", route: "component-button" },
   },
-  { id: "q-spacing", text: "Which spacing token goes between stacked form fields?", count: 9, status: "answered", source: { label: "Layout and spacing", route: "guide-layout" } },
+  {
+    id: "q-spacing",
+    text: "Which spacing token goes between stacked form fields?",
+    count: 9,
+    status: "answered",
+    source: { label: "Layout and spacing", route: "guide-layout" },
+  },
   {
     id: "q-nesting",
     text: "Can a Card contain another Card?",
@@ -494,11 +784,35 @@ export const questions: Question[] = [
     fileId: "card",
     resolves: { label: "Card: Nesting", route: "component-card" },
   },
-  { id: "q-danger", text: "Is there a danger variant for Button?", count: 6, status: "answered", source: { label: "Button props", route: "component-button" } },
-  { id: "q-nav", text: "Should section navigation use Tabs or Menu?", count: 5, status: "answered", source: { label: "Navigation patterns", route: "guide-navigation" } },
-  { id: "q-pager", text: "What replaced Pager?", count: 4, status: "answered", source: { label: "Pager", route: "component-pager" } },
-  { id: "q-icon", text: "How do I make an icon-only button accessible?", count: 3, status: "answered", source: { label: "Button accessibility", route: "component-button" } },
-]
+  {
+    id: "q-danger",
+    text: "Is there a danger variant for Button?",
+    count: 6,
+    status: "answered",
+    source: { label: "Button props", route: "component-button" },
+  },
+  {
+    id: "q-nav",
+    text: "Should section navigation use Tabs or Menu?",
+    count: 5,
+    status: "answered",
+    source: { label: "Navigation patterns", route: "guide-navigation" },
+  },
+  {
+    id: "q-pager",
+    text: "What replaced Pager?",
+    count: 4,
+    status: "answered",
+    source: { label: "Pager", route: "component-pager" },
+  },
+  {
+    id: "q-icon",
+    text: "How do I make an icon-only button accessible?",
+    count: 3,
+    status: "answered",
+    source: { label: "Button accessibility", route: "component-button" },
+  },
+];
 
 export const agentStats = {
   week: [142, 168, 201, 187, 236, 94, 256],
@@ -509,34 +823,72 @@ export const agentStats = {
     { name: "Codex", share: 11 },
   ],
   tools: [
-    { name: "get_component", count: 642, description: "Props, rules, examples, and tokens for one component." },
-    { name: "search_docs", count: 388, description: "Searches every page and returns the matching sections." },
-    { name: "check_usage", count: 171, description: "Checks a snippet against your rules before the agent commits it." },
+    {
+      name: "get_component",
+      count: 642,
+      description: "Props, rules, examples, and tokens for one component.",
+    },
+    {
+      name: "search_docs",
+      count: 388,
+      description: "Searches every page and returns the matching sections.",
+    },
+    {
+      name: "check_usage",
+      count: 171,
+      description: "Checks a snippet against your rules before the agent commits it.",
+    },
     { name: "get_tokens", count: 83, description: "Token names and values for a category." },
   ],
-}
+};
 
-export type Commit = { sha: string; message: string; author: string; when: string; bot?: boolean }
+export type Commit = { sha: string; message: string; author: string; when: string; bot?: boolean };
 
 export const initialCommits: Commit[] = [
-  { sha: "3e1a9f2", message: "Sync tokens from Figma (4 changed)", author: "Figma sync", when: "2 hours ago", bot: true },
-  { sha: "b72c0d4", message: "Document Callout tones and examples", author: "Mitch Kostelecky", when: "Yesterday" },
-  { sha: "91fe7a0", message: "Import Pagination from SDC", author: "Mitch Kostelecky", when: "2 days ago" },
-  { sha: "4c2d8b1", message: "Mark Pager as deprecated", author: "Mitch Kostelecky", when: "2 days ago" },
-  { sha: "e08a2f6", message: "Add Navigation patterns guideline", author: "Mitch Kostelecky", when: "4 days ago" },
-]
+  {
+    sha: "3e1a9f2",
+    message: "Sync tokens from Figma (4 changed)",
+    author: "Figma sync",
+    when: "2 hours ago",
+    bot: true,
+  },
+  {
+    sha: "b72c0d4",
+    message: "Document Callout tones and examples",
+    author: "Mitch Kostelecky",
+    when: "Yesterday",
+  },
+  {
+    sha: "91fe7a0",
+    message: "Import Pagination from SDC",
+    author: "Mitch Kostelecky",
+    when: "2 days ago",
+  },
+  {
+    sha: "4c2d8b1",
+    message: "Mark Pager as deprecated",
+    author: "Mitch Kostelecky",
+    when: "2 days ago",
+  },
+  {
+    sha: "e08a2f6",
+    message: "Add Navigation patterns guideline",
+    author: "Mitch Kostelecky",
+    when: "4 days ago",
+  },
+];
 
 export type DocFile = {
-  id: string
-  kind: "component" | "guideline"
-  title: string
-  description: string
-  path: string
-  updated: string
-  body: string
-}
+  id: string;
+  kind: "component" | "guideline";
+  title: string;
+  description: string;
+  path: string;
+  updated: string;
+  body: string;
+};
 
-const T = "`"
+const T = "`";
 
 export const guidelineFiles: DocFile[] = [
   {
@@ -705,7 +1057,7 @@ Interactive elements are at least 40 by 40 pixels on touch screens. Button sizes
 Media in Card and Hero needs alt text unless it’s purely decorative.
 `,
   },
-]
+];
 
 export const componentFiles: Record<string, string> = {
   button: `---
@@ -778,10 +1130,13 @@ Put the consequence in the title.
 Three in a row read as noise.
 </Dont>
 `,
-}
+};
 
 /** AI drafts the prototype can produce for open agent questions. */
-export const drafts: Record<string, { fileId: string; prompt: string; text: string; commit: string }> = {
+export const drafts: Record<
+  string,
+  { fileId: string; prompt: string; text: string; commit: string }
+> = {
   "q-loading": {
     fileId: "button",
     prompt: "How do I show a loading state on Button?",
@@ -818,16 +1173,46 @@ Place a second bordered card inside the first.
 </Dont>
 `,
   },
-}
+};
 
 export const integrations = [
-  { id: "github", name: "GitHub", status: "connected", detail: "charged-labs/charged-ui on main. Every push rebuilds the site and agent context." },
-  { id: "sdc", name: "Drupal SDC", status: "connected", detail: "Reads components/**/*.component.yml. 12 components, props and slots kept in sync." },
-  { id: "figma", name: "Figma variables", status: "connected", detail: "Charged UI Tokens file. Last sync 2 hours ago, 4 tokens changed." },
-  { id: "block", name: "WordPress block.json", status: "available", detail: "Import blocks from a theme or plugin. Attributes become props." },
-  { id: "mintlify", name: "Mintlify import", status: "available", detail: "Bring docs.json and MDX pages over in one step." },
-  { id: "storybook", name: "Storybook", status: "planned", detail: "Use existing stories as live previews." },
-] as const
+  {
+    id: "github",
+    name: "GitHub",
+    status: "connected",
+    detail: "charged-labs/charged-ui on main. Every push rebuilds the site and agent context.",
+  },
+  {
+    id: "sdc",
+    name: "Drupal SDC",
+    status: "connected",
+    detail: "Reads components/**/*.component.yml. 12 components, props and slots kept in sync.",
+  },
+  {
+    id: "figma",
+    name: "Figma variables",
+    status: "connected",
+    detail: "Charged UI Tokens file. Last sync 2 hours ago, 4 tokens changed.",
+  },
+  {
+    id: "block",
+    name: "WordPress block.json",
+    status: "available",
+    detail: "Import blocks from a theme or plugin. Attributes become props.",
+  },
+  {
+    id: "mintlify",
+    name: "Mintlify import",
+    status: "available",
+    detail: "Bring docs.json and MDX pages over in one step.",
+  },
+  {
+    id: "storybook",
+    name: "Storybook",
+    status: "planned",
+    detail: "Use existing stories as live previews.",
+  },
+] as const;
 
 /*
   Exploration: one Corpus install with two projects, a design system and a docs
@@ -835,12 +1220,27 @@ export const integrations = [
   data on purpose, with the owner's go-ahead, and goes away with it in Phase 2.
 */
 
-export type ProjectKind = "design-system" | "docs"
+export type ProjectKind = "design-system" | "docs";
 
 /** A docs page. `path` is its place in the repository, like docs/engineering/deploying.md. `lines` is its frontmatter. */
-export type DocPage = { id: string; path: string; title: string; folder: string; description: string; updated: string; lines: string[]; body: string }
+export type DocPage = {
+  id: string;
+  path: string;
+  title: string;
+  folder: string;
+  description: string;
+  updated: string;
+  lines: string[];
+  body: string;
+};
 
-export type ProjectQuestion = { id: string; text: string; count: number; status: "answered" | "gap"; source?: { label: string; route: string } }
+export type ProjectQuestion = {
+  id: string;
+  text: string;
+  count: number;
+  status: "answered" | "gap";
+  source?: { label: string; route: string };
+};
 
 export const handbook = {
   id: "handbook",
@@ -852,9 +1252,21 @@ export const handbook = {
   updated: "Yesterday",
   questions: [
     { id: "h-rollback", text: "How do I roll back a deploy?", count: 9, status: "gap" },
-    { id: "h-oncall", text: "Who is on call this week?", count: 6, status: "answered", source: { label: "On-call and incidents", route: "handbook-on-call" } },
-    { id: "h-dates", text: "How should I write dates?", count: 4, status: "answered", source: { label: "Content style guide", route: "handbook-content-style" } },
+    {
+      id: "h-oncall",
+      text: "Who is on call this week?",
+      count: 6,
+      status: "answered",
+      source: { label: "On-call and incidents", route: "handbook-on-call" },
+    },
+    {
+      id: "h-dates",
+      text: "How should I write dates?",
+      count: 4,
+      status: "answered",
+      source: { label: "Content style guide", route: "handbook-content-style" },
+    },
   ] as ProjectQuestion[],
   // The pages are Markdown files in fixtures/handbook. See src/data/handbook-pages.ts.
   pages: handbookPages,
-}
+};

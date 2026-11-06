@@ -5,13 +5,7 @@ import { cn } from "./lib/utils";
  * The Corpus mark: four petals. In `duo` mode the left pair renders in the
  * current ink and the right pair in emerald — people + agents, one mark.
  */
-export function CorpusMark({
-  className,
-  duo = false,
-}: {
-  className?: string;
-  duo?: boolean;
-}) {
+export function CorpusMark({ className, duo = false }: { className?: string; duo?: boolean }) {
   const left =
     "M0 24C0 10.7501 10.7501 0 24 0C24 13.2499 13.2499 24 0 24ZM0 24C0 37.2499 10.7501 48 24 48C24 34.7501 13.2499 24 0 24Z";
   const right =
@@ -26,7 +20,7 @@ export function CorpusMark({
 
 /** The accent gesture used across the deck: the emerald full stop. */
 export function Stop() {
-  return <span className="text-emerald-500">.</span>
+  return <span className="text-emerald-500">.</span>;
 }
 
 export function Kicker({ children, dark = false }: { children: ReactNode; dark?: boolean }) {
@@ -168,13 +162,33 @@ export function ShotFrame({
         <div
           className={cn(
             "flex items-center gap-2 px-4 py-3",
-            dark ? "bg-neutral-900" : cn("border-b", accent ? "border-emerald-100 bg-emerald-50/50" : "border-neutral-100 bg-neutral-50"),
+            dark
+              ? "bg-neutral-900"
+              : cn(
+                  "border-b",
+                  accent
+                    ? "border-emerald-100 bg-emerald-50/50"
+                    : "border-neutral-100 bg-neutral-50",
+                ),
           )}
         >
-          <span className={cn("size-2.5 rounded-full", dark ? "bg-neutral-700" : "bg-neutral-300")} />
-          <span className={cn("size-2.5 rounded-full", dark ? "bg-neutral-700" : "bg-neutral-300")} />
-          <span className={cn("size-2.5 rounded-full", dark ? "bg-neutral-700" : "bg-neutral-300")} />
-          <span className={cn("ml-2 truncate font-mono text-[11px]", dark ? "text-neutral-500" : "text-neutral-400")}>{url}</span>
+          <span
+            className={cn("size-2.5 rounded-full", dark ? "bg-neutral-700" : "bg-neutral-300")}
+          />
+          <span
+            className={cn("size-2.5 rounded-full", dark ? "bg-neutral-700" : "bg-neutral-300")}
+          />
+          <span
+            className={cn("size-2.5 rounded-full", dark ? "bg-neutral-700" : "bg-neutral-300")}
+          />
+          <span
+            className={cn(
+              "ml-2 truncate font-mono text-[11px]",
+              dark ? "text-neutral-500" : "text-neutral-400",
+            )}
+          >
+            {url}
+          </span>
         </div>
         <img
           src={src}
@@ -184,7 +198,12 @@ export function ShotFrame({
       </div>
       {label ? (
         <figcaption className="mt-3 flex items-center gap-2 font-mono text-[11px] tracking-[0.12em] uppercase">
-          <span className={cn("size-1.5 rounded-full", accent ? "bg-emerald-500" : dark ? "bg-emerald-400" : "bg-neutral-900")} />
+          <span
+            className={cn(
+              "size-1.5 rounded-full",
+              accent ? "bg-emerald-500" : dark ? "bg-emerald-400" : "bg-neutral-900",
+            )}
+          />
           <span className={dark ? "text-neutral-400" : "text-neutral-500"}>{label}</span>
         </figcaption>
       ) : null}

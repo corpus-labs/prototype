@@ -39,17 +39,17 @@ function Title() {
         <div>
           <Kicker dark>IYA Ignite Grant · GenAI Category · Fall 2026</Kicker>
           <h1 className="mt-7 text-[76px] leading-[1.28] font-semibold tracking-[-0.035em]">
-            One source of truth<Stop />
+            One source of truth
+            <Stop />
           </h1>
           <p className="mt-5 text-[29px] leading-snug font-medium tracking-[-0.015em] text-neutral-400">
             Two readers: <span className="text-neutral-50">your team</span> and{" "}
             <span className="text-emerald-400">your AI agents</span>.
           </p>
           <p className="mt-7 max-w-xl text-[15.5px] leading-relaxed text-neutral-500">
-            A context control plane for small teams and solo builders: capture
-            knowledge in a familiar editor, publish it as your docs, and connect
-            every agent and support bot — live, via MCP and marketplace apps.
-            Owned, not rented.
+            A context control plane for small teams and solo builders: capture knowledge in a
+            familiar editor, publish it as your docs, and connect every agent and support bot —
+            live, via MCP and marketplace apps. Owned, not rented.
           </p>
         </div>
         <div className="flex items-end justify-between font-mono text-[11px] tracking-[0.14em] text-neutral-600 uppercase">
@@ -86,13 +86,10 @@ function Team() {
             <div className="rounded-2xl bg-neutral-50 p-9">
               <div className="flex items-center gap-3.5">
                 <CorpusMark className="size-6 text-neutral-950" />
-                <span className="text-[28px] font-semibold tracking-[-0.02em]">
-                  [ Your name ]
-                </span>
+                <span className="text-[28px] font-semibold tracking-[-0.02em]">[ Your name ]</span>
               </div>
               <p className="mt-3 text-[14.5px] text-neutral-500">
-                USC graduate student · graduating Spring 2027 · enrolled Fall 26 –
-                Spring 27
+                USC graduate student · graduating Spring 2027 · enrolled Fall 26 – Spring 27
               </p>
               <div className="mt-5 flex gap-2">
                 {["Product", "Design", "Engineering"].map((r) => (
@@ -102,8 +99,8 @@ function Team() {
                 ))}
               </div>
               <p className="mt-5 border-t border-neutral-200 pt-4 text-[13.5px] leading-relaxed text-neutral-500">
-                No hires planned — the grant goes entirely to market validation
-                (slide 09). One person ships; the budget buys distribution.
+                No hires planned — the grant goes entirely to market validation (slide 09). One
+                person ships; the budget buys distribution.
               </p>
             </div>
           </div>
@@ -208,7 +205,9 @@ function Problem() {
                   style={{ left, top }}
                 >
                   <img src={logo} alt="" className="size-3.5" />
-                  <span className="font-mono text-[10px] text-neutral-500">{labels[logo] ?? ""}</span>
+                  <span className="font-mono text-[10px] text-neutral-500">
+                    {labels[logo] ?? ""}
+                  </span>
                 </div>
               ))}
             </div>
@@ -235,14 +234,10 @@ function Solution() {
         <div className="mt-10 flex flex-1 items-center justify-between gap-6">
           {/* The editor */}
           <div className="w-[440px] shrink-0">
-            <ShotFrame
-              src={editorShot}
-              url="corpus.local/#editor"
-              imgClassName="max-h-[280px]"
-            />
+            <ShotFrame src={editorShot} url="corpus.local/#editor" imgClassName="max-h-[280px]" />
             <p className="mt-3.5 text-[13px] leading-relaxed text-neutral-400">
-              Write in a familiar editor — headings, links, tables, no syntax to
-              learn. Markdown lives underneath, invisible unless you want it.
+              Write in a familiar editor — headings, links, tables, no syntax to learn. Markdown
+              lives underneath, invisible unless you want it.
             </p>
           </div>
 
@@ -273,8 +268,7 @@ function Solution() {
                 People
               </p>
               <p className="mt-2.5 text-[14px] leading-relaxed text-neutral-300">
-                Published documentation + help desk — handbooks, product docs,
-                support articles
+                Published documentation + help desk — handbooks, product docs, support articles
               </p>
             </div>
             <div className="rounded-2xl bg-emerald-950/50 p-6 ring-1 ring-emerald-900">
@@ -283,15 +277,15 @@ function Solution() {
                 Agents + bots
               </p>
               <p className="mt-2.5 text-[14px] leading-relaxed text-emerald-100/90">
-                Live over MCP and marketplace apps — agents read on demand;
-                sessions sync back as knowledge
+                Live over MCP and marketplace apps — agents read on demand; sessions sync back as
+                knowledge
               </p>
             </div>
           </div>
         </div>
         <p className="mt-4 font-mono text-[11.5px] tracking-[0.02em] text-neutral-500">
-          One home for ideas and organizational data. Same plane, next stops:
-          shared conversations, shared components, design systems.
+          One home for ideas and organizational data. Same plane, next stops: shared conversations,
+          shared components, design systems.
         </p>
       </div>
     </Slide>
@@ -303,10 +297,7 @@ function Today() {
   return (
     <Slide n={5}>
       <div className="relative flex h-full flex-col px-20 py-14">
-        <SlideHeading
-          kicker="04 · The product today"
-          title="A working prototype, not a mockup."
-        />
+        <SlideHeading kicker="04 · The product today" title="A working prototype, not a mockup." />
         <div className="mt-9 grid flex-1 grid-cols-[1.55fr_1fr] gap-12">
           <ShotFrame
             src={overview}
@@ -368,9 +359,8 @@ function TwoReaders() {
           />
         </div>
         <p className="mt-5 text-[13.5px] text-neutral-500">
-          One page, three surfaces: captured in the editor, published for people,
-          emitted for agents — llms.txt, Markdown, JSON today; MCP tools in
-          Phase 3.
+          One page, three surfaces: captured in the editor, published for people, emitted for agents
+          — llms.txt, Markdown, JSON today; MCP tools in Phase 3.
         </p>
       </div>
     </Slide>
@@ -380,12 +370,55 @@ function TwoReaders() {
 /* 07 — Positioning */
 function Positioning() {
   const rows = [
-    { logo: mintlifyLogo, tool: "Mintlify", people: true, agents: false, selfHosted: false, price: "free · agents $450/mo" },
-    { logo: gitbookLogo, tool: "GitBook", people: true, agents: false, selfHosted: false, price: "free (1) · $65/site/mo" },
-    { logo: notionLogo, tool: "Notion", people: true, agents: false, selfHosted: false, price: "per-seat / mo" },
-    { logo: obsidianLogo, tool: "Obsidian", people: "add-on", agents: false, selfHosted: "local app", price: "free · publish $8/mo" },
-    { logo: null, tool: "Memory MCPs", people: false, agents: "convos only", selfHosted: "varies", price: "$0–20/mo" },
-    { logo: "corpus", tool: "Corpus", people: true, agents: "generated", selfHosted: true, price: "$99 once*", corpus: true },
+    {
+      logo: mintlifyLogo,
+      tool: "Mintlify",
+      people: true,
+      agents: false,
+      selfHosted: false,
+      price: "free · agents $450/mo",
+    },
+    {
+      logo: gitbookLogo,
+      tool: "GitBook",
+      people: true,
+      agents: false,
+      selfHosted: false,
+      price: "free (1) · $65/site/mo",
+    },
+    {
+      logo: notionLogo,
+      tool: "Notion",
+      people: true,
+      agents: false,
+      selfHosted: false,
+      price: "per-seat / mo",
+    },
+    {
+      logo: obsidianLogo,
+      tool: "Obsidian",
+      people: "add-on",
+      agents: false,
+      selfHosted: "local app",
+      price: "free · publish $8/mo",
+    },
+    {
+      logo: null,
+      tool: "Memory MCPs",
+      people: false,
+      agents: "convos only",
+      selfHosted: "varies",
+      price: "$0–20/mo",
+    },
+    {
+      logo: "corpus",
+      tool: "Corpus",
+      people: true,
+      agents: "generated",
+      selfHosted: true,
+      price: "$99 once*",
+      corpus: true,
+    },
   ];
   const mark = (v: boolean | string, corpus = false) => {
     const inner =
@@ -394,7 +427,13 @@ function Positioning() {
       ) : v === false ? (
         <Minus className={corpus ? "size-4 text-neutral-700" : "size-4 text-neutral-300"} />
       ) : (
-        <span className={corpus ? "font-mono text-[11px] text-neutral-300" : "font-mono text-[11px] text-neutral-500"}>
+        <span
+          className={
+            corpus
+              ? "font-mono text-[11px] text-neutral-300"
+              : "font-mono text-[11px] text-neutral-500"
+          }
+        >
           {v}
         </span>
       );
@@ -417,7 +456,9 @@ function Positioning() {
           <Server className="size-4 text-neutral-400" />
         )}
       </span>
-      <span className={r.corpus ? "text-[15px] font-semibold" : "text-[14px] font-medium"}>{r.tool}</span>
+      <span className={r.corpus ? "text-[15px] font-semibold" : "text-[14px] font-medium"}>
+        {r.tool}
+      </span>
     </span>
   );
   return (
@@ -432,10 +473,18 @@ function Positioning() {
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="h-10 px-3" />
-                <TableHead className="h-10 px-3 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">People docs</TableHead>
-                <TableHead className="h-10 px-3 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">Agent outputs</TableHead>
-                <TableHead className="h-10 px-3 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">Self-hosted</TableHead>
-                <TableHead className="h-10 px-3 font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">Price</TableHead>
+                <TableHead className="h-10 px-3 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">
+                  People docs
+                </TableHead>
+                <TableHead className="h-10 px-3 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">
+                  Agent outputs
+                </TableHead>
+                <TableHead className="h-10 px-3 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">
+                  Self-hosted
+                </TableHead>
+                <TableHead className="h-10 px-3 font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">
+                  Price
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -449,9 +498,15 @@ function Positioning() {
                   }
                 >
                   <TableCell className="py-[15px] px-3">{toolCell(r)}</TableCell>
-                  <TableCell className="py-[15px] px-3 text-center">{mark(r.people, r.corpus)}</TableCell>
-                  <TableCell className="py-[15px] px-3 text-center">{mark(r.agents, r.corpus)}</TableCell>
-                  <TableCell className="py-[15px] px-3 text-center">{mark(r.selfHosted, r.corpus)}</TableCell>
+                  <TableCell className="py-[15px] px-3 text-center">
+                    {mark(r.people, r.corpus)}
+                  </TableCell>
+                  <TableCell className="py-[15px] px-3 text-center">
+                    {mark(r.agents, r.corpus)}
+                  </TableCell>
+                  <TableCell className="py-[15px] px-3 text-center">
+                    {mark(r.selfHosted, r.corpus)}
+                  </TableCell>
                   <TableCell className="py-[15px] px-3">
                     {r.corpus ? (
                       <span className="inline-block rounded-md bg-emerald-500/15 px-2.5 py-1 font-mono text-[11.5px] text-emerald-300">
@@ -467,12 +522,11 @@ function Positioning() {
           </Table>
         </div>
         <p className="mt-4 text-[11px] leading-relaxed text-neutral-400">
-          *Planned launch pricing. Prices from vendor sites, Nov 2026. Mintlify:
-          Starter free (5 editors); agent features from Pro, $450/mo annual;
-          self-hosting is an Enterprise add-on. GitBook: free for one user, then
-          $65/site + $12/user/mo. Obsidian: local and free; Publish ($8/mo) is
-          hosted; commercial $50/user/yr. Memory MCPs store conversations — not
-          published docs.
+          *Planned launch pricing. Prices from vendor sites, Nov 2026. Mintlify: Starter free (5
+          editors); agent features from Pro, $450/mo annual; self-hosting is an Enterprise add-on.
+          GitBook: free for one user, then $65/site + $12/user/mo. Obsidian: local and free; Publish
+          ($8/mo) is hosted; commercial $50/user/yr. Memory MCPs store conversations — not published
+          docs.
         </p>
       </div>
     </Slide>
@@ -549,8 +603,7 @@ function Roadmap() {
           </div>
         </div>
         <p className="mt-2 text-[12.5px] text-neutral-400">
-          The full phase plan, with acceptance checks per phase, lives in the repo
-          (PLAN.md).
+          The full phase plan, with acceptance checks per phase, lives in the repo (PLAN.md).
         </p>
       </div>
     </Slide>
@@ -560,9 +613,17 @@ function Roadmap() {
 /* 09 — Use of proceeds */
 function Proceeds() {
   const items = [
-    ["X ad campaign", "$2,250", "Sponsored posts aimed at developers, indie hackers and AI-tooling buyers, driving to the landing page"],
+    [
+      "X ad campaign",
+      "$2,250",
+      "Sponsored posts aimed at developers, indie hackers and AI-tooling buyers, driving to the landing page",
+    ],
     ["Landing page + email", "$300", "Domain, hosting, and email-capture / automation tooling"],
-    ["Creative testing", "$450", "Ad variants and retargeting, reallocated by measured CPC and CTR"],
+    [
+      "Creative testing",
+      "$450",
+      "Ad variants and retargeting, reallocated by measured CPC and CTR",
+    ],
   ];
   const byMarch = [
     "2,000+ landing-page visits from paid",
@@ -580,7 +641,10 @@ function Proceeds() {
         <div className="mt-8 grid flex-1 grid-cols-[1.35fr_1fr] gap-16">
           <div className="flex flex-col justify-center">
             {items.map(([what, cost, detail]) => (
-              <div key={what} className="flex items-baseline justify-between gap-8 border-b border-neutral-100 py-4">
+              <div
+                key={what}
+                className="flex items-baseline justify-between gap-8 border-b border-neutral-100 py-4"
+              >
                 <div>
                   <p className="text-[15.5px] font-medium">{what}</p>
                   <p className="mt-0.5 max-w-[400px] text-[12.5px] leading-relaxed text-neutral-500">
@@ -612,8 +676,8 @@ function Proceeds() {
               ))}
             </div>
             <p className="mt-7 text-[11.5px] leading-relaxed text-neutral-400">
-              Targets, not results — the campaign exists to buy real conversion
-              data (CPC, email rate, sales) before the IYA Venture Showcase.
+              Targets, not results — the campaign exists to buy real conversion data (CPC, email
+              rate, sales) before the IYA Venture Showcase.
             </p>
           </div>
         </div>
@@ -633,11 +697,11 @@ function Close() {
       <div className="relative flex h-full flex-col items-center justify-center gap-7 px-20 text-center">
         <CorpusMark duo className="size-14" />
         <h2 className="max-w-3xl text-[54px] leading-[1.2] font-semibold tracking-[-0.03em] text-balance">
-          Documentation your agents actually follow<Stop />
+          Documentation your agents actually follow
+          <Stop />
         </h2>
         <p className="max-w-lg text-[16px] leading-relaxed text-neutral-400">
-          Docs, agent context, and support answers — from markdown you own. $99
-          once.
+          Docs, agent context, and support answers — from markdown you own. $99 once.
         </p>
         <div className="mt-3 flex items-center gap-3 border-t border-neutral-800 pt-6 font-mono text-[11px] tracking-[0.14em] text-neutral-600 uppercase">
           <span>[ demo url ]</span>
@@ -651,4 +715,15 @@ function Close() {
   );
 }
 
-export const SLIDES = [Title, Team, Problem, Solution, Today, TwoReaders, Positioning, Roadmap, Proceeds, Close];
+export const SLIDES = [
+  Title,
+  Team,
+  Problem,
+  Solution,
+  Today,
+  TwoReaders,
+  Positioning,
+  Roadmap,
+  Proceeds,
+  Close,
+];

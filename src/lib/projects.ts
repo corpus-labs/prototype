@@ -1,29 +1,42 @@
 // Exploration: several projects in one Corpus install. See docs/decisions/proposed-projects-and-docs.md.
-import { agentStats, components, guidelineFiles, handbook, questions, tokens, workspace, type DocPage, type ProjectKind } from "@/data/workspace"
-import { useStore } from "@/lib/store"
+import {
+  agentStats,
+  components,
+  guidelineFiles,
+  handbook,
+  questions,
+  tokens,
+  workspace,
+  type DocPage,
+  type ProjectKind,
+} from "@/data/workspace";
+import { useStore } from "@/lib/store";
 
-export type ProjectId = "charged-ui" | "handbook"
+export type ProjectId = "charged-ui" | "handbook";
 
 export type ProjectSummary = {
-  id: ProjectId
-  name: string
-  kind: ProjectKind
-  description: string
-  site: string
-  repo: string
+  id: ProjectId;
+  name: string;
+  kind: ProjectKind;
+  description: string;
+  site: string;
+  repo: string;
   /** The route a project opens on. */
-  home: string
-  requests: number
+  home: string;
+  requests: number;
   /** Agent questions with no answer in the docs. */
-  open: number
-  updated: string
-  counts: [string, number][]
-}
+  open: number;
+  updated: string;
+  counts: [string, number][];
+};
 
-export const KIND_LABEL: Record<ProjectKind, string> = { "design-system": "Design system", docs: "Docs" }
+export const KIND_LABEL: Record<ProjectKind, string> = {
+  "design-system": "Design system",
+  docs: "Docs",
+};
 
 export function useProjects(): ProjectSummary[] {
-  const { resolved, commits } = useStore()
+  const { resolved, commits } = useStore();
   return [
     {
       id: "charged-ui",
@@ -58,24 +71,24 @@ export function useProjects(): ProjectSummary[] {
         ["Folders", foldersOf(handbook.pages).length],
       ],
     },
-  ]
+  ];
 }
 
 /** Which project a route belongs to. The projects dashboard belongs to none. */
 export function projectOf(route: string): ProjectId | null {
-  if (route === "projects") return null
-  if (route === "handbook" || route.startsWith("handbook-")) return "handbook"
-  return "charged-ui"
+  if (route === "projects") return null;
+  if (route === "handbook" || route.startsWith("handbook-")) return "handbook";
+  return "charged-ui";
 }
 
 export function useCurrentProject(route: string) {
-  const id = projectOf(route)
-  return useProjects().find((p) => p.id === id) ?? null
+  const id = projectOf(route);
+  return useProjects().find((p) => p.id === id) ?? null;
 }
 
 /** Pages grouped by folder, in the order folders first appear. */
 export function foldersOf(pages: DocPage[]): [string, DocPage[]][] {
-  const out = new Map<string, DocPage[]>()
-  for (const p of pages) out.set(p.folder, [...(out.get(p.folder) ?? []), p])
-  return [...out]
+  const out = new Map<string, DocPage[]>();
+  for (const p of pages) out.set(p.folder, [...(out.get(p.folder) ?? []), p]);
+  return [...out];
 }

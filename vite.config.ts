@@ -1,14 +1,18 @@
-import { fileURLToPath, URL } from "node:url"
-import { defineConfig } from "vite"
-import react from "@vitejs/plugin-react"
-import tailwindcss from "@tailwindcss/vite"
-import { viteSingleFile } from "vite-plugin-singlefile"
+import { fileURLToPath, URL } from "node:url";
+import { defineConfig, lazyPlugins } from "vite-plus";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import { viteSingleFile } from "vite-plugin-singlefile";
 
 // `npm run build:single` inlines every asset (JS, CSS, fonts) into one HTML file.
-const single = Boolean(process.env.SINGLEFILE)
+const single = Boolean(process.env.SINGLEFILE);
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), ...(single ? [viteSingleFile()] : [])],
+  staged: {
+    "*": "vp check --fix",
+  },
+  fmt: {},
+  plugins: lazyPlugins(() => [react(), tailwindcss(), ...(single ? [viteSingleFile()] : [])]),
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
@@ -17,4 +21,4 @@ export default defineConfig({
     },
   },
   build: single ? { assetsInlineLimit: 100_000_000 } : undefined,
-})
+});
