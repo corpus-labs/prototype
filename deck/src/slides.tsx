@@ -327,7 +327,7 @@ function Today() {
               <span className="font-mono text-[10.5px] tracking-[0.16em] text-neutral-400 uppercase">
                 repo
               </span>
-              <LinkSlot label="[ add url ]" />
+              <LinkSlot label="github.com/corpus-labs/prototype" />
             </div>
           </div>
         </div>
@@ -642,7 +642,7 @@ function Close() {
         <div className="mt-3 flex items-center gap-3 border-t border-neutral-800 pt-6 font-mono text-[11px] tracking-[0.14em] text-neutral-600 uppercase">
           <span>[ demo url ]</span>
           <span>·</span>
-          <span>[ github url ]</span>
+          <span>github.com/corpus-labs/prototype</span>
           <span>·</span>
           <span>[ your name ] · IYA Ignite Grant · November 2026</span>
         </div>
