@@ -374,9 +374,9 @@ function Positioning() {
       logo: mintlifyLogo,
       tool: "Mintlify",
       people: true,
-      agents: false,
+      agents: "at $450/mo",
       selfHosted: false,
-      price: "free · agents $450/mo",
+      price: "free · pro $450/mo",
     },
     {
       logo: gitbookLogo,
@@ -398,7 +398,7 @@ function Positioning() {
       logo: obsidianLogo,
       tool: "Obsidian",
       people: "add-on",
-      agents: false,
+      agents: "community",
       selfHosted: "local app",
       price: "free · publish $8/mo",
     },
@@ -525,8 +525,8 @@ function Positioning() {
           *Planned launch pricing. Prices from vendor sites, Nov 2026. Mintlify: Starter free (5
           editors); agent features from Pro, $450/mo annual; self-hosting is an Enterprise add-on.
           GitBook: free for one user, then $65/site + $12/user/mo. Obsidian: local and free; Publish
-          ($8/mo) is hosted; commercial $50/user/yr. Memory MCPs store conversations — not published
-          docs.
+          ($8/mo) is hosted; agent access via community MCP plugins — local, single-user,
+          unsupported. Memory MCPs store conversations — not published docs.
         </p>
       </div>
     </Slide>
