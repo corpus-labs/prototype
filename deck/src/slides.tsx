@@ -423,15 +423,15 @@ function Positioning() {
           kicker="06 · Where Corpus sits"
           title="Owned docs that people and agents both read — nobody else does both."
         />
-        <div className="mt-9 flex-1 overflow-hidden rounded-2xl bg-white shadow-[0_20px_48px_-28px_rgb(0_0_0/0.3)] ring-1 ring-neutral-200">
-          <Table>
+        <div className="mt-9 flex-1">
+          <Table className="[&_tr]:border-0">
             <TableHeader>
-              <TableRow className="border-neutral-200 bg-neutral-50/80 hover:bg-neutral-50/80">
-                <TableHead className="h-10" />
-                <TableHead className="h-10 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">People docs</TableHead>
-                <TableHead className="h-10 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">Agent outputs</TableHead>
-                <TableHead className="h-10 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">Self-hosted</TableHead>
-                <TableHead className="h-10 font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">Price</TableHead>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="h-10 px-3" />
+                <TableHead className="h-10 px-3 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">People docs</TableHead>
+                <TableHead className="h-10 px-3 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">Agent outputs</TableHead>
+                <TableHead className="h-10 px-3 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">Self-hosted</TableHead>
+                <TableHead className="h-10 px-3 font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">Price</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -440,15 +440,15 @@ function Positioning() {
                   key={r.tool}
                   className={
                     r.corpus
-                      ? "border-neutral-950 bg-neutral-950 text-neutral-50 hover:bg-neutral-950 [&>td]:border-neutral-800"
-                      : "border-neutral-100"
+                      ? "bg-neutral-950 text-neutral-50 hover:bg-neutral-950 [&>td:first-child]:rounded-l-xl [&>td]:px-3 [&>td:last-child]:rounded-r-xl"
+                      : "hover:bg-transparent"
                   }
                 >
-                  <TableCell className={`py-[15px] ${r.corpus ? "" : ""}`}>{toolCell(r)}</TableCell>
-                  <TableCell className="py-[15px] text-center">{mark(r.people, r.corpus)}</TableCell>
-                  <TableCell className="py-[15px] text-center">{mark(r.agents, r.corpus)}</TableCell>
-                  <TableCell className="py-[15px] text-center">{mark(r.selfHosted, r.corpus)}</TableCell>
-                  <TableCell className="py-[15px]">
+                  <TableCell className="py-[15px] px-3">{toolCell(r)}</TableCell>
+                  <TableCell className="py-[15px] px-3 text-center">{mark(r.people, r.corpus)}</TableCell>
+                  <TableCell className="py-[15px] px-3 text-center">{mark(r.agents, r.corpus)}</TableCell>
+                  <TableCell className="py-[15px] px-3 text-center">{mark(r.selfHosted, r.corpus)}</TableCell>
+                  <TableCell className="py-[15px] px-3">
                     {r.corpus ? (
                       <span className="inline-block rounded-md bg-emerald-500/15 px-2.5 py-1 font-mono text-[11.5px] text-emerald-300">
                         {r.price}
