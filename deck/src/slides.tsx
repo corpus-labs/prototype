@@ -388,13 +388,17 @@ function Positioning() {
     { logo: "corpus", tool: "Corpus", people: true, agents: "generated", selfHosted: true, price: "$99 once*", corpus: true },
   ];
   const mark = (v: boolean | string, corpus = false) => {
-    if (v === true) return <Check className={corpus ? "size-4 text-emerald-400" : "size-4 text-emerald-500"} />;
-    if (v === false) return <Minus className={corpus ? "size-4 text-neutral-700" : "size-4 text-neutral-300"} />;
-    return (
-      <span className={corpus ? "font-mono text-[11px] text-neutral-300" : "font-mono text-[11px] text-neutral-500"}>
-        {v}
-      </span>
-    );
+    const inner =
+      v === true ? (
+        <Check className={corpus ? "size-4 text-emerald-400" : "size-4 text-emerald-500"} />
+      ) : v === false ? (
+        <Minus className={corpus ? "size-4 text-neutral-700" : "size-4 text-neutral-300"} />
+      ) : (
+        <span className={corpus ? "font-mono text-[11px] text-neutral-300" : "font-mono text-[11px] text-neutral-500"}>
+          {v}
+        </span>
+      );
+    return <span className="flex items-center justify-center">{inner}</span>;
   };
   const toolCell = (r: (typeof rows)[number]) => (
     <span className="flex items-center gap-3">
