@@ -1,0 +1,453 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./shadcn-tailwind.css";
+
+/*
+  Dark mode follows the viewer first: an explicit data-theme on <html> wins,
+  otherwise the system preference applies.
+*/
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+}
+
+/* Geist, inlined (latin subset) so the prototype renders the same everywhere. */
+@font-face {
+  font-family: "Geist Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/geist/files/geist-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Geist Mono Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@theme {
+  --font-sans: "Geist Variable", "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono Variable", "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* ---------- Neutral palettes (Tailwind 4) ---------- */
+:root,
+:root[data-base="neutral"] {
+  --base-50: var(--color-neutral-50);
+  --base-100: var(--color-neutral-100);
+  --base-200: var(--color-neutral-200);
+  --base-300: var(--color-neutral-300);
+  --base-400: var(--color-neutral-400);
+  --base-500: var(--color-neutral-500);
+  --base-600: var(--color-neutral-600);
+  --base-700: var(--color-neutral-700);
+  --base-800: var(--color-neutral-800);
+  --base-900: var(--color-neutral-900);
+  --base-950: var(--color-neutral-950);
+}
+
+:root[data-base="zinc"] {
+  --base-50: var(--color-zinc-50);
+  --base-100: var(--color-zinc-100);
+  --base-200: var(--color-zinc-200);
+  --base-300: var(--color-zinc-300);
+  --base-400: var(--color-zinc-400);
+  --base-500: var(--color-zinc-500);
+  --base-600: var(--color-zinc-600);
+  --base-700: var(--color-zinc-700);
+  --base-800: var(--color-zinc-800);
+  --base-900: var(--color-zinc-900);
+  --base-950: var(--color-zinc-950);
+}
+
+:root[data-base="stone"] {
+  --base-50: var(--color-stone-50);
+  --base-100: var(--color-stone-100);
+  --base-200: var(--color-stone-200);
+  --base-300: var(--color-stone-300);
+  --base-400: var(--color-stone-400);
+  --base-500: var(--color-stone-500);
+  --base-600: var(--color-stone-600);
+  --base-700: var(--color-stone-700);
+  --base-800: var(--color-stone-800);
+  --base-900: var(--color-stone-900);
+  --base-950: var(--color-stone-950);
+}
+
+:root[data-base="slate"] {
+  --base-50: var(--color-slate-50);
+  --base-100: var(--color-slate-100);
+  --base-200: var(--color-slate-200);
+  --base-300: var(--color-slate-300);
+  --base-400: var(--color-slate-400);
+  --base-500: var(--color-slate-500);
+  --base-600: var(--color-slate-600);
+  --base-700: var(--color-slate-700);
+  --base-800: var(--color-slate-800);
+  --base-900: var(--color-slate-900);
+  --base-950: var(--color-slate-950);
+}
+
+:root[data-base="gray"] {
+  --base-50: var(--color-gray-50);
+  --base-100: var(--color-gray-100);
+  --base-200: var(--color-gray-200);
+  --base-300: var(--color-gray-300);
+  --base-400: var(--color-gray-400);
+  --base-500: var(--color-gray-500);
+  --base-600: var(--color-gray-600);
+  --base-700: var(--color-gray-700);
+  --base-800: var(--color-gray-800);
+  --base-900: var(--color-gray-900);
+  --base-950: var(--color-gray-950);
+}
+
+/* ---------- Semantic tokens: light ---------- */
+:root {
+  color-scheme: light;
+  --radius: 0.625rem;
+  --background: var(--color-white);
+  --foreground: var(--base-950);
+  --card: var(--color-white);
+  --card-foreground: var(--base-950);
+  --popover: var(--color-white);
+  --popover-foreground: var(--base-950);
+  --primary: var(--base-900);
+  --primary-foreground: var(--base-50);
+  --secondary: var(--base-100);
+  --secondary-foreground: var(--base-900);
+  --muted: var(--base-100);
+  --muted-foreground: var(--base-500);
+  --accent: var(--base-100);
+  --accent-foreground: var(--base-900);
+  --destructive: var(--color-red-600);
+  --border: var(--base-200);
+  --input: var(--base-200);
+  --ring: var(--base-400);
+  --sidebar: var(--base-50);
+  --sidebar-foreground: var(--base-950);
+  --sidebar-primary: var(--base-900);
+  --sidebar-primary-foreground: var(--base-50);
+  --sidebar-accent: color-mix(in oklch, var(--base-200) 70%, var(--base-50));
+  --sidebar-accent-foreground: var(--base-950);
+  --sidebar-border: var(--base-200);
+  --sidebar-ring: var(--base-400);
+  --good: var(--color-emerald-600);
+  --good-soft: var(--color-emerald-50);
+  --bad: var(--color-red-600);
+  --bad-soft: var(--color-red-50);
+  --warn: var(--color-amber-600);
+  --warn-soft: var(--color-amber-50);
+  --link-hover: color-mix(in oklch, var(--base-200) 45%, transparent);
+}
+
+/* ---------- Semantic tokens: dark ---------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --background: var(--base-950);
+    --foreground: var(--base-50);
+    --card: var(--base-900);
+    --card-foreground: var(--base-50);
+    --popover: var(--base-900);
+    --popover-foreground: var(--base-50);
+    --primary: var(--base-100);
+    --primary-foreground: var(--base-900);
+    --secondary: var(--base-800);
+    --secondary-foreground: var(--base-50);
+    --muted: var(--base-800);
+    --muted-foreground: var(--base-400);
+    --accent: var(--base-800);
+    --accent-foreground: var(--base-50);
+    --destructive: var(--color-red-400);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: var(--base-500);
+    --sidebar: var(--base-950);
+    --sidebar-foreground: var(--base-50);
+    --sidebar-primary: var(--base-100);
+    --sidebar-primary-foreground: var(--base-900);
+    --sidebar-accent: var(--base-900);
+    --sidebar-accent-foreground: var(--base-50);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: var(--base-500);
+    --good: var(--color-emerald-400);
+    --good-soft: color-mix(in oklch, var(--color-emerald-400) 12%, transparent);
+    --bad: var(--color-red-400);
+    --bad-soft: color-mix(in oklch, var(--color-red-400) 12%, transparent);
+    --warn: var(--color-amber-400);
+    --warn-soft: color-mix(in oklch, var(--color-amber-400) 12%, transparent);
+    --link-hover: oklch(1 0 0 / 5%);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: var(--base-950);
+  --foreground: var(--base-50);
+  --card: var(--base-900);
+  --card-foreground: var(--base-50);
+  --popover: var(--base-900);
+  --popover-foreground: var(--base-50);
+  --primary: var(--base-100);
+  --primary-foreground: var(--base-900);
+  --secondary: var(--base-800);
+  --secondary-foreground: var(--base-50);
+  --muted: var(--base-800);
+  --muted-foreground: var(--base-400);
+  --accent: var(--base-800);
+  --accent-foreground: var(--base-50);
+  --destructive: var(--color-red-400);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: var(--base-500);
+  --sidebar: var(--base-950);
+  --sidebar-foreground: var(--base-50);
+  --sidebar-primary: var(--base-100);
+  --sidebar-primary-foreground: var(--base-900);
+  --sidebar-accent: var(--base-900);
+  --sidebar-accent-foreground: var(--base-50);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: var(--base-500);
+  --good: var(--color-emerald-400);
+  --good-soft: color-mix(in oklch, var(--color-emerald-400) 12%, transparent);
+  --bad: var(--color-red-400);
+  --bad-soft: color-mix(in oklch, var(--color-red-400) 12%, transparent);
+  --warn: var(--color-amber-400);
+  --warn-soft: color-mix(in oklch, var(--color-amber-400) 12%, transparent);
+  --link-hover: oklch(1 0 0 / 5%);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* Phones draw edge to edge under the system bars; keep content clear of them. */
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 40;
+  background: var(--background);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "ss01" off;
+    text-rendering: optimizeLegibility;
+  }
+  code,
+  kbd,
+  pre,
+  samp {
+    @apply font-mono;
+  }
+  ::selection {
+    background: color-mix(in oklch, var(--foreground) 14%, transparent);
+  }
+}
+
+/*
+  The docs editor's content. It uses the reader's type scale (15px prose, 20px
+  section titles, the same lists and code) so editing a page looks like reading it.
+*/
+@layer components {
+  .docs-prose {
+    @apply max-w-[72ch] text-[15px] leading-relaxed text-pretty text-foreground outline-none;
+  }
+  .docs-prose > * + * {
+    @apply mt-5;
+  }
+  .docs-prose h1,
+  .docs-prose h2 {
+    @apply mt-10 text-xl leading-snug font-semibold tracking-[-0.02em];
+  }
+  .docs-prose h3,
+  .docs-prose h4 {
+    @apply mt-8 text-base font-semibold;
+  }
+  .docs-prose > :first-child {
+    @apply mt-0;
+  }
+  .docs-prose ul {
+    @apply list-disc pl-5;
+  }
+  .docs-prose ol {
+    @apply list-decimal pl-5;
+  }
+  .docs-prose li + li {
+    @apply mt-2;
+  }
+  .docs-prose li::marker {
+    @apply text-muted-foreground/60;
+  }
+  .docs-prose li > p {
+    @apply m-0;
+  }
+  .docs-prose a {
+    @apply font-medium underline decoration-border underline-offset-4;
+  }
+  .docs-prose strong {
+    @apply font-semibold;
+  }
+  .docs-prose code {
+    @apply rounded-[5px] bg-muted px-1 py-0.5 font-mono text-[0.86em];
+  }
+  .docs-prose pre {
+    @apply overflow-x-auto rounded-lg border bg-muted/40 p-3.5 font-mono text-[12.5px] leading-relaxed;
+  }
+  .docs-prose pre code {
+    @apply bg-transparent p-0 text-[1em];
+  }
+  .docs-prose blockquote {
+    @apply border-l-2 pl-4 text-muted-foreground;
+  }
+  .docs-prose hr {
+    @apply border-t;
+  }
+  .docs-prose table {
+    @apply w-full border-collapse text-sm;
+  }
+  .docs-prose th,
+  .docs-prose td {
+    @apply border px-3 py-2 text-left align-top;
+  }
+  .docs-prose th {
+    @apply font-medium;
+  }
+
+  /* Toolbar and menus that Milkdown positions next to the cursor or selection. */
+  .docs-editor-float {
+    @apply absolute z-40;
+  }
+  .docs-editor-float[data-show="false"] {
+    @apply hidden;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Set for two frames while the theme or palette changes (see withoutTransitions in store.tsx). */
+:root[data-switching-theme] *,
+:root[data-switching-theme] *::before,
+:root[data-switching-theme] *::after {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/*
+  Charged UI, the design system documented in this workspace. Its previews use
+  its own tokens so they read as content, separate from Corpus’s neutral chrome.
+*/
+.cui {
+  --cui-ink: #171717;
+  --cui-muted: #737373;
+  --cui-line: #e5e5e5;
+  --cui-surface: #ffffff;
+  --cui-subtle: #f5f5f5;
+  --cui-charge: #2563eb;
+  --cui-charge-deep: #1d4ed8;
+  --cui-charge-soft: #dbeafe;
+  --cui-focus: #93c5fd;
+  --cui-success: #16a34a;
+  --cui-success-soft: #dcfce7;
+  --cui-warning: #d97706;
+  --cui-warning-soft: #fef3c7;
+  --cui-danger: #dc2626;
+  --cui-danger-soft: #fee2e2;
+  color: var(--cui-ink);
+  font-family: var(--font-sans);
+}
+
+.cui[data-canvas="dark"] {
+  --cui-ink: #fafafa;
+  --cui-muted: #a3a3a3;
+  --cui-line: #2e2e2e;
+  --cui-surface: #0a0a0a;
+  --cui-subtle: #1a1a1a;
+  --cui-charge: #3b82f6;
+  --cui-charge-deep: #2563eb;
+  --cui-charge-soft: rgb(59 130 246 / 0.18);
+  --cui-focus: #1e40af;
+  --cui-success-soft: rgb(22 163 74 / 0.18);
+  --cui-warning-soft: rgb(217 119 6 / 0.18);
+  --cui-danger-soft: rgb(220 38 38 / 0.18);
+}
