@@ -18,21 +18,22 @@ export function CorpusMark({
     "M48 24C48 10.7501 37.2499 0 24 0C24 13.2499 34.7501 24 48 24ZM48 24C48 37.2499 37.2499 48 24 48C24 34.7501 34.7501 24 48 24Z";
   return (
     <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
-      <path d={left} fill={duo ? "currentColor" : "currentColor"} />
+      <path d={left} fill="currentColor" />
       <path d={right} fill={duo ? "var(--color-emerald-500)" : "currentColor"} />
     </svg>
   );
 }
 
+/** The accent gesture used across the deck: the emerald full stop. */
+export function Stop() {
+  return <span className="text-emerald-500">.</span>
+}
+
 export function Kicker({ children, dark = false }: { children: ReactNode; dark?: boolean }) {
   return (
-    <p
-      className={cn(
-        "font-mono text-[11px] font-medium tracking-[0.22em] uppercase",
-        dark ? "text-neutral-500" : "text-neutral-400",
-      )}
-    >
-      {children}
+    <p className="flex items-center gap-3 font-mono text-[11px] font-medium tracking-[0.22em] uppercase">
+      <span className={cn("h-px w-6", dark ? "bg-neutral-700" : "bg-neutral-300")} />
+      <span className={dark ? "text-neutral-400" : "text-neutral-400"}>{children}</span>
     </p>
   );
 }
@@ -56,6 +57,17 @@ export function Slide({
         className,
       )}
     >
+      {n > 1 && n < 10 && (
+        <span
+          aria-hidden="true"
+          className={cn(
+            "absolute top-0 right-8 font-mono text-[120px] leading-[1.3] font-semibold tracking-[-0.04em] select-none",
+            dark ? "text-neutral-900" : "text-neutral-100",
+          )}
+        >
+          {String(n).padStart(2, "0")}
+        </span>
+      )}
       {children}
       <span
         className={cn(
@@ -72,27 +84,50 @@ export function Slide({
 export function SlideHeading({
   kicker,
   title,
+  dark = false,
 }: {
   kicker: string;
   title: ReactNode;
+  dark?: boolean;
 }) {
   return (
-    <div className="space-y-4">
-      <Kicker>{kicker}</Kicker>
-      <h2 className="max-w-4xl text-[38px] leading-[1.2] font-semibold tracking-[-0.02em] text-balance">
+    <div className="space-y-5">
+      <Kicker dark={dark}>{kicker}</Kicker>
+      <h2
+        className={cn(
+          "max-w-4xl text-[42px] leading-[1.18] font-semibold tracking-[-0.025em] text-balance",
+          dark && "text-neutral-50",
+        )}
+      >
         {title}
       </h2>
     </div>
   );
 }
 
-export function Stat({ value, label }: { value: string; label: string }) {
+/** Spec-sheet stat: number + mono label, used in vertical ledgers. */
+export function Stat({
+  value,
+  label,
+  size = "lg",
+  rule = false,
+}: {
+  value: string;
+  label: string;
+  size?: "lg" | "md";
+  rule?: boolean;
+}) {
   return (
-    <div>
-      <div className="text-[52px] leading-[1.22] font-semibold tracking-[-0.03em] tabular">
+    <div className={cn(rule && "border-t border-neutral-200 pt-4")}>
+      <div
+        className={cn(
+          "font-semibold tracking-[-0.03em] tabular",
+          size === "lg" ? "text-[56px] leading-[1.2]" : "text-[30px] leading-[1.2]",
+        )}
+      >
         {value}
       </div>
-      <div className="mt-2 font-mono text-[11px] tracking-[0.14em] text-neutral-400 uppercase">
+      <div className="mt-1.5 font-mono text-[10.5px] tracking-[0.16em] text-neutral-400 uppercase">
         {label}
       </div>
     </div>
@@ -105,6 +140,7 @@ export function ShotFrame({
   url,
   label,
   accent = false,
+  dark = false,
   className,
   imgClassName,
 }: {
@@ -112,6 +148,7 @@ export function ShotFrame({
   url: string;
   label?: string;
   accent?: boolean;
+  dark?: boolean;
   className?: string;
   imgClassName?: string;
 }) {
@@ -119,20 +156,25 @@ export function ShotFrame({
     <figure className={cn("flex h-full flex-col", className)}>
       <div
         className={cn(
-          "flex flex-1 flex-col overflow-hidden rounded-xl border bg-white",
-          accent ? "border-emerald-300" : "border-neutral-200",
+          "flex flex-1 flex-col overflow-hidden rounded-2xl",
+          dark
+            ? "bg-neutral-950 shadow-[0_32px_64px_-32px_rgb(0_0_0/0.6)] ring-1 ring-neutral-800"
+            : cn(
+                "bg-white shadow-[0_32px_64px_-32px_rgb(0_0_0/0.35)] ring-1",
+                accent ? "ring-emerald-200" : "ring-neutral-200",
+              ),
         )}
       >
         <div
           className={cn(
-            "flex items-center gap-2 border-b px-3.5 py-2.5",
-            accent ? "border-emerald-200 bg-emerald-50/60" : "border-neutral-200 bg-neutral-50",
+            "flex items-center gap-2 px-4 py-3",
+            dark ? "bg-neutral-900" : cn("border-b", accent ? "border-emerald-100 bg-emerald-50/50" : "border-neutral-100 bg-neutral-50"),
           )}
         >
-          <span className="size-2.5 rounded-full bg-neutral-300" />
-          <span className="size-2.5 rounded-full bg-neutral-300" />
-          <span className="size-2.5 rounded-full bg-neutral-300" />
-          <span className="ml-2 truncate font-mono text-[11px] text-neutral-500">{url}</span>
+          <span className={cn("size-2.5 rounded-full", dark ? "bg-neutral-700" : "bg-neutral-300")} />
+          <span className={cn("size-2.5 rounded-full", dark ? "bg-neutral-700" : "bg-neutral-300")} />
+          <span className={cn("size-2.5 rounded-full", dark ? "bg-neutral-700" : "bg-neutral-300")} />
+          <span className={cn("ml-2 truncate font-mono text-[11px]", dark ? "text-neutral-500" : "text-neutral-400")}>{url}</span>
         </div>
         <img
           src={src}
@@ -142,8 +184,8 @@ export function ShotFrame({
       </div>
       {label ? (
         <figcaption className="mt-3 flex items-center gap-2 font-mono text-[11px] tracking-[0.12em] uppercase">
-          <span className={cn("size-1.5 rounded-full", accent ? "bg-emerald-500" : "bg-neutral-900")} />
-          <span className="text-neutral-500">{label}</span>
+          <span className={cn("size-1.5 rounded-full", accent ? "bg-emerald-500" : dark ? "bg-emerald-400" : "bg-neutral-900")} />
+          <span className={dark ? "text-neutral-400" : "text-neutral-500"}>{label}</span>
         </figcaption>
       ) : null}
     </figure>
