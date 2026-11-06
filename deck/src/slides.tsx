@@ -10,6 +10,7 @@ import {
 } from "./components/ui/table";
 import { CorpusMark, Kicker, LinkSlot, ShotFrame, Slide, SlideHeading, Stat, Stop } from "./ui";
 import overview from "./assets/shots/overview.png";
+import editorShot from "./assets/shots/editor.png";
 import buttonShot from "./assets/shots/component-button.png";
 import agentsShot from "./assets/shots/agents.png";
 
@@ -36,9 +37,10 @@ function Title() {
             <span className="text-emerald-400">your AI agents</span>.
           </p>
           <p className="mt-7 max-w-xl text-[15.5px] leading-relaxed text-neutral-500">
-            An affordable, self-hosted docs platform for small teams and solo
-            builders: write in Markdown, publish for your team, and plug the same
-            pages into any AI agent or customer-support bot. Owned, not rented.
+            A context control plane for small teams and solo builders: capture
+            knowledge in a familiar editor, publish it as your docs, and plug the
+            same pages into any AI agent or customer-support bot. Owned, not
+            rented.
           </p>
         </div>
         <div className="flex items-end justify-between font-mono text-[11px] tracking-[0.14em] text-neutral-600 uppercase">
@@ -117,8 +119,8 @@ function Team() {
 function Problem() {
   const pains = [
     {
-      head: "Docs are rented, not owned",
-      body: "Mintlify starts at $399/mo and hosts your knowledge for you. Stop paying — or leave — and it's gone.",
+      head: "Docs are rented — or raw",
+      body: "Mintlify hosts your knowledge from $399/mo. The affordable alternatives hand your team a folder of markdown files and a git repo. Neither works for everyone.",
     },
     {
       head: "Knowledge fragments everywhere",
@@ -222,32 +224,24 @@ function Problem() {
 function Solution() {
   return (
     <Slide n={4} dark>
-      <div className="relative flex h-full flex-col px-20 py-16">
+      <div className="relative flex h-full flex-col px-20 py-14">
         <SlideHeading
           dark
           kicker="03 · Solution"
-          title="Corpus renders one source for every reader."
+          title="A context control plane: capture once, serve every reader."
         />
-        <div className="mt-12 flex flex-1 items-center justify-between gap-6">
-          {/* Stacked pages */}
-          <div className="relative h-64 w-56 shrink-0">
-            <div className="absolute top-4 left-5 h-full w-full rounded-xl bg-white/[0.03] ring-1 ring-neutral-800" />
-            <div className="absolute top-2 left-2.5 h-full w-full rounded-xl bg-white/[0.05] ring-1 ring-neutral-800" />
-            <div className="relative h-full w-full rounded-xl bg-neutral-900 p-5 ring-1 ring-neutral-700">
-              <p className="font-mono text-[10px] tracking-[0.16em] text-neutral-500 uppercase">
-                your markdown
-              </p>
-              <div className="mt-4 space-y-2.5 font-mono text-[11px] leading-none text-neutral-400">
-                <p className="text-neutral-200"># Handbook</p>
-                <p className="text-neutral-500">## Getting started</p>
-                <p>install.md</p>
-                <p>write.md</p>
-                <p>publish.md</p>
-                <p className="text-neutral-500">## Reference</p>
-                <p>api.md</p>
-                <p>faq.md</p>
-              </div>
-            </div>
+        <div className="mt-10 flex flex-1 items-center justify-between gap-6">
+          {/* The editor */}
+          <div className="w-[440px] shrink-0">
+            <ShotFrame
+              src={editorShot}
+              url="corpus.local/#editor"
+              imgClassName="max-h-[280px]"
+            />
+            <p className="mt-3.5 text-[13px] leading-relaxed text-neutral-400">
+              Write in a familiar editor — headings, links, tables, no syntax to
+              learn. Markdown lives underneath, invisible unless you want it.
+            </p>
           </div>
 
           <svg width="56" height="12" viewBox="0 0 56 12" className="shrink-0" aria-hidden="true">
@@ -256,7 +250,7 @@ function Solution() {
           </svg>
 
           {/* Hub */}
-          <div className="flex w-44 shrink-0 flex-col items-center rounded-2xl bg-neutral-900 px-6 py-7 ring-1 ring-neutral-700">
+          <div className="flex w-40 shrink-0 flex-col items-center rounded-2xl bg-neutral-900 px-6 py-7 ring-1 ring-neutral-700">
             <CorpusMark duo className="size-10" />
             <p className="mt-3 text-[15px] font-medium">Corpus</p>
             <p className="mt-1 font-mono text-[10px] tracking-[0.16em] text-neutral-500 uppercase">
@@ -270,14 +264,14 @@ function Solution() {
           </svg>
 
           {/* Outputs */}
-          <div className="flex w-[420px] flex-col gap-5">
+          <div className="flex w-[400px] flex-col gap-5">
             <div className="rounded-2xl bg-neutral-900 p-6 ring-1 ring-neutral-700">
               <p className="flex items-center gap-2 font-mono text-[10.5px] tracking-[0.16em] text-neutral-400 uppercase">
                 <span className="size-1.5 rounded-full bg-neutral-200" />
                 People
               </p>
               <p className="mt-2.5 text-[14px] leading-relaxed text-neutral-300">
-                Docs site — write, publish, search: handbooks, product docs,
+                Published documentation + help desk — handbooks, product docs,
                 support articles
               </p>
             </div>
@@ -287,16 +281,15 @@ function Solution() {
                 Agents
               </p>
               <p className="mt-2.5 text-[14px] leading-relaxed text-emerald-100/90">
-                llms.txt · per-page Markdown &amp; JSON · MCP tools — any harness
-                or support bot
+                Customer-support bots + any harness — llms.txt · per-page
+                Markdown &amp; JSON · MCP tools
               </p>
             </div>
           </div>
         </div>
         <p className="mt-4 font-mono text-[11.5px] tracking-[0.02em] text-neutral-500">
-          Cursor · Claude Code · Z.ai · Copilot · your support bot — no parallel
-          copies, nothing to keep in sync. Design-system docs arrive later, on the
-          same pipeline.
+          One home for ideas and organizational data. Design systems arrive
+          later, on the same pipeline.
         </p>
       </div>
     </Slide>
@@ -341,34 +334,41 @@ function Today() {
   );
 }
 
-/* 06 — One source, two readers */
+/* 06 — Write once, read everywhere */
 function TwoReaders() {
   return (
     <Slide n={6}>
       <div className="relative flex h-full flex-col px-20 py-14">
         <SlideHeading
-          kicker="05 · One source, two readers"
-          title="The same Button doc, rendered per reader."
+          kicker="05 · Write once, read everywhere"
+          title="Write it once — the editor handles the markdown."
         />
-        <div className="mt-8 grid flex-1 grid-cols-2 gap-10">
+        <div className="mt-8 grid flex-1 grid-cols-3 gap-7">
+          <ShotFrame
+            src={editorShot}
+            url="corpus.local/#editor"
+            label="Write — no markdown required"
+            imgClassName="max-h-[250px]"
+          />
           <ShotFrame
             src={buttonShot}
             url="corpus.local/#component-button"
-            label="People — documentation view"
-            imgClassName="max-h-[300px]"
+            label="People — published view"
+            imgClassName="max-h-[250px]"
           />
           <ShotFrame
             src={agentsShot}
             url="corpus.local/#agents"
-            label="Agents — the same content, structured payloads"
+            label="Agents — structured payloads"
             dark
             accent
-            imgClassName="max-h-[300px] rounded-b-2xl"
+            imgClassName="max-h-[250px]"
           />
         </div>
         <p className="mt-5 text-[13.5px] text-neutral-500">
-          Identical source content. Agents get llms.txt, Markdown, JSON and token
-          exports today — MCP tools in Phase 3.
+          One page, three surfaces: captured in the editor, published for people,
+          emitted for agents — llms.txt, Markdown, JSON today; MCP tools in
+          Phase 3.
         </p>
       </div>
     </Slide>
