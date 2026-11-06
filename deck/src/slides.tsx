@@ -1,4 +1,4 @@
-import { Check, FileText, Minus } from "lucide-react";
+import { Check, FileText, Minus, Server } from "lucide-react";
 import { Badge } from "./components/ui/badge";
 import {
   Table,
@@ -46,9 +46,9 @@ function Title() {
           </p>
           <p className="mt-7 max-w-xl text-[15.5px] leading-relaxed text-neutral-500">
             A context control plane for small teams and solo builders: capture
-            knowledge in a familiar editor, publish it as your docs, and plug the
-            same pages into any AI agent or customer-support bot. Owned, not
-            rented.
+            knowledge in a familiar editor, publish it as your docs, and connect
+            every agent and support bot — live, via MCP and marketplace apps.
+            Owned, not rented.
           </p>
         </div>
         <div className="flex items-end justify-between font-mono text-[11px] tracking-[0.14em] text-neutral-600 uppercase">
@@ -135,8 +135,8 @@ function Problem() {
       body: "Notes stay personal in Obsidian — publishing is a paid, hosted add-on — docs sit in someone else's cloud, answers rot in Slack.",
     },
     {
-      head: "AI agents starve for context",
-      body: "Coding agents and support bots get hand-copied rules — CLAUDE.md, AGENTS.md, .cursorrules — one per harness, always stale.",
+      head: "Agents have protocols, not a source",
+      body: "MCP servers and marketplace apps are how harnesses consume context now. But a protocol needs a home to point at — and yours is split across tools that each hold a slice.",
     },
   ];
   const leaves: [string, number, number][] = [
@@ -148,12 +148,12 @@ function Problem() {
     [slackLogo, 262, 290],
   ];
   const labels: Record<string, string> = {
-    [anthropicLogo]: "CLAUDE.md",
-    [openaiLogo]: "AGENTS.md",
-    [cursorLogo]: ".cursorrules",
+    [anthropicLogo]: "session logs",
+    [openaiLogo]: "threads",
+    [cursorLogo]: "rules file",
     [figmaLogo]: "comments",
     [notionLogo]: "docs copy",
-    [slackLogo]: "threads",
+    [slackLogo]: "history",
   };
   return (
     <Slide n={3}>
@@ -212,7 +212,7 @@ function Problem() {
               ))}
             </div>
             <p className="mt-4 text-[12.5px] text-neutral-400 italic">
-              Every tool demands its own copy — always stale
+              Copies pushed out. Conversations trapped in.
             </p>
           </div>
         </div>
@@ -255,7 +255,7 @@ function Solution() {
             <CorpusMark duo className="size-10" />
             <p className="mt-3 text-[15px] font-medium">Corpus</p>
             <p className="mt-1 font-mono text-[10px] tracking-[0.16em] text-neutral-500 uppercase">
-              one pipeline
+              control plane
             </p>
           </div>
 
@@ -279,18 +279,18 @@ function Solution() {
             <div className="rounded-2xl bg-emerald-950/50 p-6 ring-1 ring-emerald-900">
               <p className="flex items-center gap-2 font-mono text-[10.5px] tracking-[0.16em] text-emerald-400 uppercase">
                 <span className="size-1.5 rounded-full bg-emerald-400" />
-                Agents
+                Agents + bots
               </p>
               <p className="mt-2.5 text-[14px] leading-relaxed text-emerald-100/90">
-                Customer-support bots + any harness — llms.txt · per-page
-                Markdown &amp; JSON · MCP tools
+                Live over MCP and marketplace apps — agents read on demand;
+                sessions sync back as knowledge
               </p>
             </div>
           </div>
         </div>
         <p className="mt-4 font-mono text-[11.5px] tracking-[0.02em] text-neutral-500">
-          One home for ideas and organizational data. Design systems arrive
-          later, on the same pipeline.
+          One home for ideas and organizational data. Same plane, next stops:
+          shared conversations, shared components, design systems.
         </p>
       </div>
     </Slide>
@@ -382,7 +382,7 @@ function Positioning() {
     { logo: mintlifyLogo, tool: "Mintlify", people: true, agents: false, selfHosted: false, price: "from $399/mo" },
     { logo: notionLogo, tool: "Notion", people: true, agents: false, selfHosted: false, price: "per-seat / mo" },
     { logo: obsidianLogo, tool: "Obsidian", people: "add-on", agents: false, selfHosted: "local app", price: "free · publish $8/mo" },
-    { logo: null, tool: "Rules files", people: false, agents: "manual", selfHosted: true, price: "free — chaotic" },
+    { logo: null, tool: "Memory MCPs", people: false, agents: "convos only", selfHosted: "varies", price: "$0–20/mo" },
     { logo: "corpus", tool: "Corpus", people: true, agents: "generated", selfHosted: true, price: "$99 once*", corpus: true },
   ];
   const mark = (v: boolean | string, corpus = false) => {
@@ -408,7 +408,7 @@ function Positioning() {
         ) : r.logo ? (
           <img src={r.logo} alt="" className="size-4" />
         ) : (
-          <FileText className="size-4 text-neutral-400" />
+          <Server className="size-4 text-neutral-400" />
         )}
       </span>
       <span className={r.corpus ? "text-[15px] font-semibold" : "text-[14px] font-medium"}>{r.tool}</span>
@@ -463,8 +463,9 @@ function Positioning() {
         <p className="mt-4 text-[11.5px] leading-relaxed text-neutral-400">
           *Planned launch pricing. Competitor prices from vendor sites, Nov 2026.
           Obsidian: notes are free and local; Publish ($8/mo/site) and Sync
-          ($4/mo) are hosted add-ons; commercial use $50/user/yr. &ldquo;Rules
-          files&rdquo; = hand-maintained CLAUDE.md / AGENTS.md / .cursorrules.
+          ($4/mo) are hosted add-ons; commercial use $50/user/yr. Memory MCPs
+          (claude-mem, Supermemory) capture conversation memory — not published
+          docs, not a home for knowledge.
         </p>
       </div>
     </Slide>
@@ -488,7 +489,7 @@ function Roadmap() {
     {
       when: "Jan 2027",
       title: "Agents, first class",
-      body: "MCP server, llms.txt, per-page payloads, usage log.",
+      body: "MCP server, first marketplace app, session sync-back, usage log.",
     },
     {
       when: "Spring 2027",
