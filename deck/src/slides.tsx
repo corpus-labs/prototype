@@ -46,9 +46,9 @@ function Title() {
             <span className="text-emerald-400">your AI agents</span>.
           </p>
           <p className="mt-6 max-w-xl text-[16px] leading-relaxed text-neutral-500">
-            An affordable, self-hosted docs platform: write in Markdown, publish for
-            your team, and plug the same pages into any AI agent or customer-support
-            bot. Owned, not rented.
+            An affordable, self-hosted docs platform for small teams and solo
+            builders: write in Markdown, publish for your team, and plug the same
+            pages into any AI agent or customer-support bot. Owned, not rented.
           </p>
         </div>
         <div className="flex items-end justify-between font-mono text-[11px] tracking-[0.14em] text-neutral-600 uppercase">
@@ -147,7 +147,7 @@ function Problem() {
     {
       icon: Layers,
       head: "Knowledge fragments everywhere",
-      body: "Notes in Obsidian, docs in someone's cloud, answers buried in Slack. No single place, no single format.",
+      body: "Notes stay personal in Obsidian — publishing is a paid, hosted add-on — docs sit in someone else's cloud, answers rot in Slack. No single place, no single format.",
     },
     {
       icon: Bot,
@@ -342,7 +342,7 @@ function Positioning() {
   const rows = [
     { tool: "Mintlify", people: true, agents: false, selfHosted: false, price: "from $399/mo" },
     { tool: "Notion", people: true, agents: false, selfHosted: false, price: "per-seat / mo" },
-    { tool: "Obsidian", people: "personal", agents: false, selfHosted: true, price: "free — local only" },
+    { tool: "Obsidian", people: "add-on", agents: false, selfHosted: "local app", price: "free · publish $8/mo" },
     { tool: "Rules files", people: false, agents: "manual", selfHosted: true, price: "free — chaotic" },
     { tool: "Corpus", people: true, agents: "generated", selfHosted: true, price: "$99 once*", corpus: true },
   ];
@@ -401,8 +401,9 @@ function Positioning() {
         </div>
         <p className="mt-4 text-[12px] text-neutral-400">
           *Planned launch pricing. Competitor prices from vendor sites, Nov 2026.
-          &ldquo;Rules files&rdquo; = hand-maintained CLAUDE.md / AGENTS.md /
-          .cursorrules.
+          Obsidian: notes are free and local; Publish ($8/mo/site) and Sync
+          ($4/mo) are hosted add-ons; commercial use $50/user/yr. &ldquo;Rules
+          files&rdquo; = hand-maintained CLAUDE.md / AGENTS.md / .cursorrules.
         </p>
       </div>
     </Slide>
@@ -551,8 +552,8 @@ function Close() {
           Documentation your agents actually follow.
         </h2>
         <p className="max-w-xl text-[16px] leading-relaxed text-neutral-400">
-          One source of truth for people and agents. Self-hosted. Markdown-native.
-          $99.
+          Docs, agent context, and support answers — from markdown you own. $99
+          once.
         </p>
         <div className="mt-2 flex items-center gap-3 font-mono text-[11px] tracking-[0.14em] text-neutral-600 uppercase">
           <span>[ demo url ]</span>
