@@ -20,6 +20,7 @@ import figmaLogo from "./assets/logos/figma.svg";
 import notionLogo from "./assets/logos/notion.svg";
 import slackLogo from "./assets/logos/slack.svg";
 import mintlifyLogo from "./assets/logos/mintlify.svg";
+import gitbookLogo from "./assets/logos/gitbook.svg";
 import obsidianLogo from "./assets/logos/obsidian.svg";
 
 /* 01 — Title */
@@ -128,7 +129,7 @@ function Problem() {
   const pains = [
     {
       head: "Docs are rented — or raw",
-      body: "Mintlify hosts your knowledge from $399/mo. The affordable alternatives hand your team a folder of markdown files and a git repo. Neither works for everyone.",
+      body: "Mintlify's agent features jump from $0 to $450/mo, and self-hosting is enterprise-only. The free route is markdown files and a git repo. Neither works for everyone.",
     },
     {
       head: "Knowledge fragments everywhere",
@@ -379,7 +380,8 @@ function TwoReaders() {
 /* 07 — Positioning */
 function Positioning() {
   const rows = [
-    { logo: mintlifyLogo, tool: "Mintlify", people: true, agents: false, selfHosted: false, price: "from $399/mo" },
+    { logo: mintlifyLogo, tool: "Mintlify", people: true, agents: false, selfHosted: false, price: "free · agents $450/mo" },
+    { logo: gitbookLogo, tool: "GitBook", people: true, agents: false, selfHosted: false, price: "free (1) · $65/site/mo" },
     { logo: notionLogo, tool: "Notion", people: true, agents: false, selfHosted: false, price: "per-seat / mo" },
     { logo: obsidianLogo, tool: "Obsidian", people: "add-on", agents: false, selfHosted: "local app", price: "free · publish $8/mo" },
     { logo: null, tool: "Memory MCPs", people: false, agents: "convos only", selfHosted: "varies", price: "$0–20/mo" },
@@ -460,12 +462,13 @@ function Positioning() {
             </TableBody>
           </Table>
         </div>
-        <p className="mt-4 text-[11.5px] leading-relaxed text-neutral-400">
-          *Planned launch pricing. Competitor prices from vendor sites, Nov 2026.
-          Obsidian: notes are free and local; Publish ($8/mo/site) and Sync
-          ($4/mo) are hosted add-ons; commercial use $50/user/yr. Memory MCPs
-          (claude-mem, Supermemory) capture conversation memory — not published
-          docs, not a home for knowledge.
+        <p className="mt-4 text-[11px] leading-relaxed text-neutral-400">
+          *Planned launch pricing. Prices from vendor sites, Nov 2026. Mintlify:
+          Starter free (5 editors); agent features from Pro, $450/mo annual;
+          self-hosting is an Enterprise add-on. GitBook: free for one user, then
+          $65/site + $12/user/mo. Obsidian: local and free; Publish ($8/mo) is
+          hosted; commercial $50/user/yr. Memory MCPs store conversations — not
+          published docs.
         </p>
       </div>
     </Slide>
