@@ -104,6 +104,21 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Animated connector beams (screen only; frozen by design in print). */
+@keyframes beamFlow {
+  to {
+    stroke-dashoffset: -22;
+  }
+}
+.beam {
+  animation: beamFlow 1.5s linear infinite;
+}
+@media print {
+  .beam {
+    animation: none;
+  }
+}
+
 /* ---------- Deck chrome (screen only) ---------- */
 .deck {
   width: 1280px;

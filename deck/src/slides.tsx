@@ -1,4 +1,4 @@
-import { Check, Minus } from "lucide-react";
+import { Check, FileText, Minus } from "lucide-react";
 import { Badge } from "./components/ui/badge";
 import {
   Table,
@@ -13,6 +13,14 @@ import overview from "./assets/shots/overview.png";
 import editorShot from "./assets/shots/editor.png";
 import buttonShot from "./assets/shots/component-button.png";
 import agentsShot from "./assets/shots/agents.png";
+import openaiLogo from "./assets/logos/openai.svg";
+import anthropicLogo from "./assets/logos/anthropic.svg";
+import cursorLogo from "./assets/logos/cursor.svg";
+import figmaLogo from "./assets/logos/figma.svg";
+import notionLogo from "./assets/logos/notion.svg";
+import slackLogo from "./assets/logos/slack.svg";
+import mintlifyLogo from "./assets/logos/mintlify.svg";
+import obsidianLogo from "./assets/logos/obsidian.svg";
 
 /* 01 — Title */
 function Title() {
@@ -132,12 +140,21 @@ function Problem() {
     },
   ];
   const leaves: [string, number, number][] = [
-    ["CLAUDE.md", 30, 128],
-    ["AGENTS.md", 216, 128],
-    [".cursorrules", 66, 222],
-    ["notion", 252, 222],
-    ["slack", 150, 312],
+    [anthropicLogo, 250, 0],
+    [openaiLogo, 262, 58],
+    [cursorLogo, 246, 116],
+    [figmaLogo, 264, 174],
+    [notionLogo, 248, 232],
+    [slackLogo, 262, 290],
   ];
+  const labels: Record<string, string> = {
+    [anthropicLogo]: "CLAUDE.md",
+    [openaiLogo]: "AGENTS.md",
+    [cursorLogo]: ".cursorrules",
+    [figmaLogo]: "comments",
+    [notionLogo]: "docs copy",
+    [slackLogo]: "threads",
+  };
   return (
     <Slide n={3}>
       <div className="relative flex h-full flex-col px-20 py-16">
@@ -162,56 +179,40 @@ function Problem() {
             ))}
           </div>
           <div className="flex flex-col items-center justify-center">
-            <svg viewBox="0 0 380 380" className="w-full max-w-[380px]" aria-hidden="true">
-              {leaves.map(([, x, y]) => (
-                <path
-                  key={`p${x}`}
-                  d={`M190 62 Q190 ${(62 + y) / 2} ${x + 55} ${y}`}
-                  fill="none"
-                  stroke="#e5e5e5"
-                  strokeWidth="1.5"
-                />
+            <div className="relative h-[360px] w-[430px]">
+              <svg viewBox="0 0 430 360" className="absolute inset-0" aria-hidden="true">
+                {leaves.map(([, left, top]) => {
+                  const y = top + 18;
+                  return (
+                    <path
+                      key={`b${left}`}
+                      d={`M132 180 C 196 180, ${left - 72} ${y}, ${left} ${y}`}
+                      fill="none"
+                      stroke="#d4d4d4"
+                      strokeWidth="1.5"
+                      strokeDasharray="6 5"
+                      className="beam"
+                    />
+                  );
+                })}
+              </svg>
+              <div className="absolute top-[158px] left-0 flex h-11 items-center gap-2 rounded-xl bg-neutral-950 px-4 text-neutral-50">
+                <FileText className="size-3.5 text-neutral-400" />
+                <span className="font-mono text-[11px] tracking-[0.06em]">your knowledge</span>
+              </div>
+              {leaves.map(([logo, left, top]) => (
+                <div
+                  key={logo}
+                  className="absolute flex h-9 w-[168px] items-center gap-2.5 rounded-lg bg-white pr-3 pl-2.5 shadow-[0_2px_10px_rgb(0_0_0/0.07)] ring-1 ring-neutral-200"
+                  style={{ left, top }}
+                >
+                  <img src={logo} alt="" className="size-3.5" />
+                  <span className="font-mono text-[10px] text-neutral-500">{labels[logo] ?? ""}</span>
+                </div>
               ))}
-              <rect x="112" y="16" width="156" height="36" rx="9" fill="#0a0a0a" />
-              <text
-                x="190"
-                y="39"
-                textAnchor="middle"
-                className="font-mono"
-                fontSize="10.5"
-                fill="#fafafa"
-                letterSpacing="0.05em"
-              >
-                one knowledge base
-              </text>
-              {leaves.map(([label, x, y]) => (
-                <g key={label}>
-                  <rect
-                    x={x}
-                    y={y}
-                    width="110"
-                    height="32"
-                    rx="7"
-                    fill="#ffffff"
-                    stroke="#d4d4d4"
-                    strokeWidth="1.2"
-                    strokeDasharray="4 3"
-                  />
-                  <text
-                    x={x + 55}
-                    y={y + 20}
-                    textAnchor="middle"
-                    className="font-mono"
-                    fontSize="11"
-                    fill="#a3a3a3"
-                  >
-                    {label}
-                  </text>
-                </g>
-              ))}
-            </svg>
+            </div>
             <p className="mt-4 text-[12.5px] text-neutral-400 italic">
-              N hand-made copies, none authoritative
+              Every tool demands its own copy — always stale
             </p>
           </div>
         </div>
@@ -378,17 +379,41 @@ function TwoReaders() {
 /* 07 — Positioning */
 function Positioning() {
   const rows = [
-    { tool: "Mintlify", people: true, agents: false, selfHosted: false, price: "from $399/mo" },
-    { tool: "Notion", people: true, agents: false, selfHosted: false, price: "per-seat / mo" },
-    { tool: "Obsidian", people: "add-on", agents: false, selfHosted: "local app", price: "free · publish $8/mo" },
-    { tool: "Rules files", people: false, agents: "manual", selfHosted: true, price: "free — chaotic" },
-    { tool: "Corpus", people: true, agents: "generated", selfHosted: true, price: "$99 once*", corpus: true },
+    { logo: mintlifyLogo, tool: "Mintlify", people: true, agents: false, selfHosted: false, price: "from $399/mo" },
+    { logo: notionLogo, tool: "Notion", people: true, agents: false, selfHosted: false, price: "per-seat / mo" },
+    { logo: obsidianLogo, tool: "Obsidian", people: "add-on", agents: false, selfHosted: "local app", price: "free · publish $8/mo" },
+    { logo: null, tool: "Rules files", people: false, agents: "manual", selfHosted: true, price: "free — chaotic" },
+    { logo: "corpus", tool: "Corpus", people: true, agents: "generated", selfHosted: true, price: "$99 once*", corpus: true },
   ];
   const mark = (v: boolean | string, corpus = false) => {
-    if (v === true) return <Check className="size-4 text-emerald-500" />;
-    if (v === false) return <Minus className={corpus ? "size-4 text-neutral-600" : "size-4 text-neutral-300"} />;
-    return <span className="font-mono text-[11.5px] text-neutral-500">{v}</span>;
+    if (v === true) return <Check className={corpus ? "size-4 text-emerald-400" : "size-4 text-emerald-500"} />;
+    if (v === false) return <Minus className={corpus ? "size-4 text-neutral-700" : "size-4 text-neutral-300"} />;
+    return (
+      <span className={corpus ? "font-mono text-[11px] text-neutral-300" : "font-mono text-[11px] text-neutral-500"}>
+        {v}
+      </span>
+    );
   };
+  const toolCell = (r: (typeof rows)[number]) => (
+    <span className="flex items-center gap-3">
+      <span
+        className={
+          r.corpus
+            ? "flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-neutral-900 ring-1 ring-neutral-700"
+            : "flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-white shadow-[0_1px_4px_rgb(0_0_0/0.08)] ring-1 ring-neutral-200"
+        }
+      >
+        {r.logo === "corpus" ? (
+          <CorpusMark duo className="size-4" />
+        ) : r.logo ? (
+          <img src={r.logo} alt="" className="size-4" />
+        ) : (
+          <FileText className="size-4 text-neutral-400" />
+        )}
+      </span>
+      <span className={r.corpus ? "text-[15px] font-semibold" : "text-[14px] font-medium"}>{r.tool}</span>
+    </span>
+  );
   return (
     <Slide n={7}>
       <div className="relative flex h-full flex-col px-20 py-14">
@@ -396,15 +421,15 @@ function Positioning() {
           kicker="06 · Where Corpus sits"
           title="Owned docs that people and agents both read — nobody else does both."
         />
-        <div className="mt-10 flex-1">
+        <div className="mt-9 flex-1 overflow-hidden rounded-2xl bg-white shadow-[0_20px_48px_-28px_rgb(0_0_0/0.3)] ring-1 ring-neutral-200">
           <Table>
             <TableHeader>
-              <TableRow className="hover:bg-transparent border-neutral-300">
-                <TableHead className="h-9" />
-                <TableHead className="h-9 font-mono text-[10px] tracking-[0.14em] text-neutral-400 uppercase">People docs</TableHead>
-                <TableHead className="h-9 font-mono text-[10px] tracking-[0.14em] text-neutral-400 uppercase">Agent outputs</TableHead>
-                <TableHead className="h-9 font-mono text-[10px] tracking-[0.14em] text-neutral-400 uppercase">Self-hosted</TableHead>
-                <TableHead className="h-9 font-mono text-[10px] tracking-[0.14em] text-neutral-400 uppercase">Price</TableHead>
+              <TableRow className="border-neutral-200 bg-neutral-50/80 hover:bg-neutral-50/80">
+                <TableHead className="h-10" />
+                <TableHead className="h-10 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">People docs</TableHead>
+                <TableHead className="h-10 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">Agent outputs</TableHead>
+                <TableHead className="h-10 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">Self-hosted</TableHead>
+                <TableHead className="h-10 font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">Price</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -413,24 +438,22 @@ function Positioning() {
                   key={r.tool}
                   className={
                     r.corpus
-                      ? "bg-neutral-950 border-neutral-950 text-neutral-50 hover:bg-neutral-950 [&>td]:border-neutral-800"
+                      ? "border-neutral-950 bg-neutral-950 text-neutral-50 hover:bg-neutral-950 [&>td]:border-neutral-800"
                       : "border-neutral-100"
                   }
                 >
-                  <TableCell className="py-4 text-[14px] font-medium">
+                  <TableCell className={`py-[15px] ${r.corpus ? "" : ""}`}>{toolCell(r)}</TableCell>
+                  <TableCell className="py-[15px] text-center">{mark(r.people, r.corpus)}</TableCell>
+                  <TableCell className="py-[15px] text-center">{mark(r.agents, r.corpus)}</TableCell>
+                  <TableCell className="py-[15px] text-center">{mark(r.selfHosted, r.corpus)}</TableCell>
+                  <TableCell className="py-[15px]">
                     {r.corpus ? (
-                      <span className="inline-flex items-center gap-2.5">
-                        <CorpusMark duo className="size-4" /> Corpus
+                      <span className="inline-block rounded-md bg-emerald-500/15 px-2.5 py-1 font-mono text-[11.5px] text-emerald-300">
+                        {r.price}
                       </span>
                     ) : (
-                      r.tool
+                      <span className="font-mono text-[12px] text-neutral-500">{r.price}</span>
                     )}
-                  </TableCell>
-                  <TableCell className="py-4">{mark(r.people, r.corpus)}</TableCell>
-                  <TableCell className="py-4">{mark(r.agents, r.corpus)}</TableCell>
-                  <TableCell className="py-4">{mark(r.selfHosted, r.corpus)}</TableCell>
-                  <TableCell className={`py-4 font-mono text-[12.5px] ${r.corpus ? "text-emerald-400" : "text-neutral-500"}`}>
-                    {r.price}
                   </TableCell>
                 </TableRow>
               ))}
