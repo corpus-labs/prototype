@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import { FACTS } from "./facts";
+import { SplitView } from "./split-view";
 import { cn } from "./lib/utils";
 import { ToolLogo, type ToolId } from "./tool-logo";
 import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title, Todo } from "./ui";
 import coverShot from "./assets/shots/cover-notebook.png";
-import splitShot from "./assets/shots/how-split.png";
 import siteShot from "./assets/shots/traction-site.png";
 import portrait from "./assets/portrait.jpg";
 
@@ -334,11 +334,11 @@ function HowItWorks() {
             <span className="text-muted">get the same words</span>
           </Dot>
         </div>
-        <Shot
-          src={splitShot}
-          alt="The Refunds help page in Corpus’s split view: the page as people read it beside the Markdown agents get, with the same section highlighted on both sides"
+        <SplitView
+          pageId="refunds"
+          site="charged-help.corpus.app"
+          start="How long refunds take"
           className="min-h-0 flex-1 rounded-b-none"
-          imgClassName="h-full object-cover object-top"
         />
       </div>
     </Slide>
@@ -562,7 +562,7 @@ function Competition() {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.name} className={cn("border-b", r.us && "border-b-0 bg-subtle")}>
+              <tr key={r.name} className={cn("border-b", r.us && "border-b-0 bg-good-soft")}>
                 <td className={cn("py-[12px]", r.us ? "pl-3 font-semibold" : "font-medium")}>
                   {r.us ? (
                     <span className="inline-flex items-center gap-2">
