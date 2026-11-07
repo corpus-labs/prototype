@@ -351,7 +351,7 @@ function Publishing() {
     <section id="publish" className="border-t bg-subtle py-24 sm:py-32">
       <div className={WRAP}>
         <Heading
-          title="Publish a help center from the same pages."
+          title="Turn your notebook into a help center."
           lead="Docs, a help center, or a handbook, on your own domain: search, articles by topic, and a support bot that answers from those pages. Every page is also served as Markdown for AI tools."
         />
         <AppWindow
