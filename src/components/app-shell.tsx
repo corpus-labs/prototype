@@ -12,6 +12,7 @@ import {
   FileTextIcon,
   HouseIcon,
   LayoutGridIcon,
+  LifeBuoyIcon,
   MoonIcon,
   PaletteIcon,
   PenLineIcon,
@@ -79,11 +80,14 @@ import { copyText } from "@/components/common";
 import { CorpusLogo, CorpusMark } from "@/components/corpus-logo";
 import {
   components,
+  docsProjectOf,
+  docsProjects,
   guidelineFiles,
-  handbook,
   questions,
   tokens,
   workspace,
+  type DocsProject,
+  type ProjectKind,
 } from "@/data/workspace";
 import {
   KIND_LABEL,
@@ -218,12 +222,20 @@ export function useOpenGaps() {
   return questions.filter((q) => q.status === "gap" && !resolved.includes(q.id));
 }
 
+/** Each kind of project gets one icon, wherever projects are listed. */
+export const KIND_ICON: Record<ProjectKind, React.ComponentType<{ className?: string }>> = {
+  "design-system": ComponentIcon,
+  docs: BookOpenIcon,
+  "help-center": LifeBuoyIcon,
+};
+
 function crumbs(route: string): { label: string; route?: string }[] {
-  if (route === "handbook") return [{ label: "Pages" }];
-  if (route.startsWith("handbook-")) {
+  const docs = docsProjectOf(route);
+  if (docs) {
+    if (route === docs.id) return [{ label: "Pages" }];
     return [
-      { label: "Pages", route: "handbook" },
-      { label: handbook.pages.find((p) => `handbook-${p.id}` === route)?.title ?? "" },
+      { label: "Pages", route: docs.id },
+      { label: docs.pages.find((p) => `${docs.id}-${p.id}` === route)?.title ?? "" },
     ];
   }
   const section = sectionOf(route);
@@ -311,6 +323,7 @@ function AppSidebar({ route }: { route: string }) {
   );
 
   const project = projectOf(route);
+  const docs = docsProjectOf(route);
 
   return (
     <Sidebar collapsible="icon">
@@ -361,7 +374,7 @@ function AppSidebar({ route }: { route: string }) {
             </SidebarGroup>
           </>
         )}
-        {project === "handbook" && <DocsNav route={route} />}
+        {docs && <DocsNav project={docs} route={route} />}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
@@ -406,7 +419,7 @@ function ProjectsNav() {
       <SidebarGroupContent>
         <SidebarMenu>
           {projects.map((p) => {
-            const Icon = p.kind === "docs" ? BookOpenIcon : ComponentIcon;
+            const Icon = KIND_ICON[p.kind];
             return (
               <SidebarMenuItem key={p.id}>
                 <SidebarMenuButton
@@ -434,21 +447,21 @@ function ProjectsNav() {
 }
 
 /** A docs project’s sidebar is its page tree: one group per folder, like a notes app. */
-function DocsNav({ route }: { route: string }) {
+function DocsNav({ project, route }: { project: DocsProject; route: string }) {
   const { setOpenMobile } = useSidebar();
   const drafts = useDocDrafts();
   const link = (to: string) => <a href={`#${to}`} onClick={() => setOpenMobile(false)} />;
   return (
     <>
       <SidebarGroup>
-        <SidebarGroupLabel>Docs</SidebarGroupLabel>
+        <SidebarGroupLabel>{KIND_LABEL[project.kind]}</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
-                isActive={route === "handbook"}
+                isActive={route === project.id}
                 tooltip="Overview"
-                render={link("handbook")}
+                render={link(project.id)}
               >
                 <HouseIcon />
                 <span>Overview</span>
@@ -458,7 +471,7 @@ function DocsNav({ route }: { route: string }) {
         </SidebarGroupContent>
       </SidebarGroup>
       {/* Titles come from this tab's drafts while a page is being edited. */}
-      {foldersOf(handbook.pages.map((p) => withDraft(p, drafts))).map(([folder, pages]) => (
+      {foldersOf(project.pages.map((p) => withDraft(p, drafts))).map(([folder, pages]) => (
         <SidebarGroup key={folder}>
           <SidebarGroupLabel>{folder}</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -466,9 +479,9 @@ function DocsNav({ route }: { route: string }) {
               {pages.map((p) => (
                 <SidebarMenuItem key={p.id}>
                   <SidebarMenuButton
-                    isActive={route === `handbook-${p.id}`}
+                    isActive={route === `${project.id}-${p.id}`}
                     tooltip={p.title}
-                    render={link(`handbook-${p.id}`)}
+                    render={link(`${project.id}-${p.id}`)}
                   >
                     <FileTextIcon />
                     <span>{p.title}</span>
@@ -539,12 +552,12 @@ function DesktopTopbar({ route }: { route: string }) {
         <Button
           variant="outline"
           size="sm"
-          aria-label="Search docs and tokens"
+          aria-label="Search everything"
           className="w-8 gap-2 px-0 text-muted-foreground lg:w-56 lg:justify-start lg:px-2.5"
           onClick={() => setCommandOpen(true)}
         >
           <SearchIcon />
-          <span className="hidden lg:inline">Search docs and tokens</span>
+          <span className="hidden lg:inline">Search everything</span>
           <Kbd className="ml-auto hidden lg:inline-flex">{MOD_KEY}K</Kbd>
         </Button>
         <ThemeToggle />
@@ -602,6 +615,7 @@ const COLS: Record<number, string> = { 3: "grid-cols-3", 4: "grid-cols-4", 5: "g
 function MobileTabbar({ route }: { route: string }) {
   const section = sectionOf(route);
   const project = projectOf(route);
+  const docs = docsProjectOf(route);
   const { setOpenMobile } = useSidebar();
   const { setCommandOpen } = useStore();
   const gaps = useOpenGaps();
@@ -638,9 +652,9 @@ function MobileTabbar({ route }: { route: string }) {
             active: ["guidelines", "integrations", "workspace"].includes(section),
           },
         ]
-      : project === "handbook"
+      : docs
         ? [
-            { key: "handbook", label: "Overview", icon: HouseIcon, active: route === "handbook" },
+            { key: docs.id, label: "Overview", icon: HouseIcon, active: route === docs.id },
             search,
             { key: "projects", label: "Projects", icon: LayoutGridIcon, active: false },
             {
@@ -648,7 +662,7 @@ function MobileTabbar({ route }: { route: string }) {
               label: "Pages",
               icon: FileTextIcon,
               action: "more",
-              active: route.startsWith("handbook-"),
+              active: route.startsWith(`${docs.id}-`),
             },
           ]
         : [
@@ -739,7 +753,7 @@ function CommandMenu() {
       className="top-[calc(env(safe-area-inset-top,0px)+1rem)] [--command-list:min(60svh,420px)] sm:top-[calc(50svh-(var(--command-list)+2.75rem)/2)]"
     >
       <Command>
-        <CommandInput placeholder="Search components, guidelines, tokens…" />
+        <CommandInput placeholder="Search pages, components, and tokens…" />
         <CommandList className="max-h-(--command-list)">
           <CommandEmpty>
             Nothing matches. Agents asking the same thing would hit a gap too.
@@ -765,7 +779,7 @@ function CommandMenu() {
           <CommandGroup heading="Projects">
             {projects.map((p) => (
               <CommandItem key={p.id} value={`project ${p.name}`} onSelect={() => go(p.home)}>
-                {p.kind === "docs" ? <BookOpenIcon /> : <ComponentIcon />}
+                {React.createElement(KIND_ICON[p.kind])}
                 {p.name}
                 <CommandShortcut>{KIND_LABEL[p.kind]}</CommandShortcut>
               </CommandItem>
@@ -800,19 +814,21 @@ function CommandMenu() {
               </CommandItem>
             ))}
           </CommandGroup>
-          <CommandGroup heading={handbook.name}>
-            {handbook.pages.map((p) => (
-              <CommandItem
-                key={p.id}
-                value={`page ${p.title} ${p.folder}`}
-                onSelect={() => go(`handbook-${p.id}`)}
-              >
-                <FileTextIcon />
-                {p.title}
-                <CommandShortcut>{p.folder}</CommandShortcut>
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          {docsProjects.map((d) => (
+            <CommandGroup key={d.id} heading={d.name}>
+              {d.pages.map((p) => (
+                <CommandItem
+                  key={p.id}
+                  value={`page ${d.name} ${p.title} ${p.folder}`}
+                  onSelect={() => go(`${d.id}-${p.id}`)}
+                >
+                  <FileTextIcon />
+                  {p.title}
+                  <CommandShortcut>{p.folder}</CommandShortcut>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          ))}
           <CommandGroup heading="Tokens">
             {tokens
               .filter((t) => t.group === "color")

@@ -1,6 +1,6 @@
 // Sample content for the prototype. The workspace documents Charged UI,
 // the first design system planned to live in Corpus.
-import { handbookPages } from "@/data/handbook-pages";
+import { handbookPages, helpPages } from "@/data/handbook-pages";
 
 export type Status = "stable" | "beta" | "deprecated";
 export type Source = "sdc" | "block" | "storybook";
@@ -1215,12 +1215,13 @@ export const integrations = [
 ] as const;
 
 /*
-  Exploration: one Corpus install with two projects, a design system and a docs
-  space. See docs/decisions/proposed-projects-and-docs.md. This extends the sample
-  data on purpose, with the owner's go-ahead, and goes away with it in Phase 2.
+  Exploration: one Corpus install with several projects: a design system, a team
+  handbook, and a customer help center. See docs/decisions/proposed-projects-and-docs.md
+  and proposed-knowledge-notebook.md. This extends the sample data on purpose, with the
+  owner's go-ahead, and goes away with it in Phase 2.
 */
 
-export type ProjectKind = "design-system" | "docs";
+export type ProjectKind = "design-system" | "docs" | "help-center";
 
 /** A docs page. `path` is its place in the repository, like docs/engineering/deploying.md. `lines` is its frontmatter. */
 export type DocPage = {
@@ -1242,8 +1243,25 @@ export type ProjectQuestion = {
   source?: { label: string; route: string };
 };
 
-export const handbook = {
+/** A project made of Markdown pages in folders: a handbook, a help center, any notebook. */
+export type DocsProject = {
+  /** Also the route prefix: `handbook` is the overview, `handbook-<page>` a page. */
+  id: "handbook" | "help";
+  kind: Exclude<ProjectKind, "design-system">;
+  name: string;
+  description: string;
+  site: string;
+  repo: string;
+  /** Agent requests this week, plus support bot questions for a help center. */
+  requests: number;
+  updated: string;
+  questions: ProjectQuestion[];
+  pages: DocPage[];
+};
+
+export const handbook: DocsProject = {
   id: "handbook",
+  kind: "docs",
   name: "Web team handbook",
   description: "How the web team builds, ships, and supports campus sites.",
   site: "handbook.charged.dev",
@@ -1266,7 +1284,60 @@ export const handbook = {
       status: "answered",
       source: { label: "Content style guide", route: "handbook-content-style" },
     },
-  ] as ProjectQuestion[],
+  ],
   // The pages are Markdown files in fixtures/handbook. See src/data/handbook-pages.ts.
   pages: handbookPages,
 };
+
+/** Customer-facing answers. The support bot and the help site read the same pages. */
+export const helpCenter: DocsProject = {
+  id: "help",
+  kind: "help-center",
+  name: "Customer help",
+  description:
+    "Answers for Charged Labs customers. The help site and the support bot read the same pages.",
+  site: "help.charged.dev",
+  repo: "charged-labs/help",
+  requests: 386,
+  updated: "Today",
+  questions: [
+    {
+      id: "c-refunds",
+      text: "How long do refunds take?",
+      count: 23,
+      status: "answered",
+      source: { label: "Refunds", route: "help-refunds" },
+    },
+    {
+      id: "c-move",
+      text: "Can I move my license to a new site?",
+      count: 17,
+      status: "answered",
+      source: { label: "Licenses and sites", route: "help-licenses" },
+    },
+    {
+      id: "c-invoice",
+      text: "Where do I download my invoice?",
+      count: 11,
+      status: "answered",
+      source: { label: "Invoices and receipts", route: "help-invoices" },
+    },
+    { id: "c-nonprofit", text: "Do you offer discounts for nonprofits?", count: 8, status: "gap" },
+    {
+      id: "c-drupal",
+      text: "Does the theme work with Drupal 11?",
+      count: 6,
+      status: "answered",
+      source: { label: "Install a theme", route: "help-install" },
+    },
+  ],
+  // The pages are Markdown files in fixtures/help. See src/data/handbook-pages.ts.
+  pages: helpPages,
+};
+
+export const docsProjects: DocsProject[] = [handbook, helpCenter];
+
+/** The docs project a route belongs to, if any. */
+export function docsProjectOf(route: string): DocsProject | undefined {
+  return docsProjects.find((p) => route === p.id || route.startsWith(`${p.id}-`));
+}

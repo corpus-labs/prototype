@@ -1,13 +1,28 @@
-// Exploration: a docs project. See docs/decisions/proposed-projects-and-docs.md
-// and docs/decisions/proposed-docs-editor.md.
+// Exploration: docs projects (a handbook, a help center). See
+// docs/decisions/proposed-projects-and-docs.md, proposed-docs-editor.md,
+// and proposed-knowledge-notebook.md.
 import * as React from "react";
 import { PlusIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
-import { Dot, Facts, PageHeader, Section, SegmentedControl, linkClass } from "@/components/common";
-import { handbook, type DocPage } from "@/data/workspace";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  AgentPane,
+  Dot,
+  Facts,
+  PageHeader,
+  ReaderSwitch,
+  Section,
+  SegmentedControl,
+  linkClass,
+  useEffectiveReader,
+  type Hover,
+} from "@/components/common";
+import type { DocPage, DocsProject } from "@/data/workspace";
+import { guideLines, type Line } from "@/lib/agent-format";
 import { pageMetaSchema } from "@core/markdown/frontmatter";
 import { linksIn, resolveLink } from "@core/markdown/links";
 import {
@@ -21,7 +36,10 @@ import {
 } from "@/lib/docs-drafts";
 import { LinkResolver } from "@/lib/mdx-lite";
 import { foldersOf } from "@/lib/projects";
+import { useStore } from "@/lib/store";
+import { answerFrom, type BotReply } from "@/lib/support";
 import { cn } from "@/lib/utils";
+import { PROVIDER_LABEL, modelLabel } from "@/pages/editor";
 import { MdxPeople } from "@/pages/guidelines";
 
 // ProseMirror and Milkdown are the heaviest part of the app, so the editor loads only when someone edits.
@@ -29,19 +47,28 @@ const DocsEditor = React.lazy(() =>
   import("@/components/docs-editor/docs-editor").then((m) => ({ default: m.DocsEditor })),
 );
 
-/** Every handbook page as it reads right now, with this tab's drafts applied. */
-function usePages() {
+/** Every page in a docs project as it reads right now, with this tab's drafts applied. */
+function usePages(project: DocsProject) {
   const drafts = useDocDrafts();
-  return { drafts, pages: handbook.pages.map((p) => withDraft(p, drafts)) };
+  return { drafts, pages: project.pages.map((p) => withDraft(p, drafts)) };
 }
 
-export function HandbookOverview() {
-  const { drafts, pages } = usePages();
+/** What an agent gets for a docs page: the same Markdown, keyed by section like the page. */
+function pageLines(page: DocPage): Line[] {
+  const intro: Line[] = [{ text: `# ${page.title}`, key: "intro", kind: "h1" }];
+  if (page.description)
+    intro.push({ text: "", key: "intro" }, { text: page.description, key: "intro" });
+  return [...intro, ...guideLines(page.body)];
+}
+
+export function DocsOverview({ project }: { project: DocsProject }) {
+  const { drafts, pages } = usePages(project);
+  const help = project.kind === "help-center";
   return (
     <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-12">
       <PageHeader
-        title={handbook.name}
-        description={handbook.description}
+        title={project.name}
+        description={project.description}
         actions={
           <Button
             variant="outline"
@@ -60,22 +87,27 @@ export function HandbookOverview() {
         meta={
           <Facts
             items={[
-              ["Repository", <code className="font-mono text-[13px]">{handbook.repo}</code>],
-              ["Site", handbook.site],
-              ["Pages", handbook.pages.length],
-              ["Updated", handbook.updated.toLowerCase()],
+              ["Repository", <code className="font-mono text-[13px]">{project.repo}</code>],
+              ["Site", project.site],
+              ["Pages", project.pages.length],
+              ["Updated", project.updated.toLowerCase()],
             ]}
           />
         }
       />
 
       <div className="mt-12 grid gap-16">
+        {help && <SupportBot project={project} pages={pages} />}
         <Section
-          title="Agent questions"
-          aside={<span className="tabular">{handbook.requests} requests this week</span>}
+          title={help ? "Customer questions" : "Agent questions"}
+          aside={
+            <span className="tabular">
+              {project.requests} {help ? "questions" : "requests"} this week
+            </span>
+          }
         >
           <ul className="divide-y border-y">
-            {handbook.questions.map((q) => (
+            {project.questions.map((q) => (
               <li key={q.id} className="py-4">
                 <p className="text-[15px] text-pretty">{q.text}</p>
                 <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
@@ -107,7 +139,7 @@ export function HandbookOverview() {
                   {list.map((p) => (
                     <li key={p.id}>
                       <a
-                        href={`#handbook-${p.id}`}
+                        href={`#${project.id}-${p.id}`}
                         className="group -mx-1 flex items-baseline justify-between gap-4 rounded-md px-1 py-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                       >
                         <span className="min-w-0">
@@ -134,11 +166,14 @@ export function HandbookOverview() {
   );
 }
 
-export function HandbookPage({ id }: { id: string }) {
-  const { drafts, pages } = usePages();
+export function DocsPage({ project, id }: { project: DocsProject; id: string }) {
+  const { drafts, pages } = usePages(project);
+  const { reader, setReader } = useStore();
+  const mode = useEffectiveReader(reader);
+  const [hover, setHover] = React.useState<Hover>({ key: null, from: null });
   const [editing, setEditing] = React.useState(false);
   const [view, setView] = React.useState<"rich" | "markdown">("rich");
-  const file = handbook.pages.find((p) => p.id === id);
+  const file = project.pages.find((p) => p.id === id);
   if (!file) return <p className="p-8 text-sm text-muted-foreground">That page doesn’t exist.</p>;
 
   const page = withDraft(file, drafts);
@@ -148,7 +183,7 @@ export function HandbookPage({ id }: { id: string }) {
   const resolve = (href: string) => {
     const target = resolveLink(file.path, href);
     const hit = pages.find((p) => p.path === target);
-    return hit ? `#handbook-${hit.id}` : undefined;
+    return hit ? `#${project.id}-${hit.id}` : undefined;
   };
   const linkedFrom = pages.filter(
     (p) =>
@@ -170,15 +205,31 @@ export function HandbookPage({ id }: { id: string }) {
     );
   }
 
+  const lines = pageLines(page);
+  const request = (
+    <>
+      <span className="text-muted-foreground">GET</span> {project.site}/
+      {file.path.replace(/^docs\//, "")}
+    </>
+  );
+
   return (
-    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-12">
+    <div
+      className={cn(
+        "mx-auto w-full px-4 py-8 md:px-8 md:py-12",
+        mode === "split" ? "max-w-[1480px]" : "max-w-[1120px]",
+      )}
+    >
       <PageHeader
         title={page.title}
         description={page.description}
         actions={
-          <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-            Edit
-          </Button>
+          <>
+            <ReaderSwitch value={reader} onChange={setReader} />
+            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+              Edit
+            </Button>
+          </>
         }
         meta={
           <Facts
@@ -198,7 +249,30 @@ export function HandbookPage({ id }: { id: string }) {
       />
       <div className="mt-10">
         <LinkResolver.Provider value={resolve}>
-          <MdxPeople body={page.body} />
+          {mode === "people" && <MdxPeople body={page.body} />}
+          {mode === "agents" && (
+            <div className="grid gap-3">
+              <p className="max-w-[68ch] text-sm text-muted-foreground">
+                The same words, served as Markdown at this page’s URL plus{" "}
+                <code className="font-mono text-xs">.md</code>, over MCP, and in llms.txt.
+              </p>
+              <AgentPane request={request} lines={lines} />
+            </div>
+          )}
+          {mode === "split" && (
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] gap-8">
+              <MdxPeople body={page.body} hover={hover} onHover={setHover} />
+              <div className="min-w-0">
+                <AgentPane
+                  className="sticky top-16 max-h-[calc(100svh-5.5rem)]"
+                  request={request}
+                  lines={lines}
+                  hover={hover}
+                  onHover={setHover}
+                />
+              </div>
+            </div>
+          )}
         </LinkResolver.Provider>
       </div>
       {linkedFrom.length > 0 && (
@@ -206,7 +280,7 @@ export function HandbookPage({ id }: { id: string }) {
           <ul className="grid gap-2">
             {linkedFrom.map((p) => (
               <li key={p.id}>
-                <a href={`#handbook-${p.id}`} className={linkClass}>
+                <a href={`#${project.id}-${p.id}`} className={linkClass}>
                   {p.title}
                 </a>
                 <span className="ml-2 text-sm text-muted-foreground">{p.folder}</span>
@@ -220,7 +294,7 @@ export function HandbookPage({ id }: { id: string }) {
           <ul className="grid gap-2">
             {nearby.map((p) => (
               <li key={p.id}>
-                <a href={`#handbook-${p.id}`} className={linkClass}>
+                <a href={`#${project.id}-${p.id}`} className={linkClass}>
                   {p.title}
                 </a>
                 <span className="ml-2 text-sm text-muted-foreground">{p.description}</span>
@@ -375,5 +449,109 @@ function PageEditor({
         )}
       </div>
     </div>
+  );
+}
+
+const BOT_EXAMPLES = [
+  "How long do refunds take?",
+  "Can I move my license to a new site?",
+  "Do you offer discounts for nonprofits?",
+];
+
+/**
+ * The support bot, as a customer meets it on the help site. It answers only from
+ * these pages, links the page it used, and says so when no page covers the question.
+ */
+function SupportBot({ project, pages }: { project: DocsProject; pages: DocPage[] }) {
+  const { ai } = useStore();
+  const [question, setQuestion] = React.useState("");
+  const [asked, setAsked] = React.useState<{ q: string; reply: BotReply } | null>(null);
+  const [thinking, setThinking] = React.useState(false);
+  const model = modelLabel(ai.provider, ai.model);
+  const via =
+    ai.provider === "ollama"
+      ? `${model} on your server`
+      : `${model} on your ${PROVIDER_LABEL[ai.provider]} key`;
+
+  const ask = (q: string) => {
+    const text = q.trim();
+    if (!text) return;
+    setQuestion(text);
+    setThinking(true);
+    window.setTimeout(() => {
+      setAsked({ q: text, reply: answerFrom(text, pages) });
+      setThinking(false);
+    }, 600);
+  };
+
+  return (
+    <Section title="Ask the support bot" aside={<span>Answers only from these pages</span>}>
+      <form
+        className="flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          ask(question);
+        }}
+      >
+        <Input
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          placeholder="Ask what a customer would ask"
+          aria-label="Question for the support bot"
+          className="max-w-xl"
+        />
+        <Button type="submit" disabled={thinking || !question.trim()}>
+          {thinking && <Spinner />}
+          Ask
+        </Button>
+      </form>
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        {BOT_EXAMPLES.map((q) => (
+          <button
+            key={q}
+            type="button"
+            className={cn(linkClass, "font-normal text-muted-foreground")}
+            onClick={() => ask(q)}
+          >
+            {q}
+          </button>
+        ))}
+      </div>
+      {asked && (
+        <div className="mt-6 max-w-3xl rounded-xl border" aria-live="polite">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b px-4 py-3">
+            <p className="text-[15px] font-medium">“{asked.q}”</p>
+            <p className="text-sm text-muted-foreground">{via}</p>
+          </div>
+          {asked.reply.kind === "answer" ? (
+            <div className="px-4 py-4">
+              <p className="text-[15px] leading-relaxed text-pretty">{asked.reply.text}</p>
+              <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                <Dot tone="good">From</Dot>
+                <a
+                  href={`#${project.id}-${asked.reply.page.id}`}
+                  className={cn(linkClass, "font-normal text-foreground")}
+                >
+                  {asked.reply.page.title}
+                  {asked.reply.section ? `, ${asked.reply.section}` : ""}
+                </a>
+                <code className="font-mono text-xs">{asked.reply.page.path}</code>
+              </p>
+            </div>
+          ) : (
+            <div className="px-4 py-4">
+              <Dot tone="bad" className="text-[15px] text-bad">
+                No page answers this yet
+              </Dot>
+              <p className="mt-2 text-sm leading-relaxed text-pretty text-muted-foreground">
+                The bot tells the customer it doesn’t know and hands them to a person, instead of
+                guessing. The question joins the list below, so someone can write the page once and
+                every reader gets it.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </Section>
   );
 }

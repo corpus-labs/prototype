@@ -4,17 +4,21 @@ import { Agents } from "@/pages/agents";
 import { ComponentDetail, ComponentsIndex } from "@/pages/components";
 import { Editor } from "@/pages/editor";
 import { GuideReader, GuidelinesIndex } from "@/pages/guidelines";
-import { HandbookOverview, HandbookPage } from "@/pages/handbook";
+import { DocsOverview, DocsPage } from "@/pages/handbook";
 import { Integrations } from "@/pages/integrations";
 import { Overview } from "@/pages/overview";
+import { docsProjectOf } from "@/data/workspace";
 import { Projects } from "@/pages/projects";
 import { WorkspaceSettings } from "@/pages/settings";
 import { Tokens } from "@/pages/tokens";
 
 function Page({ route }: { route: string }) {
   if (route === "projects") return <Projects />;
-  if (route === "handbook") return <HandbookOverview />;
-  if (route.startsWith("handbook-")) return <HandbookPage id={route.slice("handbook-".length)} />;
+  const docs = docsProjectOf(route);
+  if (docs) {
+    if (route === docs.id) return <DocsOverview project={docs} />;
+    return <DocsPage project={docs} id={route.slice(docs.id.length + 1)} />;
+  }
   if (route === "components") return <ComponentsIndex />;
   if (route.startsWith("component-"))
     return <ComponentDetail id={route.slice("component-".length)} />;

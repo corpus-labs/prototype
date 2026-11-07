@@ -2,8 +2,9 @@
 import {
   agentStats,
   components,
+  docsProjectOf,
+  docsProjects,
   guidelineFiles,
-  handbook,
   questions,
   tokens,
   workspace,
@@ -12,7 +13,7 @@ import {
 } from "@/data/workspace";
 import { useStore } from "@/lib/store";
 
-export type ProjectId = "charged-ui" | "handbook";
+export type ProjectId = "charged-ui" | "handbook" | "help";
 
 export type ProjectSummary = {
   id: ProjectId;
@@ -24,15 +25,20 @@ export type ProjectSummary = {
   /** The route a project opens on. */
   home: string;
   requests: number;
-  /** Agent questions with no answer in the docs. */
+  /** What `requests` counts, in the words the card shows. */
+  requestsLabel: string;
+  /** Questions with no answer in the docs. */
   open: number;
   updated: string;
   counts: [string, number][];
+  /** A docs project's pages, for its preview. */
+  pages?: DocPage[];
 };
 
 export const KIND_LABEL: Record<ProjectKind, string> = {
   "design-system": "Design system",
   docs: "Docs",
+  "help-center": "Help center",
 };
 
 export function useProjects(): ProjectSummary[] {
@@ -47,6 +53,7 @@ export function useProjects(): ProjectSummary[] {
       repo: workspace.repo,
       home: "overview",
       requests: agentStats.week.reduce((a, b) => a + b, 0),
+      requestsLabel: "Agent requests",
       open: questions.filter((q) => q.status === "gap" && !resolved.includes(q.id)).length,
       updated: commits[0].when,
       counts: [
@@ -55,30 +62,31 @@ export function useProjects(): ProjectSummary[] {
         ["Guidelines", guidelineFiles.length],
       ],
     },
-    {
-      id: "handbook",
-      name: handbook.name,
-      kind: "docs",
-      description: handbook.description,
-      site: handbook.site,
-      repo: handbook.repo,
-      home: "handbook",
-      requests: handbook.requests,
-      open: handbook.questions.filter((q) => q.status === "gap").length,
-      updated: handbook.updated,
+    ...docsProjects.map((d): ProjectSummary => ({
+      id: d.id,
+      name: d.name,
+      kind: d.kind,
+      description: d.description,
+      site: d.site,
+      repo: d.repo,
+      home: d.id,
+      requests: d.requests,
+      requestsLabel: d.kind === "help-center" ? "Questions" : "Agent requests",
+      open: d.questions.filter((q) => q.status === "gap").length,
+      updated: d.updated,
       counts: [
-        ["Pages", handbook.pages.length],
-        ["Folders", foldersOf(handbook.pages).length],
+        ["Pages", d.pages.length],
+        ["Folders", foldersOf(d.pages).length],
       ],
-    },
+      pages: d.pages,
+    })),
   ];
 }
 
 /** Which project a route belongs to. The projects dashboard belongs to none. */
 export function projectOf(route: string): ProjectId | null {
   if (route === "projects") return null;
-  if (route === "handbook" || route.startsWith("handbook-")) return "handbook";
-  return "charged-ui";
+  return docsProjectOf(route)?.id ?? "charged-ui";
 }
 
 export function useCurrentProject(route: string) {

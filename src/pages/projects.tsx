@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { ComponentThumb, CuiScope } from "@/components/charged-ui";
 import { Dot, Facts, PageHeader, Section } from "@/components/common";
-import { handbook, questions, workspace } from "@/data/workspace";
+import { docsProjects, helpCenter, questions, workspace, type DocPage } from "@/data/workspace";
 import { KIND_LABEL, foldersOf, useProjects, type ProjectSummary } from "@/lib/projects";
 import { navigate } from "@/lib/router";
 import { useStore } from "@/lib/store";
@@ -23,11 +23,11 @@ function SystemPreview({ dark }: { dark: boolean }) {
 }
 
 /** A docs project previews as its page tree. */
-function DocsPreview() {
+function DocsPreview({ pages }: { pages: DocPage[] }) {
   return (
     <div className="pointer-events-none h-44 overflow-hidden bg-muted/50 px-6 py-5" aria-hidden>
       <div className="grid gap-3">
-        {foldersOf(handbook.pages)
+        {foldersOf(pages)
           .slice(0, 2)
           .map(([folder, pages]) => (
             <div key={folder}>
@@ -50,13 +50,41 @@ function DocsPreview() {
   );
 }
 
+/** A help center previews as the support bot answering from one of its pages. */
+function HelpPreview() {
+  const q = helpCenter.questions[0];
+  return (
+    <div
+      className="pointer-events-none flex h-44 flex-col justify-center gap-2.5 overflow-hidden bg-muted/50 px-6 py-5"
+      aria-hidden
+    >
+      <p className="self-end rounded-xl rounded-br-sm bg-background px-3 py-1.5 text-sm shadow-xs ring-1 ring-foreground/10">
+        {q.text}
+      </p>
+      <div className="max-w-[90%] text-sm">
+        <p className="text-pretty">Refunds take 3 business days once we approve them.</p>
+        <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <FileTextIcon className="size-3.5" />
+          From {q.source?.label}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function ProjectCard({ p, dark }: { p: ProjectSummary; dark: boolean }) {
   return (
     <a
       href={`#${p.home}`}
       className="group flex flex-col overflow-hidden rounded-xl border transition-colors outline-none hover:border-foreground/25 focus-visible:ring-3 focus-visible:ring-ring/50"
     >
-      {p.kind === "design-system" ? <SystemPreview dark={dark} /> : <DocsPreview />}
+      {p.kind === "design-system" ? (
+        <SystemPreview dark={dark} />
+      ) : p.kind === "help-center" ? (
+        <HelpPreview />
+      ) : (
+        <DocsPreview pages={p.pages ?? []} />
+      )}
       <div className="grid gap-4 border-t p-5">
         <div>
           <div className="flex items-baseline justify-between gap-3">
@@ -66,7 +94,7 @@ function ProjectCard({ p, dark }: { p: ProjectSummary; dark: boolean }) {
           <p className="mt-1 text-sm text-muted-foreground">{p.description}</p>
         </div>
         <Facts
-          items={[...p.counts, ["Agent requests", `${p.requests.toLocaleString()} this week`]]}
+          items={[...p.counts, [p.requestsLabel, `${p.requests.toLocaleString()} this week`]]}
         />
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
           {p.open ? (
@@ -102,15 +130,17 @@ export function Projects() {
           navigate(`edit-${q.fileId}`);
         },
       })),
-    ...handbook.questions
-      .filter((q) => q.status === "gap")
-      .map((q) => ({
-        id: q.id,
-        text: q.text,
-        count: q.count,
-        project: handbook.name,
-        write: undefined,
-      })),
+    ...docsProjects.flatMap((d) =>
+      d.questions
+        .filter((q) => q.status === "gap")
+        .map((q) => ({
+          id: q.id,
+          text: q.text,
+          count: q.count,
+          project: d.name,
+          write: undefined,
+        })),
+    ),
   ].sort((a, b) => b.count - a.count);
 
   return (
@@ -119,8 +149,8 @@ export function Projects() {
         title="Projects"
         description={
           open
-            ? `Agents made ${requests} requests across your ${projects.length} projects this week, and ${open} of their questions had no answer.`
-            : `Agents made ${requests} requests across your ${projects.length} projects this week and found an answer every time.`
+            ? `People and agents asked ${requests} questions across your ${projects.length} projects this week, and ${open} had no answer.`
+            : `People and agents asked ${requests} questions across your ${projects.length} projects this week, and every one found an answer.`
         }
         actions={
           <Button
@@ -129,7 +159,7 @@ export function Projects() {
               toast.add({
                 title: "Adding projects isn’t part of this prototype",
                 description:
-                  "A new project points Corpus at another content repository, for a design system or a docs space.",
+                  "A new project points Corpus at another folder of Markdown: a handbook, a help center, or a design system.",
               })
             }
           >
@@ -139,7 +169,7 @@ export function Projects() {
         }
       />
 
-      <div className="mt-10 grid gap-5 md:grid-cols-2">
+      <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {projects.map((p) => (
           <ProjectCard key={p.id} p={p} dark={dark} />
         ))}
