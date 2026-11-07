@@ -7,7 +7,8 @@ import { GuideReader, GuidelinesIndex } from "@/pages/guidelines";
 import { DocsOverview, DocsPage } from "@/pages/handbook";
 import { Integrations } from "@/pages/integrations";
 import { Overview } from "@/pages/overview";
-import { docsProjectOf } from "@/data/workspace";
+import { docsProjectOf, docsProjects } from "@/data/workspace";
+import { PublishedSite } from "@/pages/site";
 import { Projects } from "@/pages/projects";
 import { WorkspaceSettings } from "@/pages/settings";
 import { Tokens } from "@/pages/tokens";
@@ -32,8 +33,20 @@ function Page({ route }: { route: string }) {
   return <Overview />;
 }
 
+/** `site-help` is a docs project's published home page, `site-help-refunds` one of its pages. */
+function siteOf(route: string) {
+  if (!route.startsWith("site-")) return null;
+  const rest = route.slice("site-".length);
+  const project = docsProjects.find((p) => rest === p.id || rest.startsWith(`${p.id}-`));
+  if (!project) return null;
+  return { project, pageId: rest === project.id ? null : rest.slice(project.id.length + 1) };
+}
+
 export default function App() {
   const route = useRoute();
+  // The published site is what readers see, so it has none of Corpus's own chrome.
+  const site = siteOf(route);
+  if (site) return <PublishedSite key={route} project={site.project} pageId={site.pageId} />;
   return (
     <AppShell route={route}>
       <Page key={route} route={route} />

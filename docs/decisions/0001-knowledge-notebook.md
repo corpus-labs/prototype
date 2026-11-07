@@ -57,6 +57,7 @@ It does four jobs, and design systems are one of them:
 - Docs and help center pages have the People, Split, and Agents reader.
 - The Agents screen shows setup for Codex and any MCP client. AI settings add Z.ai and DeepSeek.
 - General settings show where Corpus runs. Hosting isn't built.
+- `#site-help` shows the help center as customers would see it once published: a home page with search, articles by topic, and the support bot, and article pages with a sidebar, "Copy page", and "On this page". The docs project's overview links to it with "View site". Publishing itself isn't built.
 
 All of it is sample data and goes away with the rest in Phase 2.
 

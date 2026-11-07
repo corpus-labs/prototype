@@ -2,7 +2,7 @@
 // docs/decisions/proposed-projects-and-docs.md, proposed-docs-editor.md,
 // and 0001-knowledge-notebook.md.
 import * as React from "react";
-import { PlusIcon } from "lucide-react";
+import { GlobeIcon, PlusIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +36,7 @@ import {
 } from "@/lib/docs-drafts";
 import { LinkResolver } from "@/lib/mdx-lite";
 import { foldersOf } from "@/lib/projects";
+import { navigate } from "@/lib/router";
 import { useStore } from "@/lib/store";
 import { answerFrom, type BotReply } from "@/lib/support";
 import { cn } from "@/lib/utils";
@@ -70,19 +71,25 @@ export function DocsOverview({ project }: { project: DocsProject }) {
         title={project.name}
         description={project.description}
         actions={
-          <Button
-            variant="outline"
-            onClick={() =>
-              toast.add({
-                title: "New pages need the server",
-                description:
-                  "Creating a file in the repository arrives with Phase 5. Until then, edit the pages that are here.",
-              })
-            }
-          >
-            <PlusIcon />
-            New page
-          </Button>
+          <>
+            <Button variant="outline" onClick={() => navigate(`site-${project.id}`)}>
+              <GlobeIcon />
+              View site
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() =>
+                toast.add({
+                  title: "New pages need the server",
+                  description:
+                    "Creating a file in the repository arrives with Phase 5. Until then, edit the pages that are here.",
+                })
+              }
+            >
+              <PlusIcon />
+              New page
+            </Button>
+          </>
         }
         meta={
           <Facts
