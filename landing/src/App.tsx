@@ -8,6 +8,7 @@ import { PreviewNotice, WaitlistForm } from "./waitlist";
 import heroShot from "./assets/hero-projects.png";
 import splitShot from "./assets/split.png";
 import editorShot from "./assets/editor.png";
+import siteShot from "./assets/site.png";
 
 const WRAP = "mx-auto w-full max-w-[1180px] px-5 sm:px-8";
 
@@ -337,6 +338,29 @@ function Writing() {
             </li>
           ))}
         </ul>
+      </div>
+    </section>
+  );
+}
+
+/* Publishing --------------------------------------------------------------- */
+
+function Publishing() {
+  return (
+    <section id="publish" className="border-t bg-subtle py-24 sm:py-32">
+      <div className={WRAP}>
+        <Heading
+          title="Publish a help center from the same pages."
+          lead="Docs, a help center, or a handbook, on your own domain: search, articles by topic, and a support bot that answers from those pages. Every page is also served as Markdown for AI tools."
+        />
+        <AppWindow
+          src={siteShot}
+          width={2560}
+          height={1600}
+          address="help.charged.dev"
+          alt="A published help center for Charged Labs: a search box, articles grouped by topic, and a support bot that answers from the same pages"
+          className="mt-12"
+        />
       </div>
     </section>
   );
@@ -702,6 +726,7 @@ export default function App() {
         <Problem />
         <Jobs />
         <Writing />
+        <Publishing />
         <HowItWorks />
         <SupportBot />
         <AnyAI />
