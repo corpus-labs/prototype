@@ -3,7 +3,7 @@ import { FACTS } from "./facts";
 import { cn } from "./lib/utils";
 import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title, Todo } from "./ui";
 import coverShot from "./assets/shots/cover-notebook.png";
-import writeShot from "./assets/shots/how-write.png";
+import splitShot from "./assets/shots/how-split.png";
 import projectsShot from "./assets/shots/traction-projects.png";
 
 /* Shared pieces --------------------------------------------------------- */
@@ -305,45 +305,50 @@ function HowItWorks() {
   return (
     <Slide section="How it works">
       <Body>
-        <Title className="max-w-[1000px]">
-          Write once in the notebook. Publish it, and connect any AI in one line.
+        <Title className="max-w-[960px]">
+          Write once in the notebook. Every reader gets the same words.
         </Title>
       </Body>
-      <Shot
-        src={writeShot}
-        alt="A handbook page open for editing in Corpus, with a Rich and Markdown switch and the page tree beside it"
-        className="absolute top-[236px] left-16 h-[428px] w-[672px]"
-        imgClassName="h-full object-cover object-top-left"
-      />
-      <ol className="absolute top-[236px] right-16 bottom-14 w-[432px] divide-y border-y">
+      <ol className="absolute top-[232px] inset-x-16 grid grid-cols-3 gap-10">
         <Step n={1} head="Write">
-          Pages are plain Markdown files you own, kept in folders. Edit them as rich text or as
-          Markdown.
+          Plain Markdown files you own, in folders. Edit them as rich text or as Markdown.
         </Step>
         <Step n={2} head="Publish and connect">
-          Publish a docs site or help center. Any MCP client connects with one line:
-          <code className="mt-2.5 block rounded-lg border bg-subtle px-3 py-2 text-[12.5px] leading-[1.6] text-ink">
-            claude mcp add --transport http acme
-            <br />
-            https://docs.acme.com/mcp
-          </code>
+          A docs site or help center for people. One line connects Claude, Codex, or any MCP client.
         </Step>
         <Step n={3} head="Fill the gaps">
-          When people or agents ask something the notebook can’t answer, AI drafts the page for you
-          to review, using the model you pick.
+          Questions nobody could answer come back as AI drafts, written with the model you pick.
         </Step>
       </ol>
+      <div className="absolute inset-x-16 top-[378px] bottom-0 flex flex-col">
+        <div className="mb-3 grid grid-cols-[52.5%_1fr] px-1 text-[15px]">
+          <Dot tone="off">
+            <span className="font-medium">People</span>
+            <span className="text-muted">read the help page</span>
+          </Dot>
+          <Dot tone="good">
+            <span className="font-medium">Agents and the support bot</span>
+            <span className="text-muted">get the same words</span>
+          </Dot>
+        </div>
+        <Shot
+          src={splitShot}
+          alt="The Refunds help page in Corpus’s split view: the page as people read it beside the Markdown agents get, with the same section highlighted on both sides"
+          className="min-h-0 flex-1 rounded-b-none"
+          imgClassName="h-full object-cover object-top"
+        />
+      </div>
     </Slide>
   );
 }
 
 function Step({ n, head, children }: { n: number; head: string; children: ReactNode }) {
   return (
-    <li className="grid grid-cols-[26px_1fr] py-4">
+    <li className="grid grid-cols-[24px_1fr] border-t pt-3.5">
       <span className="text-[15px] font-medium text-faint tabular-nums">{n}</span>
       <div>
         <p className="text-[17px] font-medium">{head}</p>
-        <div className="mt-1 text-[15px] leading-[1.5] text-pretty text-muted">{children}</div>
+        <div className="mt-1 text-[14.5px] leading-[1.5] text-pretty text-muted">{children}</div>
       </div>
     </li>
   );
@@ -351,12 +356,11 @@ function Step({ n, head, children }: { n: number; head: string; children: ReactN
 
 /* 6. Competition --------------------------------------------------------- */
 
-type Has = "yes" | "part" | "planned" | "no";
+type Has = "yes" | "part" | "no";
 
 const HAS_LABEL: Record<Has, string> = {
   yes: "Yes",
   part: "Partly",
-  planned: "Planned",
   no: "No",
 };
 
@@ -372,9 +376,6 @@ function Mark({ has }: { has: Has }) {
           className="size-[11px] rounded-full border-[1.5px] border-ink"
           style={{ background: "linear-gradient(90deg, var(--color-ink) 50%, transparent 50%)" }}
         />
-      )}
-      {has === "planned" && (
-        <span className="size-[11px] rounded-full border-[1.5px] border-neutral-400" />
       )}
       {has === "no" && <span className="h-px w-2.5 bg-neutral-300" />}
       <span className="sr-only">{HAS_LABEL[has]}</span>
@@ -419,7 +420,7 @@ function Competition() {
     },
     {
       name: "Corpus",
-      has: ["yes", "yes", "planned", "yes", "yes", "yes"],
+      has: ["yes", "yes", "yes", "yes", "yes", "yes"],
       price: "$79 to $99, once",
       us: true,
     },
@@ -481,7 +482,7 @@ function Competition() {
         </table>
         <div className="absolute inset-x-0 bottom-0">
           <div className="flex gap-6 text-[13px] text-muted">
-            {(["yes", "part", "planned", "no"] as Has[]).map((h) => (
+            {(["yes", "part", "no"] as Has[]).map((h) => (
               <span key={h} className="inline-flex items-center gap-2">
                 <Mark has={h} />
                 {HAS_LABEL[h]}
@@ -493,7 +494,7 @@ function Competition() {
             Mintlify self-hosting is Enterprise only. Zendesk AI answers are $1.50 each committed or
             $2 pay as you go, and its MCP server is in early access. Obsidian is free for work; its
             AI access comes from community plugins. zeroheight caps agent access at 500 calls a
-            month. Corpus pricing is planned, and support answers aren’t built yet.
+            month. Corpus pricing is planned, and its features run in a prototype on sample data.
           </Source>
         </div>
       </Body>
@@ -606,17 +607,18 @@ function Traction() {
       tone: "good",
       label: "Built",
       items: [
-        "Notebook pages in folders, edited as rich text or Markdown",
-        "Docs and design system projects in one workspace",
-        "Every page served to AI as MCP, llms.txt, and Markdown",
-        "Unanswered questions become AI drafts to review",
+        "Notebook pages in folders, as rich text or Markdown",
+        "Handbook, help center, and design system projects",
+        "A support bot that cites its page, or says it doesn’t know",
+        "Every page served to any AI: MCP, llms.txt, Markdown",
+        "Unanswered questions become drafts from any AI provider",
       ],
     },
     { tone: "warn", label: "Next", items: ["Read a real folder of Markdown from disk"] },
     {
       tone: "off",
       label: "Not yet",
-      items: ["Support answers, hosting, and user research. This grant pays for the research."],
+      items: ["Hosting, live AI calls, and user research"],
     },
   ];
   return (
@@ -627,12 +629,12 @@ function Traction() {
           <figure>
             <Shot
               src={projectsShot}
-              alt="The Corpus projects screen: a team handbook and a design system side by side, with agent requests and unanswered questions"
+              alt="The Corpus projects screen: a design system, a team handbook, and a customer help center side by side, with questions asked and unanswered"
             />
             <figcaption className="mt-3 text-[13.5px] leading-snug text-pretty text-muted">
-              A team handbook and a design system in one workspace, with the questions agents
-              couldn’t answer. Sample data; AI, git, and MCP calls are simulated until their build
-              phases land.
+              A design system, a team handbook, and a customer help center in one workspace, with
+              the questions nobody could answer yet. Sample data; AI, git, and MCP calls are
+              simulated until their build phases land.
             </figcaption>
           </figure>
           <div className="flex flex-col">
@@ -822,7 +824,7 @@ function Milestones() {
     {
       when: "Nov 2026",
       head: "Clickable prototype",
-      body: "Notebook, docs, and design system projects on sample data, plus an 8-phase build plan.",
+      body: "Handbook, help center, and design system projects on sample data, plus a build plan.",
       done: true,
     },
     {
@@ -843,7 +845,7 @@ function Milestones() {
     {
       when: "Spring 2027",
       head: "Launch",
-      body: "Lifetime licenses on sale, support answers, and the IYA Venture Showcase.",
+      body: "Lifetime licenses on sale, a hosted plan, and the IYA Venture Showcase.",
     },
   ];
   return (
