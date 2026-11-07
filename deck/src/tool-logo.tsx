@@ -1,12 +1,16 @@
 // Logos for the AI tools Corpus plugs into, from LobeHub's icon set (MIT,
 // github.com/lobehub/lobe-icons). Each draws in the current text color.
-// Codex uses OpenAI's mark. Z.ai's "Z" comes from its own logo (z.ai), without the
+// Codex uses OpenAI's mark. Cursor's is the glyph from its own logo (cursor.com), without
+// the dark tile, on that logo's 512-unit grid. Z.ai's "Z" comes from its own logo (z.ai), without the
 // blue tile, on that logo's 30-unit grid.
 // The same file lives in src/, deck/src/, and landing/src/; keep them in step.
 
 export type ToolId = "claude" | "codex" | "cursor" | "zai" | "deepseek" | "grok";
 
-const PATHS: Record<Exclude<ToolId, "cursor">, string[]> = {
+const PATHS: Record<ToolId, string[]> = {
+  cursor: [
+    "m410.344 159.545-146.38-84.5111c-4.7-2.7145-10.5-2.7145-15.2 0l-146.373 84.5111c-3.9515 2.282-6.391 6.501-6.391 11.071v170.418c0 4.569 2.4395 8.789 6.391 11.07l146.379 84.512c4.701 2.714 10.501 2.714 15.201 0l146.38-84.512c3.951-2.281 6.391-6.501 6.391-11.07v-170.418c0-4.57-2.44-8.789-6.391-11.071zm-9.195 17.902-141.308 244.751c-.955 1.65-3.477.976-3.477-.934v-160.261c0-3.203-1.711-6.164-4.487-7.772l-138.786-80.127c-1.65-.956-.976-3.478.934-3.478h282.616c4.013 0 6.522 4.35 4.515 7.828h-.007z",
+  ],
   claude: [
     "M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z",
   ],
@@ -27,16 +31,10 @@ const PATHS: Record<Exclude<ToolId, "cursor">, string[]> = {
 };
 
 /** Logos drawn on a grid other than 24 units, moved so they sit centered in 24. */
-const SHIFT: Partial<Record<ToolId, string>> = { zai: "translate(-3 -3)" };
-
-// Cursor's cube is drawn in shades; here the shades are opacities of the text color.
-const CURSOR: [string, number][] = [
-  ["M11.925 24l10.425-6-10.425-6L1.5 18l10.425 6z", 0.6],
-  ["M22.35 18V6L11.925 0v12l10.425 6z", 0.25],
-  ["M11.925 0L1.5 6v12l10.425-6V0z", 0.45],
-  ["M22.35 6L11.925 24V12L22.35 6z", 0.7],
-  ["M22.35 6l-10.425 6L1.5 6h20.85z", 1],
-];
+const SHIFT: Partial<Record<ToolId, string>> = {
+  zai: "translate(-3 -3)",
+  cursor: "translate(-2.724 -2.693) scale(0.05743)",
+};
 
 export function ToolLogo({ id, className }: { id: ToolId; className?: string }) {
   return (
@@ -47,9 +45,9 @@ export function ToolLogo({ id, className }: { id: ToolId; className?: string }) 
       className={className}
       aria-hidden
     >
-      {id === "cursor"
-        ? CURSOR.map(([d, opacity]) => <path key={d} d={d} opacity={opacity} />)
-        : PATHS[id].map((d) => <path key={d} d={d} transform={SHIFT[id]} />)}
+      {PATHS[id].map((d) => (
+        <path key={d} d={d} transform={SHIFT[id]} />
+      ))}
     </svg>
   );
 }
