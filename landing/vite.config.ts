@@ -11,6 +11,8 @@ export default defineConfig({
     options: { typeAware: true, typeCheck: true },
   },
   base: "./",
+  // The support bot demo reads the prototype's sample help pages from ../fixtures.
+  server: { fs: { allow: [".."] } },
   plugins: lazyPlugins(() => [
     react(),
     tailwindcss(),

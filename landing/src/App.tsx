@@ -1,12 +1,12 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { CONFIG, JOBS, type JobId } from "./config";
 import { cn } from "./lib/utils";
-import { CorpusLogo, CorpusMark, Dot, Heading, Shot } from "./ui";
+import { AppWindow, CorpusLogo, CorpusMark, Dot, Heading, Shot } from "./ui";
+import { BotDemo } from "./bot-demo";
 import { visit } from "./visit";
 import { PreviewNotice, WaitlistForm } from "./waitlist";
 import heroShot from "./assets/hero-projects.png";
 import splitShot from "./assets/split.png";
-import botShot from "./assets/bot-answer.png";
 
 const WRAP = "mx-auto w-full max-w-[1180px] px-5 sm:px-8";
 
@@ -86,15 +86,41 @@ function Hero() {
         </div>
       </div>
       <div className="mx-auto mt-14 w-full max-w-[1260px] px-5 sm:mt-20 sm:px-8">
-        <Shot
-          src={heroShot}
-          width={2560}
-          height={1424}
-          alt="Corpus with three projects side by side: the Charged UI design system, a web team handbook, and a customer help center, each showing questions asked this week and the ones with no answer"
-          className="rounded-b-none sm:rounded-b-[14px]"
-        />
+        <div className="relative">
+          <AppWindow
+            src={heroShot}
+            width={2560}
+            height={1450}
+            address="corpus.charged.dev"
+            alt="Corpus with three projects side by side: the Charged UI design system, a web team handbook, and a customer help center, each showing questions asked this week and the ones with no answer"
+          />
+          <Callout className="top-[60%] -left-6">
+            <p className="text-[13px] text-muted">“How long do refunds take?”</p>
+            <Dot tone="good" className="mt-1 text-[14px] font-medium">
+              Answered from Refunds
+            </Dot>
+          </Callout>
+          <Callout className="top-[19%] -right-6">
+            <p className="text-[13px] text-muted">Connected over MCP</p>
+            <p className="mt-1 text-[14px] font-medium">Claude Code, Codex, Cursor</p>
+          </Callout>
+        </div>
       </div>
     </section>
+  );
+}
+
+/** A small card floating over the hero window, pointing at one thing the product does. */
+function Callout({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <div
+      className={cn(
+        "absolute hidden rounded-xl bg-white px-4 py-3 shadow-[0_0_0_1px_rgb(0_0_0/0.08),0_12px_32px_-12px_rgb(0_0_0/0.25)] lg:block",
+        className,
+      )}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -349,24 +375,19 @@ function SupportBot() {
             title="A support bot that cites its source, or says it doesn’t know."
             lead="It answers customers only from your help center’s pages and links the page it used. When no page covers a question, it hands off to a person instead of guessing."
           />
-          <div className="mt-8 rounded-2xl border p-5">
-            <p className="text-[15px] font-medium">“Do you offer discounts for nonprofits?”</p>
-            <Dot tone="bad" className="mt-3 text-[15px] text-bad">
-              No page answers this yet
-            </Dot>
-            <p className="mt-1.5 pl-4 text-[14.5px] leading-[1.5] text-pretty text-muted">
-              Handed to a person, and added to your list of questions to answer. Write the page
-              once, and every reader gets it.
-            </p>
-          </div>
+          <p className="mt-6 text-[15.5px] leading-[1.55] text-pretty">
+            <span className="font-medium">Try it.</span>{" "}
+            <span className="text-muted">
+              Ask about refunds, licenses, invoices, installing a theme, or updates. Then ask
+              something those pages don’t cover.
+            </span>
+          </p>
         </div>
         <div className="self-center">
-          <Shot
-            src={botShot}
-            width={1664}
-            height={754}
-            alt="The Corpus support bot answering “How long do refunds take?” with “Refunds take 3 business days once we approve them,” linked to the Refunds page it came from"
-          />
+          <BotDemo />
+          <p className="mt-3 text-[13.5px] text-muted">
+            A live demo, running on the five sample help pages from the prototype.
+          </p>
         </div>
       </div>
     </section>

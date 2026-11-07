@@ -118,3 +118,46 @@ export function Heading({
     </div>
   );
 }
+
+/**
+ * The product framed as an app window: a slim title bar with the address, then the
+ * screenshot, which already shows the app's tinted canvas and white panel.
+ */
+export function AppWindow({
+  src,
+  alt,
+  width,
+  height,
+  address,
+  className,
+}: {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  address: string;
+  className?: string;
+}) {
+  return (
+    <div className={cn("shot overflow-hidden bg-mist-100", className)}>
+      <div className="relative flex h-10 items-center border-b border-black/[0.06] px-4">
+        <span className="flex gap-2" aria-hidden>
+          <span className="size-3 rounded-full bg-mist-300" />
+          <span className="size-3 rounded-full bg-mist-300" />
+          <span className="size-3 rounded-full bg-mist-300" />
+        </span>
+        <span className="absolute left-1/2 hidden -translate-x-1/2 rounded-md bg-white/80 px-3 py-1 text-[12.5px] text-muted ring-1 ring-black/[0.06] sm:block">
+          {address}
+        </span>
+      </div>
+      <img
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        decoding="async"
+        className="block h-auto w-full"
+      />
+    </div>
+  );
+}
