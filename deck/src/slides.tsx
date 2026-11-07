@@ -53,7 +53,7 @@ function Cover() {
       </div>
       <Shot
         src={coverShot}
-        alt="The Corpus prototype showing a team handbook: pages in folders, open to the decision log"
+        alt="Editing the decision log in Corpus: a formatting toolbar, and the block menu opened under a heading"
         className="absolute top-[150px] bottom-0 left-[676px] w-[940px] rounded-b-none"
         imgClassName="h-full object-cover object-top-left"
       />
@@ -608,7 +608,7 @@ function Traction() {
       tone: "good",
       label: "Built",
       items: [
-        "Notebook pages in folders, as rich text or Markdown",
+        "A notebook editor: toolbar, slash menu, to-dos, page links",
         "Handbook, help center, and design system projects",
         "A support bot that cites its page, or says it doesn’t know",
         "Every page served to any AI: MCP, llms.txt, Markdown",
