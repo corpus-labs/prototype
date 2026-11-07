@@ -316,7 +316,8 @@ function HowItWorks() {
           Plain Markdown files you own, in folders. Edit them as rich text or as Markdown.
         </Step>
         <Step n={2} head="Publish and connect">
-          A docs site or help center for people. One line connects Claude, Codex, or any MCP client.
+          A docs site or help center for people. Plugins connect Claude, Codex, and more in one
+          click.
         </Step>
         <Step n={3} head="Fill the gaps">
           Questions nobody could answer come back as AI drafts, written with the model you pick.
