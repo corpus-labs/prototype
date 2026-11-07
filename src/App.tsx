@@ -10,11 +10,13 @@ import { Overview } from "@/pages/overview";
 import { docsProjectOf, docsProjects } from "@/data/workspace";
 import { PublishedSite } from "@/pages/site";
 import { Projects } from "@/pages/projects";
+import { Plugins } from "@/pages/plugins";
 import { WorkspaceSettings } from "@/pages/settings";
 import { Tokens } from "@/pages/tokens";
 
 function Page({ route }: { route: string }) {
   if (route === "projects") return <Projects />;
+  if (route === "plugins") return <Plugins />;
   const docs = docsProjectOf(route);
   if (docs) {
     if (route === docs.id) return <DocsOverview project={docs} />;

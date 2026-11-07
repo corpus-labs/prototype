@@ -16,6 +16,7 @@ import {
   MoonIcon,
   PaletteIcon,
   PenLineIcon,
+  PlugIcon,
   SearchIcon,
   Settings2Icon,
   SunIcon,
@@ -356,7 +357,7 @@ function AppSidebar({ route }: { route: string }) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {project === null && <ProjectsNav />}
+        {project === null && <ProjectsNav route={route} />}
         {project === "charged-ui" && (
           <>
             <SidebarGroup>
@@ -408,39 +409,58 @@ function AppSidebar({ route }: { route: string }) {
 }
 
 /** On the projects dashboard, the sidebar lists the projects themselves. */
-function ProjectsNav() {
+function ProjectsNav({ route }: { route: string }) {
   const { setOpenMobile } = useSidebar();
   const projects = useProjects();
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {projects.map((p) => {
-            const Icon = KIND_ICON[p.kind];
-            return (
-              <SidebarMenuItem key={p.id}>
-                <SidebarMenuButton
-                  tooltip={p.name}
-                  render={<a href={`#${p.home}`} onClick={() => setOpenMobile(false)} />}
-                >
-                  <Icon />
-                  <span>{p.name}</span>
-                </SidebarMenuButton>
-                {p.open > 0 && (
-                  <SidebarMenuBadge className="text-muted-foreground tabular">
-                    <span className="flex items-center gap-1.5">
-                      <span className="size-1.5 rounded-full bg-bad" />
-                      {p.open}
-                    </span>
-                  </SidebarMenuBadge>
-                )}
-              </SidebarMenuItem>
-            );
-          })}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
+    <>
+      <SidebarGroup>
+        <SidebarGroupLabel>Projects</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {projects.map((p) => {
+              const Icon = KIND_ICON[p.kind];
+              return (
+                <SidebarMenuItem key={p.id}>
+                  <SidebarMenuButton
+                    tooltip={p.name}
+                    render={<a href={`#${p.home}`} onClick={() => setOpenMobile(false)} />}
+                  >
+                    <Icon />
+                    <span>{p.name}</span>
+                  </SidebarMenuButton>
+                  {p.open > 0 && (
+                    <SidebarMenuBadge className="text-muted-foreground tabular">
+                      <span className="flex items-center gap-1.5">
+                        <span className="size-1.5 rounded-full bg-bad" />
+                        {p.open}
+                      </span>
+                    </SidebarMenuBadge>
+                  )}
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+      <SidebarGroup>
+        <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                isActive={route === "plugins"}
+                tooltip="Plugins"
+                render={<a href="#plugins" onClick={() => setOpenMobile(false)} />}
+              >
+                <PlugIcon />
+                <span>Plugins</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    </>
   );
 }
 
@@ -525,7 +545,7 @@ function DesktopTopbar({ route }: { route: string }) {
             {project ? (
               <ProjectMenu variant="crumb" current={project} />
             ) : (
-              <BreadcrumbPage>Projects</BreadcrumbPage>
+              <BreadcrumbPage>{route === "plugins" ? "Plugins" : "Projects"}</BreadcrumbPage>
             )}
           </BreadcrumbItem>
           {trail.map((c, i) => (
@@ -579,7 +599,9 @@ function MobileTopbar({ route }: { route: string }) {
       {project ? (
         <ProjectMenu variant="title" current={project} />
       ) : (
-        <span className="text-[15px] font-semibold tracking-tight">Projects</span>
+        <span className="text-[15px] font-semibold tracking-tight">
+          {route === "plugins" ? "Plugins" : "Projects"}
+        </span>
       )}
       <div className="ml-auto flex items-center">
         <Button
@@ -785,6 +807,13 @@ function CommandMenu() {
             <CommandItem value="all projects dashboard" onSelect={() => go("projects")}>
               <LayoutGridIcon />
               All projects
+            </CommandItem>
+            <CommandItem
+              value="plugins claude codex cursor ai tools"
+              onSelect={() => go("plugins")}
+            >
+              <PlugIcon />
+              Plugins
             </CommandItem>
           </CommandGroup>
           <CommandGroup heading="Components">
