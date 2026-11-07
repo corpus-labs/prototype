@@ -119,9 +119,41 @@ export function Heading({
   );
 }
 
+/** A 14px stroke icon for the browser toolbar, in the style of the rest of the page. */
+function ToolbarIcon({ d, className }: { d: string[]; className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={cn("size-3.5", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      {d.map((path) => (
+        <path key={path} d={path} />
+      ))}
+    </svg>
+  );
+}
+
+const ICON = {
+  back: ["m12 19-7-7 7-7", "M19 12H5"],
+  forward: ["M5 12h14", "m12 5 7 7-7 7"],
+  reload: ["M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8", "M21 3v5h-5"],
+  copy: [
+    "M8 10a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2z",
+    "M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2",
+  ],
+};
+
 /**
- * The product framed as an app window: a slim title bar with the address, then the
- * screenshot, which already shows the app's tinted canvas and white panel.
+ * The product in a browser window, after Geist's Browser component: window
+ * buttons and history controls on the left, a pill address bar in the middle,
+ * and the screenshot below. The screenshot already shows the app's tinted
+ * canvas and white panel.
  */
 export function AppWindow({
   src,
@@ -139,16 +171,32 @@ export function AppWindow({
   className?: string;
 }) {
   return (
-    <div className={cn("shot overflow-hidden bg-mist-100", className)}>
-      <div className="relative flex h-10 items-center border-b border-black/[0.06] px-4">
-        <span className="flex gap-2" aria-hidden>
-          <span className="size-3 rounded-full bg-mist-300" />
-          <span className="size-3 rounded-full bg-mist-300" />
-          <span className="size-3 rounded-full bg-mist-300" />
-        </span>
-        <span className="absolute left-1/2 hidden -translate-x-1/2 rounded-md bg-white/80 px-3 py-1 text-[12.5px] text-muted ring-1 ring-black/[0.06] sm:block">
-          {address}
-        </span>
+    <div
+      className={cn(
+        "overflow-hidden rounded-[14px] bg-neutral-50 shadow-[0_0_0_1px_rgb(0_0_0/0.08),0_2px_2px_rgb(0_0_0/0.04),0_32px_64px_-24px_rgb(0_0_0/0.18)]",
+        className,
+      )}
+    >
+      <div className="flex items-center gap-4 border-b border-black/[0.06] bg-white px-4 py-2 md:gap-6 md:px-5 md:py-2.5">
+        <div className="flex flex-1 items-center gap-4">
+          <span className="flex gap-2" aria-hidden>
+            <span className="size-3 rounded-full bg-[#FE5F57]" />
+            <span className="size-3 rounded-full bg-[#FEBB2E]" />
+            <span className="size-3 rounded-full bg-[#26C941]" />
+          </span>
+          <span className="hidden items-center gap-4 text-neutral-500 md:flex">
+            <ToolbarIcon d={ICON.back} />
+            <ToolbarIcon d={ICON.forward} className="opacity-40" />
+            <ToolbarIcon d={ICON.reload} />
+          </span>
+        </div>
+        <div className="flex min-w-0 flex-[2] justify-center md:flex-1">
+          <span className="flex h-[34px] w-full max-w-xs items-center rounded-full border border-neutral-200 bg-neutral-50 pr-2.5 pl-4 text-[13px]">
+            <span className="min-w-0 flex-1 truncate text-center text-neutral-900">{address}</span>
+            <ToolbarIcon d={ICON.copy} className="size-3 text-neutral-500" />
+          </span>
+        </div>
+        <div className="hidden flex-1 md:block" />
       </div>
       <img
         src={src}

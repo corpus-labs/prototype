@@ -7,6 +7,7 @@ import { visit } from "./visit";
 import { PreviewNotice, WaitlistForm } from "./waitlist";
 import heroShot from "./assets/hero-projects.png";
 import splitShot from "./assets/split.png";
+import editorShot from "./assets/editor.png";
 
 const WRAP = "mx-auto w-full max-w-[1180px] px-5 sm:px-8";
 
@@ -303,6 +304,44 @@ function Jobs() {
   );
 }
 
+/* Writing ------------------------------------------------------------------ */
+
+function Writing() {
+  const ways: [string, string][] = [
+    ["/", "Insert any block: headings, lists, to-dos, quotes, code, tables"],
+    ["[[", "Link another page by name, as a plain Markdown link"],
+    ["Markdown", "Switch to the file itself whenever you want it"],
+  ];
+  return (
+    <section id="write" className="py-24 sm:py-32">
+      <div className={WRAP}>
+        <Heading
+          title="Write like it’s a notebook, because it is."
+          lead="A toolbar, a slash menu, to-dos, and links between pages, the way Notion and Obsidian work. Every page is still a Markdown file you own."
+        />
+        <AppWindow
+          src={editorShot}
+          width={2560}
+          height={1600}
+          address="corpus.charged.dev"
+          alt="Editing a handbook page in Corpus: a formatting toolbar above the page, a selection menu over bold text, and a to-do list with one item checked"
+          className="mt-12"
+        />
+        <ul className="mt-8 grid gap-x-10 gap-y-4 border-t pt-6 sm:grid-cols-3">
+          {ways.map(([key, text]) => (
+            <li key={key} className="grid grid-cols-[auto_1fr] items-baseline gap-3 text-[15.5px]">
+              <kbd className="rounded-md border bg-subtle px-1.5 py-0.5 font-mono text-[13px]">
+                {key}
+              </kbd>
+              <span className="text-pretty text-muted">{text}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
 /* How it works ------------------------------------------------------------- */
 
 function HowItWorks() {
@@ -321,7 +360,7 @@ function HowItWorks() {
     ],
   ];
   return (
-    <section id="how" className="py-24 sm:py-32">
+    <section id="how" className="border-t py-24 sm:py-32">
       <div className={WRAP}>
         <Heading
           title="Every reader gets the same words."
@@ -662,6 +701,7 @@ export default function App() {
         <Hero />
         <Problem />
         <Jobs />
+        <Writing />
         <HowItWorks />
         <SupportBot />
         <AnyAI />
