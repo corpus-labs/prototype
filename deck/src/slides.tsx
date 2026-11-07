@@ -242,7 +242,7 @@ function Solution() {
   const jobs: [head: string, body: string, instead: string][] = [
     [
       "AI context",
-      "Claude, Codex, Cursor, or any tool that speaks MCP reads your plans, decisions, and rules.",
+      "Plugins for Claude, Codex, and more recall your plans and decisions, and save new ones back.",
       "prompt files in every AI tool",
     ],
     [
@@ -355,7 +355,114 @@ function Step({ n, head, children }: { n: number; head: string; children: ReactN
   );
 }
 
-/* 6. Competition --------------------------------------------------------- */
+/* 6. Plugins ------------------------------------------------------------ */
+
+function Tile({ tile, className }: { tile: string; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "grid size-9 shrink-0 place-items-center rounded-lg border bg-subtle text-[13px] font-semibold",
+        className,
+      )}
+    >
+      {tile}
+    </span>
+  );
+}
+
+/** One fact, saved from one tool on Monday and recalled from another today. */
+function SharedMemory() {
+  const turn = (tile: string, tool: string, when: string, ask: string, reply: ReactNode) => (
+    <div className="grid gap-3 px-5 py-4">
+      <p className="flex items-center gap-2 text-[13px] text-muted">
+        <Tile tile={tile} className="size-6 rounded-md text-[11px]" />
+        <span className="font-medium text-ink">{tool}</span>
+        {when}
+      </p>
+      <p className="justify-self-end rounded-2xl rounded-br-md bg-ink px-3.5 py-2 text-[14.5px] text-white">
+        {ask}
+      </p>
+      <div className="text-[14.5px] leading-[1.5]">{reply}</div>
+    </div>
+  );
+  return (
+    <figure className="divide-y overflow-hidden rounded-xl border bg-white">
+      {turn(
+        "Cl",
+        "Claude Code",
+        "Monday",
+        "Remember that refunds now take 3 business days.",
+        <>
+          <Dot tone="good">Saved to Customer help, Refunds</Dot>
+          <p className="mt-1 pl-4 text-[13px] text-muted">
+            As a draft. Mitch approved it the same day.
+          </p>
+        </>,
+      )}
+      {turn(
+        "Cx",
+        "Codex",
+        "Today",
+        "How long do refunds take?",
+        <>
+          <p>3 business days once the refund is approved.</p>
+          <p className="mt-1 text-[13px] text-muted">From Customer help, Refunds</p>
+        </>,
+      )}
+    </figure>
+  );
+}
+
+function Plugins() {
+  const tools: [string, string][] = [
+    ["Cl", "Claude"],
+    ["Cx", "Codex"],
+    ["Cu", "Cursor"],
+    ["Z", "Z.ai"],
+    ["DS", "DeepSeek"],
+    ["Ge", "Gemini CLI"],
+  ];
+  const rows: [string, string][] = [
+    ["Recall", "Agents answer from the notebook and cite the page they used."],
+    ["Save", "They save decisions and fixes back as drafts a person approves."],
+    ["One click", "No terminal or config file, so the whole team can use it."],
+  ];
+  return (
+    <Slide section="Plugins">
+      <Body>
+        <Title className="max-w-[980px]">Plugins give every AI tool the same memory.</Title>
+        <Lead className="max-w-[880px]">
+          What one tool saves to Corpus, every other tool can recall. Switch models, and the memory
+          comes with you.
+        </Lead>
+        <div className="absolute inset-x-0 bottom-0 grid grid-cols-[520px_1fr] items-end gap-14">
+          <SharedMemory />
+          <div>
+            <ul className="grid grid-cols-3 gap-x-5 gap-y-3">
+              {tools.map(([tile, name]) => (
+                <li key={name} className="flex items-center gap-2.5 text-[15px] font-medium">
+                  <Tile tile={tile} />
+                  {name}
+                </li>
+              ))}
+            </ul>
+            <dl className="mt-6 divide-y border-y text-[15px] leading-[1.45]">
+              {rows.map(([k, v]) => (
+                <div key={k} className="grid grid-cols-[96px_1fr] gap-4 py-2.5">
+                  <dt className="font-medium">{k}</dt>
+                  <dd className="text-pretty text-muted">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+      </Body>
+    </Slide>
+  );
+}
+
+/* 7. Competition --------------------------------------------------------- */
 
 type Has = "yes" | "part" | "no";
 
@@ -611,7 +718,7 @@ function Traction() {
         "A notebook editor: toolbar, slash menu, to-dos, page links",
         "Handbook, help center, and design system projects",
         "A published help center with search and a support bot",
-        "Every page served to any AI: MCP, llms.txt, Markdown",
+        "Plugins that recall and save notes, with a review queue",
         "Unanswered questions become drafts from any AI provider",
       ],
     },
@@ -837,8 +944,8 @@ function Milestones() {
     },
     {
       when: "Jan 2027",
-      head: "Any AI connects",
-      body: "Claude, Codex, Cursor, and other MCP clients read real notebooks.",
+      head: "Plugins ship",
+      body: "Claude and Codex plugins recall and save notes. Any MCP client reads real notebooks.",
     },
     {
       when: "Feb 2027",
@@ -877,7 +984,8 @@ function Milestones() {
             ))}
           </ol>
           <p className="mt-6 text-[14.5px] text-muted">
-            After the Showcase: imports from Notion, and plugins for WordPress and Drupal.
+            After the Showcase: plugins for Z.ai, DeepSeek, and more, imports from Notion, and
+            plugins for WordPress and Drupal.
           </p>
         </div>
         <div className="absolute inset-x-0 bottom-0 border-t pt-5">
@@ -956,6 +1064,7 @@ export const SLIDES = [
   WhyNow,
   Solution,
   HowItWorks,
+  Plugins,
   Competition,
   BusinessModel,
   Traction,
