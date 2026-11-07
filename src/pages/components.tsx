@@ -570,11 +570,16 @@ function DoDont({
       >
         <span
           className={cn(
-            "inline-flex items-center gap-1 font-medium",
+            // The word sets the baseline, so "Do" lines up with the title after it.
+            "inline-flex items-baseline gap-1 font-medium",
             good ? "text-good" : "text-bad",
           )}
         >
-          {good ? <CheckIcon className="size-4" /> : <XIcon className="size-4" />}
+          {good ? (
+            <CheckIcon className="size-4 self-center" />
+          ) : (
+            <XIcon className="size-4 self-center" />
+          )}
           {good ? "Do" : "Don’t"}
         </span>
         <span className="ml-1.5 font-medium">{title}</span>
