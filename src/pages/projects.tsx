@@ -3,7 +3,8 @@ import { FileTextIcon, FolderIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { ComponentThumb, CuiScope } from "@/components/charged-ui";
-import { Dot, Facts, PageHeader, Section } from "@/components/common";
+import { KIND_ICON } from "@/components/app-shell";
+import { Dot, PageHeader, Section } from "@/components/common";
 import { docsProjects, helpCenter, questions, workspace, type DocPage } from "@/data/workspace";
 import { KIND_LABEL, foldersOf, useProjects, type ProjectSummary } from "@/lib/projects";
 import { navigate } from "@/lib/router";
@@ -72,11 +73,18 @@ function HelpPreview() {
   );
 }
 
+/**
+ * A project at a glance: what it looks like, what it is, and the one thing to act on.
+ * The description and counts live on the project's own overview.
+ */
 function ProjectCard({ p, dark }: { p: ProjectSummary; dark: boolean }) {
+  const Icon = KIND_ICON[p.kind];
+  const [label, count] = p.counts[0];
   return (
     <a
       href={`#${p.home}`}
-      className="group flex flex-col overflow-hidden rounded-xl border transition-colors outline-none hover:border-foreground/25 focus-visible:ring-3 focus-visible:ring-ring/50"
+      title={p.description}
+      className="group @container flex flex-col overflow-hidden rounded-xl border bg-card transition-colors outline-none hover:border-foreground/25 focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       {p.kind === "design-system" ? (
         <SystemPreview dark={dark} />
@@ -85,27 +93,33 @@ function ProjectCard({ p, dark }: { p: ProjectSummary; dark: boolean }) {
       ) : (
         <DocsPreview pages={p.pages ?? []} />
       )}
-      <div className="grid gap-4 border-t p-5">
-        <div>
-          <div className="flex items-baseline justify-between gap-3">
-            <p className="truncate text-lg font-semibold tracking-[-0.02em]">{p.name}</p>
-            <span className="shrink-0 text-sm text-muted-foreground">{KIND_LABEL[p.kind]}</span>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">{p.description}</p>
-        </div>
-        <Facts
-          items={[...p.counts, [p.requestsLabel, `${p.requests.toLocaleString()} this week`]]}
-        />
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-          {p.open ? (
-            <Dot tone="bad" className="text-bad">
-              {p.open} unanswered {p.open === 1 ? "question" : "questions"}
-            </Dot>
-          ) : (
-            <Dot tone="good">Every question answered</Dot>
-          )}
-          <span className="text-muted-foreground">Updated {p.updated.toLowerCase()}</span>
-        </div>
+      <div className="flex items-center gap-3 border-t px-4 py-3.5">
+        <span className="grid size-9 shrink-0 place-items-center rounded-lg border bg-background text-muted-foreground">
+          <Icon className="size-[18px]" />
+        </span>
+        <span className="min-w-0">
+          <span className="block truncate text-[15px] font-semibold tracking-[-0.01em]">
+            {p.name}
+          </span>
+          <span className="block truncate text-[13px] text-muted-foreground">
+            {KIND_LABEL[p.kind]}, {count} {label.toLowerCase()}
+          </span>
+        </span>
+      </div>
+      <div className="mt-auto flex items-center justify-between gap-3 border-t px-4 py-3 text-sm whitespace-nowrap">
+        <span className="text-muted-foreground">
+          <span className="font-medium text-foreground tabular">{p.requests.toLocaleString()}</span>{" "}
+          {p.kind === "help-center" ? "questions" : "requests"}
+          {/* Narrow cards drop "this week"; the page lead already says it. */}
+          <span className="hidden @[21rem]:inline"> this week</span>
+        </span>
+        {p.open ? (
+          <Dot tone="bad" className="text-bad">
+            {p.open} unanswered
+          </Dot>
+        ) : (
+          <Dot tone="good">All answered</Dot>
+        )}
       </div>
     </a>
   );
