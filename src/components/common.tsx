@@ -120,7 +120,11 @@ const DOT: Record<"good" | "warn" | "bad" | "off", string> = {
   off: "bg-muted-foreground/50",
 };
 
-/** A colored dot before a word. The one way state is shown, instead of outlined badges. */
+/**
+ * A colored dot before a word. The one way state is shown, instead of outlined badges.
+ * The words set the baseline and the dot centers beside them, so a Dot lines up with
+ * the text around it in rows that align by baseline, like Facts.
+ */
 export function Dot({
   tone,
   children,
@@ -131,8 +135,8 @@ export function Dot({
   className?: string;
 }) {
   return (
-    <span className={cn("inline-flex items-center gap-1.5", className)}>
-      <span className={cn("size-1.5 shrink-0 rounded-full", DOT[tone])} />
+    <span className={cn("inline-flex items-baseline gap-1.5", className)}>
+      <span className={cn("size-1.5 shrink-0 self-center rounded-full", DOT[tone])} />
       {children}
     </span>
   );

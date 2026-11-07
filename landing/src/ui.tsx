@@ -57,8 +57,9 @@ export function Dot({
   className?: string;
 }) {
   return (
-    <span className={cn("inline-flex items-center gap-2", className)}>
-      <span className={cn("size-2 shrink-0 rounded-full", DOT[tone])} />
+    <span className={cn("inline-flex items-baseline gap-2", className)}>
+      {/* The words set the baseline; the dot centers beside them. */}
+      <span className={cn("size-2 shrink-0 self-center rounded-full", DOT[tone])} />
       {children}
     </span>
   );
