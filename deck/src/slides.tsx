@@ -2,9 +2,9 @@ import type { ReactNode } from "react";
 import { FACTS } from "./facts";
 import { cn } from "./lib/utils";
 import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title, Todo } from "./ui";
-import titleShot from "./assets/shots/title-button.png";
-import solutionShot from "./assets/shots/solution-split.png";
-import tractionShot from "./assets/shots/traction-draft.png";
+import coverShot from "./assets/shots/cover-notebook.png";
+import writeShot from "./assets/shots/how-write.png";
+import projectsShot from "./assets/shots/traction-projects.png";
 
 /* Shared pieces --------------------------------------------------------- */
 
@@ -30,29 +30,19 @@ function Fact({ k, children, wide = false }: { k: string; children: ReactNode; w
   );
 }
 
-/** A rule as the product shows it: the keyword, then the sentence. */
-function Rule({ kw, children }: { kw: string; children: ReactNode }) {
-  return (
-    <li className="grid grid-cols-[44px_1fr] items-baseline gap-3">
-      <code className="text-[11.5px] font-medium">{kw}</code>
-      <span>{children}</span>
-    </li>
-  );
-}
-
 /* 1. Cover --------------------------------------------------------------- */
 
 function Cover() {
   return (
     <Slide>
       <CorpusLogo className="absolute top-14 left-16 h-[30px]" />
-      <div className="absolute top-[178px] left-16 w-[560px]">
-        <h1 className="text-[58px] leading-[1.05] font-semibold tracking-[-0.035em] text-balance">
-          Design system docs that AI agents follow.
+      <div className="absolute top-[170px] left-16 w-[572px]">
+        <h1 className="text-[56px] leading-[1.05] font-semibold tracking-[-0.035em] text-balance">
+          Own what your company knows. Use it with any AI.
         </h1>
-        <p className="mt-6 text-[21px] leading-[1.45] text-pretty text-muted">
-          Document a design system once. People read it as a website, and coding agents like Claude
-          Code and Cursor read the same source.
+        <p className="mt-6 text-[20px] leading-[1.45] text-pretty text-muted">
+          Corpus is one notebook for your docs, help center, AI context, and design system. Host it
+          with us or on your own server, and pay once.
         </p>
       </div>
       <div className="absolute bottom-14 left-16 grid gap-1 text-[15px]">
@@ -61,8 +51,8 @@ function Cover() {
         <p className="text-muted">Ignite Grant, GenAI track, Fall 2026</p>
       </div>
       <Shot
-        src={titleShot}
-        alt="The Corpus prototype showing the Button component page"
+        src={coverShot}
+        alt="The Corpus prototype showing a team handbook: pages in folders, open to the decision log"
         className="absolute top-[150px] bottom-0 left-[676px] w-[940px] rounded-b-none"
         imgClassName="h-full object-cover object-top-left"
       />
@@ -70,175 +60,118 @@ function Cover() {
   );
 }
 
-/* 2. Team ---------------------------------------------------------------- */
+/* 2. Problem ------------------------------------------------------------- */
 
-function Team() {
-  const record: [string, ReactNode][] = [
+function Problem() {
+  const pains: [string, string][] = [
     [
-      "Founder, Charged Labs",
-      "Developer tools for Drupal and WordPress, including Charged UI, the first design system documented in Corpus.",
+      "Scattered",
+      "Docs in Mintlify or GitBook, notes in Notion or Obsidian, help articles in Zendesk, and AI context in each vendor’s own project files.",
     ],
+    ["Rented", "Every tool bills by the seat, the site, or the answer, every month."],
     [
-      "Staff-level frontend engineer",
-      "Flipgrid (acquired by Microsoft), OurFamilyWizard, and Parsley Health.",
-    ],
-    [
-      "Elite author on ThemeForest",
-      "More than $75,000 in lifetime sales, Envato’s bar for Elite. I’ve sold one-time-priced products to developers before.",
-    ],
-    [
-      "15 years in the Drupal community",
-      "Corpus launches there first, with people I already know how to reach.",
+      "Stuck",
+      "Context saved inside one AI vendor stays there. Switch models, and you set it all up again.",
     ],
   ];
   return (
-    <Slide section="Team">
+    <Slide section="Problem">
       <Body>
-        <Title>Solo founder, already inside the market Corpus serves first.</Title>
-        <div className="mt-12 grid grid-cols-[372px_1fr] gap-16">
-          <div>
-            <div className="grid size-[72px] place-items-center rounded-full bg-neutral-100 text-[24px] font-medium text-neutral-600">
-              MK
-            </div>
-            <p className="mt-5 text-[28px] font-semibold tracking-[-0.02em]">Mitch Kostelecky</p>
-            <p className="mt-1 text-[17px] text-muted">
-              Founder. Product, design, and engineering.
-            </p>
-            <dl className="mt-7 grid gap-2.5 text-[15px] leading-snug">
-              <Fact k="USC">
-                IYA graduate student, MS in Integrated Design, Business and Technology
-              </Fact>
-              <Fact k="Enrolled">Fall 2026 and Spring 2027</Fact>
-              <Fact k="Email">
-                <Fill value={FACTS.email} todo="email" />
-              </Fact>
-            </dl>
-          </div>
+        <Title className="max-w-[900px]">
+          Company knowledge is scattered, rented, and stuck with one AI vendor.
+        </Title>
+        <div className="mt-11 grid grid-cols-[1fr_560px] gap-14">
           <ul className="divide-y border-y">
-            {record.map(([head, body]) => (
-              <li key={head} className="py-[15px]">
-                <p className="text-[18px] font-medium">{head}</p>
-                <p className="mt-1 text-[15.5px] leading-[1.5] text-pretty text-muted">{body}</p>
+            {pains.map(([head, body]) => (
+              <li key={head} className="py-4">
+                <p className="text-[18.5px] font-medium">{head}</p>
+                <p className="mt-1 text-[16px] leading-[1.5] text-pretty text-muted">{body}</p>
               </li>
             ))}
           </ul>
+          <FiveAnswers />
         </div>
       </Body>
     </Slide>
   );
 }
 
-/* 3. Problem ------------------------------------------------------------- */
-
-function Problem() {
+function FiveAnswers() {
+  const answers: [where: string, said: string, note?: string][] = [
+    ["Help center", "“5 business days”"],
+    ["Docs site", "“Up to 7 days”"],
+    ["Support bot", "“Within 24 hours”", "a guess"],
+    ["ChatGPT project", "“5 to 7 days”", "last year’s PDF"],
+  ];
   return (
-    <Slide section="Problem">
-      <Body>
-        <Title className="max-w-[880px]">
-          AI agents write UI code now. They don’t follow your design system.
-        </Title>
-        <div className="mt-11 grid grid-cols-[1fr_588px] gap-14">
-          <div className="flex flex-col">
-            <ul className="divide-y border-y text-[18.5px] leading-[1.45]">
-              <li className="py-4">
-                Design system rules live in docs written for people. Agents can’t use them, so they
-                guess.
-              </li>
-              <li className="py-4">
-                The guess is almost right: the wrong component, a hardcoded color, a vague label.
-              </li>
-              <li className="py-4">
-                Someone fixes it in review, again and again. Nobody sees which answers were missing.
-              </li>
-            </ul>
-            <div className="mt-auto">
-              <p className="text-[15px] leading-snug text-pretty text-muted">
-                <span className="font-semibold text-ink">66%</span> of developers say their top
-                frustration with AI tools is answers that are “almost right, but not quite.”
-              </p>
-              <Source className="mt-1.5">Stack Overflow Developer Survey 2025</Source>
-            </div>
-          </div>
-          <CodeCompare />
-        </div>
-      </Body>
-    </Slide>
-  );
-}
-
-function CodeCompare() {
-  return (
-    <figure className="overflow-hidden rounded-xl border bg-white">
+    <figure className="self-start overflow-hidden rounded-xl border bg-white">
       <figcaption className="border-b bg-subtle px-5 py-3 text-[14px] text-muted">
-        Asked to “add a checkout button to the cart page”
+        Five places answer “How long do refunds take?”
       </figcaption>
-      <div className="px-5 pt-4 pb-4">
-        <Dot tone="bad" className="text-[14px] font-medium text-bad">
-          What the agent wrote
-        </Dot>
-        <pre className="mt-2 text-[13.5px] leading-[1.6]">{`<a class="btn btn-primary" href="/checkout">
-  Checkout
-</a>`}</pre>
-      </div>
-      <div className="border-t px-5 pt-4 pb-5">
-        <Dot tone="good" className="text-[14px] font-medium text-good">
-          What Charged UI’s docs say
-        </Dot>
-        <pre className="mt-2 text-[13.5px] leading-[1.6]">{`{{ include('charged_ui:button', {
-  variant: 'primary',
-  label: 'Go to checkout',
-  href: '/checkout',
-}) }}`}</pre>
-        <ul className="mt-3 grid gap-1.5 border-t border-dashed pt-3 text-[13px] leading-snug text-muted">
-          <Rule kw="MUST">pass href to Button for links styled as buttons.</Rule>
-          <Rule kw="MUST">write labels as a verb phrase, three words or fewer.</Rule>
-        </ul>
-      </div>
+      <ul className="divide-y text-[15.5px]">
+        {answers.map(([where, said, note]) => (
+          <li key={where} className="grid grid-cols-[150px_1fr] items-baseline px-5 py-3">
+            <span className="text-muted">{where}</span>
+            <Dot tone="bad">
+              {said}
+              {note && <span className="text-[13.5px] text-muted">{note}</span>}
+            </Dot>
+          </li>
+        ))}
+        <li className="grid grid-cols-[150px_1fr] items-baseline bg-good-soft px-5 py-3">
+          <span className="text-muted">Team notes</span>
+          <Dot tone="good">
+            <span className="font-medium">“3 business days, since March”</span>
+          </Dot>
+        </li>
+      </ul>
+      <p className="border-t px-5 py-3 text-[13px] text-muted">
+        An illustration. Every copy was right once.
+      </p>
     </figure>
   );
 }
 
-/* 4. Why now ------------------------------------------------------------- */
+/* 3. Why now ------------------------------------------------------------- */
 
 function WhyNow() {
-  const shifts: [string, ReactNode][] = [
+  const shifts: [string, ReactNode, string][] = [
     [
-      "Agents got a standard plug",
-      "The Model Context Protocol (MCP) lets an agent ask an outside source for context. Claude Code, Cursor, VS Code, and Codex all support it.",
+      "Teams use several models at once",
+      "37% of enterprises use five or more models, up from 29% a year earlier.",
+      "Andreessen Horowitz, CIO survey, 2025",
     ],
     [
-      "Design system tools are adding it",
-      "zeroheight, Supernova, and Storybook now ship MCP servers. Teams are asking for this, and vendors are answering.",
+      "One plug fits all of them",
+      "The Model Context Protocol (MCP) lets Claude, ChatGPT, Codex, Cursor, and VS Code read from the same outside source.",
+      "Each vendor’s docs, November 2026",
     ],
     [
-      "Without a source, agents fill the gaps",
-      "An agent that can’t find your rules falls back on what it saw in training: other teams’ components, not yours.",
+      "So knowledge has to outlive the model",
+      "Write it once, somewhere you own, and point this year’s AI at it.",
+      "",
     ],
   ];
   return (
     <Slide section="Why now">
       <Body>
         <Title className="max-w-[960px]">
-          Agents became an everyday tool, and they now have a standard way to read context.
+          Teams now use several AI models, and the leader keeps changing.
         </Title>
-        <div className="absolute inset-x-0 bottom-0 grid grid-cols-[420px_1fr] items-end gap-16">
-          <div className="pb-5">
-            <p className="text-[136px] leading-[0.85] font-semibold tracking-[-0.05em] tabular-nums">
-              84%
-            </p>
-            <p className="mt-7 text-[20px] leading-[1.45] text-pretty">
-              of developers use or plan to use AI tools. Half of professional developers use them
-              every day.
-            </p>
-            <Source className="mt-3">
-              Stack Overflow Developer Survey 2025 (51% use them daily)
-            </Source>
-          </div>
+        <div className="absolute inset-x-0 bottom-0 grid grid-cols-[452px_1fr] items-end gap-16">
+          <figure>
+            <figcaption className="text-[15px] font-medium">
+              Share of enterprise AI model use
+            </figcaption>
+            <ShareShift />
+            <Source className="mt-2">Menlo Ventures, LLM market update, July 2025</Source>
+          </figure>
           <ul className="divide-y border-y">
-            {shifts.map(([head, body]) => (
-              <li key={head} className="py-[18px]">
-                <p className="text-[18.5px] font-medium">{head}</p>
-                <p className="mt-1 text-[16px] leading-[1.5] text-pretty text-muted">{body}</p>
+            {shifts.map(([head, body, source]) => (
+              <li key={head} className="py-4">
+                <p className="text-[18px] font-medium">{head}</p>
+                <p className="mt-1 text-[15.5px] leading-[1.5] text-pretty text-muted">{body}</p>
+                {source && <Source className="mt-1">{source}</Source>}
               </li>
             ))}
           </ul>
@@ -248,193 +181,424 @@ function WhyNow() {
   );
 }
 
-/* 5. Solution ------------------------------------------------------------ */
+/** A two-point slope chart. Direct labels carry identity, so there's no legend. */
+function ShareShift() {
+  const x0 = 140;
+  const x1 = 312;
+  const y = (v: number) => 236 - (v / 60) * 216;
+  const series = [
+    { name: "OpenAI", from: 50, to: 25, stroke: "stroke-neutral-400", fill: "fill-neutral-400" },
+    { name: "Anthropic", from: 12, to: 32, stroke: "stroke-ink", fill: "fill-ink" },
+  ];
+  return (
+    <svg viewBox="0 0 452 272" className="mt-3 w-full" role="img" aria-labelledby="share-desc">
+      <desc id="share-desc">
+        OpenAI fell from 50% of enterprise model use in 2023 to 25% in 2025. Anthropic rose from 12%
+        to 32%.
+      </desc>
+      <line x1={x0} x2={x0} y1={12} y2={244} className="stroke-line" />
+      <line x1={x1} x2={x1} y1={12} y2={244} className="stroke-line" />
+      {series.map((s) => (
+        <g key={s.name}>
+          <line
+            x1={x0}
+            y1={y(s.from)}
+            x2={x1}
+            y2={y(s.to)}
+            className={s.stroke}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          <circle cx={x0} cy={y(s.from)} r="5" className={s.fill} stroke="#fff" strokeWidth="2" />
+          <circle cx={x1} cy={y(s.to)} r="5" className={s.fill} stroke="#fff" strokeWidth="2" />
+          <text
+            x={x0 - 14}
+            y={y(s.from)}
+            textAnchor="end"
+            dominantBaseline="middle"
+            className="fill-ink text-[15px]"
+          >
+            {s.name} <tspan className="font-semibold">{s.from}%</tspan>
+          </text>
+          <text x={x1 + 14} y={y(s.to)} dominantBaseline="middle" className="fill-ink text-[15px]">
+            <tspan className="font-semibold">{s.to}%</tspan> {s.name}
+          </text>
+        </g>
+      ))}
+      <text x={x0} y={266} textAnchor="middle" className="fill-muted text-[13px]">
+        2023
+      </text>
+      <text x={x1} y={266} textAnchor="middle" className="fill-muted text-[13px]">
+        2025
+      </text>
+    </svg>
+  );
+}
+
+/* 4. Solution ------------------------------------------------------------ */
 
 function Solution() {
+  const jobs: [head: string, body: string, instead: string][] = [
+    [
+      "AI context",
+      "Claude, Codex, Cursor, or any tool that speaks MCP reads your plans, decisions, and rules.",
+      "prompt files in every AI tool",
+    ],
+    [
+      "Support answers",
+      "A support bot answers customers from the same pages your team already keeps.",
+      "Zendesk AI, at $1.50 an answer",
+    ],
+    [
+      "Docs and help center",
+      "Publish public docs, a help center, or an internal handbook from the notebook.",
+      "Mintlify or GitBook",
+    ],
+    [
+      "Design systems",
+      "Components, tokens, and usage rules, with live previews of the real thing.",
+      "zeroheight",
+    ],
+  ];
   return (
     <Slide section="Solution">
       <Body>
-        <Title className="max-w-[900px]">
-          Corpus: write the docs once. People and agents read the same source.
+        <Title className="max-w-[980px]">
+          Corpus: one notebook that every person, support bot, and AI tool reads.
         </Title>
-      </Body>
-      <div className="absolute inset-x-16 top-[240px] bottom-0 flex flex-col">
-        <div className="mb-3.5 grid grid-cols-[53.9%_1fr] px-1 text-[15.5px]">
-          <Dot tone="off">
-            <span className="font-medium">People</span>
-            <span className="text-muted">read the published page</span>
-          </Dot>
-          <Dot tone="good">
-            <span className="font-medium">Agents</span>
-            <span className="text-muted">get the same rules, word for word</span>
-          </Dot>
+        <Lead className="max-w-[900px]">
+          A context control plane for your company. Write it once, choose what’s public, and every
+          reader gets the same answer.
+        </Lead>
+        <div className="absolute inset-x-0 bottom-0">
+          <div className="flex h-[60px] items-center gap-3 rounded-xl bg-ink px-5 text-white">
+            <CorpusMark className="size-5" />
+            <span className="text-[17px] font-semibold">Corpus notebook</span>
+            <span className="text-[14.5px] text-neutral-400">
+              Markdown files you own, hosted or on your server
+            </span>
+          </div>
+          <ol className="grid grid-cols-4 gap-8">
+            {jobs.map(([head, body, instead]) => (
+              <li key={head}>
+                <span className="ml-5 block h-7 w-px bg-neutral-300" />
+                <div className="border-t pt-4">
+                  <p className="text-[18px] font-medium">{head}</p>
+                  <p className="mt-1.5 text-[15px] leading-[1.5] text-pretty text-muted">{body}</p>
+                  <p className="mt-3 text-[13.5px] leading-snug text-pretty">
+                    <span className="text-muted">Instead of </span>
+                    {instead}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
-        <Shot
-          src={solutionShot}
-          alt="Corpus split view: the Button page for people beside the Markdown an agent receives, with the Rules section highlighted on both sides"
-          className="min-h-0 flex-1 rounded-b-none"
-          imgClassName="h-full object-cover object-top"
-        />
-      </div>
+      </Body>
     </Slide>
   );
 }
 
-/* 6. How it works -------------------------------------------------------- */
+/* 5. How it works -------------------------------------------------------- */
 
 function HowItWorks() {
-  const steps: [string, string][] = [
-    [
-      "Point it at your repo",
-      "Component schemas, docs, and tokens stay as files in your git repo, on your server.",
-    ],
-    [
-      "Every reader, one source",
-      "People browse a site. Agents connect over MCP and ask for exactly the component they need.",
-    ],
-    [
-      "Gaps become drafts",
-      "When agents ask something the docs can’t answer, AI drafts the answer for you to review.",
-    ],
-  ];
   return (
     <Slide section="How it works">
       <Body>
-        <Title className="max-w-[920px]">
-          Docs stay in your repo. Corpus serves every reader and flags what’s missing.
+        <Title className="max-w-[1000px]">
+          Write once in the notebook. Publish it, and connect any AI in one line.
         </Title>
       </Body>
-      <Diagram />
-      <ol className="absolute inset-x-16 bottom-14 grid grid-cols-3 gap-10">
-        {steps.map(([head, body], i) => (
-          <li key={head} className="grid grid-cols-[28px_1fr] gap-1">
-            <span className="text-[15px] font-medium text-faint tabular-nums">{i + 1}</span>
-            <div>
-              <p className="text-[16px] font-medium">{head}</p>
-              <p className="mt-1 text-[14.5px] leading-[1.5] text-pretty text-muted">{body}</p>
-            </div>
-          </li>
-        ))}
+      <Shot
+        src={writeShot}
+        alt="A handbook page open for editing in Corpus, with a Rich and Markdown switch and the page tree beside it"
+        className="absolute top-[236px] left-16 h-[428px] w-[672px]"
+        imgClassName="h-full object-cover object-top-left"
+      />
+      <ol className="absolute top-[236px] right-16 bottom-14 w-[432px] divide-y border-y">
+        <Step n={1} head="Write">
+          Pages are plain Markdown files you own, kept in folders. Edit them as rich text or as
+          Markdown.
+        </Step>
+        <Step n={2} head="Publish and connect">
+          Publish a docs site or help center. Any MCP client connects with one line:
+          <code className="mt-2.5 block rounded-lg border bg-subtle px-3 py-2 text-[12.5px] leading-[1.6] text-ink">
+            claude mcp add --transport http acme
+            <br />
+            https://docs.acme.com/mcp
+          </code>
+        </Step>
+        <Step n={3} head="Fill the gaps">
+          When people or agents ask something the notebook can’t answer, AI drafts the page for you
+          to review, using the model you pick.
+        </Step>
       </ol>
     </Slide>
   );
 }
 
-function Diagram() {
-  // A 1152 x 300 canvas under the title. Boxes are HTML, connectors are one SVG.
-  const line = "stroke-neutral-300";
+function Step({ n, head, children }: { n: number; head: string; children: ReactNode }) {
   return (
-    <div className="absolute top-[250px] left-16 h-[300px] w-[1152px]">
-      <svg viewBox="0 0 1152 300" className="absolute inset-0 overflow-visible" aria-hidden>
-        <defs>
-          <marker
-            id="arrow"
-            viewBox="0 0 8 8"
-            refX="7"
-            refY="4"
-            markerWidth="8"
-            markerHeight="8"
-            orient="auto"
-          >
-            <path d="M0 0 8 4 0 8z" className="fill-neutral-400" />
-          </marker>
-          <marker
-            id="arrow-good"
-            viewBox="0 0 8 8"
-            refX="7"
-            refY="4"
-            markerWidth="8"
-            markerHeight="8"
-            orient="auto"
-          >
-            <path d="M0 0 8 4 0 8z" className="fill-good" />
-          </marker>
-        </defs>
-        {/* repo to Corpus */}
-        <path
-          d="M338 104 H 418"
-          className={line}
-          strokeWidth="1.5"
-          fill="none"
-          markerEnd="url(#arrow)"
-        />
-        {/* Corpus to people and agents */}
-        <path
-          d="M606 104 C 650 104, 650 50, 700 50"
-          className={line}
-          strokeWidth="1.5"
-          fill="none"
-          markerEnd="url(#arrow)"
-        />
-        <path
-          d="M606 104 C 650 104, 650 166, 700 166"
-          className={line}
-          strokeWidth="1.5"
-          fill="none"
-          markerEnd="url(#arrow)"
-        />
-        {/* the loop: agent questions come back to the repo as drafts */}
-        <path
-          d="M926 222 V 268 Q 926 282 912 282 H 183 Q 169 282 169 268 V 166"
-          className="stroke-good"
-          strokeWidth="1.5"
-          strokeDasharray="5 5"
-          fill="none"
-          markerEnd="url(#arrow-good)"
-        />
-      </svg>
-
-      {/* Your repo */}
-      <div className="absolute top-0 left-0 w-[338px] rounded-xl border bg-white">
-        <div className="flex items-baseline justify-between border-b px-4 py-2.5">
-          <span className="text-[14.5px] font-medium">Your git repo</span>
-          <span className="text-[12.5px] text-muted">files you own</span>
-        </div>
-        <ul className="grid gap-1 px-4 py-3 font-mono text-[12.5px] leading-[1.55]">
-          <li>components/button/button.component.yml</li>
-          <li>components/button/button.twig</li>
-          <li>docs/components/button.mdx</li>
-          <li>tokens/charged-ui.tokens.json</li>
-        </ul>
+    <li className="grid grid-cols-[26px_1fr] py-4">
+      <span className="text-[15px] font-medium text-faint tabular-nums">{n}</span>
+      <div>
+        <p className="text-[17px] font-medium">{head}</p>
+        <div className="mt-1 text-[15px] leading-[1.5] text-pretty text-muted">{children}</div>
       </div>
-
-      {/* Corpus */}
-      <div className="absolute top-[52px] left-[418px] flex h-[104px] w-[188px] flex-col items-center justify-center rounded-xl bg-ink text-white">
-        <CorpusMark className="size-6" />
-        <p className="mt-2 text-[16px] font-semibold">Corpus</p>
-        <p className="text-[12.5px] text-neutral-400">on your server</p>
-      </div>
-
-      {/* People */}
-      <div className="absolute top-0 left-[700px] w-[452px] rounded-xl border bg-white px-4 py-3">
-        <Dot tone="off" className="text-[14.5px] font-medium">
-          People
-        </Dot>
-        <p className="mt-1 text-[14px] text-muted">
-          A docs site with live previews:{" "}
-          <code className="text-[12.5px] text-ink">docs.charged.dev</code>
-        </p>
-      </div>
-
-      {/* Agents */}
-      <div className="absolute top-[116px] left-[700px] w-[452px] rounded-xl border border-emerald-200 bg-white px-4 py-3">
-        <Dot tone="good" className="text-[14.5px] font-medium">
-          Agents
-        </Dot>
-        <p className="mt-1 text-[14px] text-muted">Claude Code, Cursor, and Codex over MCP</p>
-        <code className="mt-1.5 block text-[12.5px]">get_component {'{ name: "button" }'}</code>
-      </div>
-
-      {/* The loop label, sitting on the dashed line */}
-      <div className="absolute top-[266px] left-[338px] flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-1.5 text-[13.5px] whitespace-nowrap">
-        <span className="font-medium">Questions the docs couldn’t answer</span>
-        <span className="text-muted">come back as AI drafts to review</span>
-      </div>
-    </div>
+    </li>
   );
 }
 
-/* 7. Traction ------------------------------------------------------------ */
+/* 6. Competition --------------------------------------------------------- */
+
+type Has = "yes" | "part" | "planned" | "no";
+
+const HAS_LABEL: Record<Has, string> = {
+  yes: "Yes",
+  part: "Partly",
+  planned: "Planned",
+  no: "No",
+};
+
+function Mark({ has }: { has: Has }) {
+  return (
+    <span
+      className="inline-grid size-[12px] place-items-center align-middle"
+      title={HAS_LABEL[has]}
+    >
+      {has === "yes" && <span className="size-[11px] rounded-full bg-ink" />}
+      {has === "part" && (
+        <span
+          className="size-[11px] rounded-full border-[1.5px] border-ink"
+          style={{ background: "linear-gradient(90deg, var(--color-ink) 50%, transparent 50%)" }}
+        />
+      )}
+      {has === "planned" && (
+        <span className="size-[11px] rounded-full border-[1.5px] border-neutral-400" />
+      )}
+      {has === "no" && <span className="h-px w-2.5 bg-neutral-300" />}
+      <span className="sr-only">{HAS_LABEL[has]}</span>
+    </span>
+  );
+}
+
+function Competition() {
+  const cols = [
+    "Docs site",
+    "Notes and plans",
+    "Support answers",
+    "Design system",
+    "Any AI can read it",
+    "Self-host",
+  ];
+  const rows: { name: string; has: Has[]; price: string; us?: boolean }[] = [
+    {
+      name: "Mintlify",
+      has: ["yes", "no", "part", "no", "yes", "part"],
+      price: "$450 a month",
+    },
+    {
+      name: "GitBook",
+      has: ["yes", "yes", "part", "no", "yes", "no"],
+      price: "$65 a site, plus $12 a user, monthly",
+    },
+    {
+      name: "Zendesk",
+      has: ["yes", "no", "yes", "no", "part", "no"],
+      price: "$55 an agent a month, plus $1.50 an AI answer",
+    },
+    {
+      name: "Obsidian",
+      has: ["part", "yes", "no", "no", "part", "yes"],
+      price: "Free app. Sync $4 a user, Publish $8 a site, monthly",
+    },
+    {
+      name: "zeroheight",
+      has: ["yes", "no", "no", "yes", "part", "no"],
+      price: "$49 an editor a month",
+    },
+    {
+      name: "Corpus",
+      has: ["yes", "yes", "planned", "yes", "yes", "yes"],
+      price: "$79 to $99, once",
+      us: true,
+    },
+  ];
+  return (
+    <Slide section="Competition">
+      <Body>
+        <Title className="max-w-[980px]">
+          Teams pay for five tools, every month, to do what one notebook can.
+        </Title>
+        <table className="mt-9 w-full table-fixed border-collapse text-left text-[15px]">
+          <colgroup>
+            <col className="w-[148px]" />
+            {cols.map((c) => (
+              <col key={c} className="w-[92px]" />
+            ))}
+            <col />
+          </colgroup>
+          <thead>
+            <tr className="border-b align-bottom text-[13px] leading-snug text-muted">
+              <th className="pb-2.5 font-normal" />
+              {cols.map((c) => (
+                <th key={c} className="px-1 pb-2.5 text-center font-normal">
+                  {c}
+                </th>
+              ))}
+              <th className="pb-2.5 pl-6 font-normal">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.name} className={cn("border-b", r.us && "border-b-0 bg-subtle")}>
+                <td className={cn("py-[12px]", r.us ? "pl-3 font-semibold" : "font-medium")}>
+                  {r.us ? (
+                    <span className="inline-flex items-center gap-2">
+                      <CorpusMark className="size-4" />
+                      {r.name}
+                    </span>
+                  ) : (
+                    r.name
+                  )}
+                </td>
+                {r.has.map((h, i) => (
+                  <td key={cols[i]} className="text-center">
+                    <Mark has={h} />
+                  </td>
+                ))}
+                <td
+                  className={cn(
+                    "pl-6 text-[14px] leading-snug",
+                    r.us ? "font-semibold" : "text-muted",
+                  )}
+                >
+                  {r.price}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="absolute inset-x-0 bottom-0">
+          <div className="flex gap-6 text-[13px] text-muted">
+            {(["yes", "part", "planned", "no"] as Has[]).map((h) => (
+              <span key={h} className="inline-flex items-center gap-2">
+                <Mark has={h} />
+                {HAS_LABEL[h]}
+              </span>
+            ))}
+          </div>
+          <Source className="mt-3 max-w-[1100px] text-pretty">
+            Vendor pricing pages and docs, November 2026, billed yearly where both are listed.
+            Mintlify self-hosting is Enterprise only. Zendesk AI answers are $1.50 each committed or
+            $2 pay as you go, and its MCP server is in early access. Obsidian is free for work; its
+            AI access comes from community plugins. zeroheight caps agent access at 500 calls a
+            month. Corpus pricing is planned, and support answers aren’t built yet.
+          </Source>
+        </div>
+      </Body>
+    </Slide>
+  );
+}
+
+/* 7. Business model ------------------------------------------------------ */
+
+function BusinessModel() {
+  const plans: [name: string, plan: string, total: number][] = [
+    ["Mintlify", "Pro", 16200],
+    ["GitBook", "Essential, one site", 2340],
+    ["Zendesk", "Suite Team, one agent", 1980],
+    ["zeroheight", "Starter, one editor", 1764],
+    ["Obsidian", "Sync and Publish, one person", 432],
+    ["Corpus", "Lifetime license", 99],
+  ];
+  const max = plans[0][2];
+  const terms: [string, ReactNode][] = [
+    ["Price", "$79 to $99 once, for a lifetime license. The demand test picks the price."],
+    [
+      "Hosting",
+      <>
+        Run it on your own server, or we host it for <Fill value={FACTS.hostedPrice} todo="price" />
+        .
+      </>,
+    ],
+    ["AI costs", "Each team brings its own AI key and model, so model bills never land on Corpus."],
+    [
+      "Who buys",
+      <>
+        Small teams priced out of Mintlify and Zendesk: startups, agencies, schools, and nonprofits.{" "}
+        <Fill value={FACTS.market} todo="how many" />
+      </>,
+    ],
+    [
+      "Reach",
+      "X first, then Notion imports and WordPress and Drupal plugins, where millions of sites already live.",
+    ],
+    ["Goal", "Bootstrapped and profitable. Not raising venture capital."],
+  ];
+  return (
+    <Slide section="Business model">
+      <Body>
+        <Title className="max-w-[960px]">
+          Pay once, own it for life. Each sale is nearly all margin.
+        </Title>
+        <div className="mt-10 grid grid-cols-[536px_1fr] gap-14">
+          <figure>
+            <figcaption className="text-[15px] font-medium">
+              Three years of the smallest paid plan, at list price
+            </figcaption>
+            <ul className="mt-3 border-t">
+              {plans.map(([name, plan, total]) => {
+                const us = name === "Corpus";
+                return (
+                  <li key={name} className="grid grid-cols-[176px_1fr] items-center gap-3 py-[7px]">
+                    <div className="leading-tight">
+                      <p className={cn("text-[15px]", us ? "font-semibold" : "font-medium")}>
+                        {name}
+                      </p>
+                      <p className="text-[12.5px] text-muted">{plan}</p>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className={cn("h-3 rounded-r-[4px]", us ? "bg-good" : "bg-neutral-300")}
+                        style={{
+                          width: `max(3px, calc((100% - 92px) * ${total / max}))`,
+                        }}
+                      />
+                      <span
+                        className={cn(
+                          "text-[14px] whitespace-nowrap tabular-nums",
+                          us ? "font-semibold" : "text-muted",
+                        )}
+                      >
+                        ${total.toLocaleString("en-US")}
+                        {us && " once"}
+                      </span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            <Source className="mt-3 text-pretty">
+              Yearly list prices from each pricing page, November 2026, before extra users, agents,
+              sites, or AI answers.
+            </Source>
+          </figure>
+          <dl className="divide-y border-y text-[15px] leading-[1.45]">
+            {terms.map(([k, v]) => (
+              <div key={k} className="grid grid-cols-[96px_1fr] gap-4 py-[9px]">
+                <dt className="font-medium">{k}</dt>
+                <dd className="text-pretty text-muted">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </Body>
+    </Slide>
+  );
+}
+
+/* 8. Traction ------------------------------------------------------------ */
 
 function Traction() {
   const groups: { tone: "good" | "warn" | "off"; label: string; items: ReactNode[] }[] = [
@@ -442,37 +606,43 @@ function Traction() {
       tone: "good",
       label: "Built",
       items: [
-        "Ten screens: components, tokens, agents, editor, and more",
-        "Agent output from the same source: Markdown, JSON, llms.txt",
-        "An 8-phase build plan, each phase with a pass or fail check",
+        "Notebook pages in folders, edited as rich text or Markdown",
+        "Docs and design system projects in one workspace",
+        "Every page served to AI as MCP, llms.txt, and Markdown",
+        "Unanswered questions become AI drafts to review",
       ],
     },
-    { tone: "warn", label: "Next", items: ["Phase 1: read a real design system repo from disk"] },
-    { tone: "off", label: "Not yet", items: ["User research. This grant pays for it."] },
+    { tone: "warn", label: "Next", items: ["Read a real folder of Markdown from disk"] },
+    {
+      tone: "off",
+      label: "Not yet",
+      items: ["Support answers, hosting, and user research. This grant pays for the research."],
+    },
   ];
   return (
     <Slide section="Traction">
       <Body>
-        <Title>What’s built: the whole product, as a clickable prototype.</Title>
+        <Title>What’s built: a clickable prototype of the whole notebook.</Title>
         <div className="mt-9 grid grid-cols-[664px_1fr] gap-12">
           <figure>
             <Shot
-              src={tractionShot}
-              alt="The Corpus editor with the writing assistant, which has drafted an answer to a question agents asked 14 times"
+              src={projectsShot}
+              alt="The Corpus projects screen: a team handbook and a design system side by side, with agent requests and unanswered questions"
             />
             <figcaption className="mt-3 text-[13.5px] leading-snug text-pretty text-muted">
-              The editor drafting an answer agents asked for 14 times. Sample data from Charged UI;
-              AI, git, and MCP calls are simulated until their build phases land.
+              A team handbook and a design system in one workspace, with the questions agents
+              couldn’t answer. Sample data; AI, git, and MCP calls are simulated until their build
+              phases land.
             </figcaption>
           </figure>
           <div className="flex flex-col">
-            <div className="grid gap-5">
+            <div className="grid gap-4">
               {groups.map((g) => (
                 <div key={g.label}>
                   <Dot tone={g.tone} className="text-[15px] font-medium">
                     {g.label}
                   </Dot>
-                  <ul className="mt-1.5 grid gap-1.5 pl-4 text-[15px] leading-[1.4]">
+                  <ul className="mt-1.5 grid gap-1.5 pl-4 text-[14.5px] leading-[1.4]">
                     {g.items.map((it, i) => (
                       <li key={i}>{it}</li>
                     ))}
@@ -508,157 +678,58 @@ function Traction() {
   );
 }
 
-/* 8. Differentiation ----------------------------------------------------- */
+/* 9. Team ---------------------------------------------------------------- */
 
-type Cell = [tone: "good" | "warn" | "off", text: string];
-
-function Differentiation() {
-  const rows: { name: string; ds: Cell; home: Cell; agents: Cell; price: string; us?: boolean }[] =
+function Team() {
+  const record: [string, ReactNode][] = [
     [
-      {
-        name: "Mintlify",
-        ds: ["off", "No, general product docs"],
-        home: ["off", "Their cloud"],
-        agents: ["good", "Yes"],
-        price: "Free, or $450/mo for Pro",
-      },
-      {
-        name: "zeroheight",
-        ds: ["good", "Yes"],
-        home: ["off", "Their cloud"],
-        agents: ["good", "Yes, 500 calls a month"],
-        price: "Free for 1 editor, then $49/editor/mo",
-      },
-      {
-        name: "Supernova",
-        ds: ["good", "Yes"],
-        home: ["off", "Their cloud"],
-        agents: ["good", "Yes"],
-        price: "Free tier, or $399/mo for Pro",
-      },
-      {
-        name: "Storybook",
-        ds: ["good", "Yes, for developers"],
-        home: ["good", "Your repo"],
-        agents: ["warn", "Preview, React only"],
-        price: "Free, open source",
-      },
-      {
-        name: "Corpus",
-        ds: ["good", "Yes, Drupal first"],
-        home: ["good", "Your repo, your server"],
-        agents: ["good", "Yes, built in"],
-        price: "$79 to $99, once",
-        us: true,
-      },
-    ];
-  const cell = ([tone, text]: Cell, us?: boolean) => (
-    <Dot tone={tone} className={us ? "font-medium" : undefined}>
-      {text}
-    </Dot>
-  );
-  return (
-    <Slide section="Differentiation">
-      <Body>
-        <Title className="max-w-[960px]">
-          The design system docs you own: your repo, your server, one price.
-        </Title>
-        <Lead className="max-w-[900px]">
-          Every other option with agent access keeps your docs in its cloud, or only reads React.
-        </Lead>
-        <table className="mt-9 w-full table-fixed border-collapse text-left text-[15px]">
-          <colgroup>
-            <col className="w-[150px]" />
-            <col className="w-[270px]" />
-            <col className="w-[210px]" />
-            <col className="w-[220px]" />
-            <col />
-          </colgroup>
-          <thead>
-            <tr className="border-b text-[13.5px] text-muted">
-              <th className="pb-2.5 font-normal" />
-              <th className="pb-2.5 font-normal">Built for design systems</th>
-              <th className="pb-2.5 font-normal">Where your docs live</th>
-              <th className="pb-2.5 font-normal">Agents can read it</th>
-              <th className="pb-2.5 font-normal">Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.name} className={cn("border-b", r.us && "border-b-0 bg-subtle")}>
-                <td className={cn("py-[13px]", r.us ? "pl-3 font-semibold" : "font-medium")}>
-                  {r.us ? (
-                    <span className="inline-flex items-center gap-2">
-                      <CorpusMark className="size-4" />
-                      {r.name}
-                    </span>
-                  ) : (
-                    r.name
-                  )}
-                </td>
-                <td>{cell(r.ds, r.us)}</td>
-                <td>{cell(r.home, r.us)}</td>
-                <td>{cell(r.agents, r.us)}</td>
-                <td className={r.us ? "font-medium" : "text-muted"}>{r.price}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <Source className="absolute bottom-0 max-w-[1080px] text-pretty">
-          From each vendor’s pricing page and docs, November 2026. Prices billed yearly where both
-          are listed. Mintlify Pro is $540 a month billed monthly, and self-hosting is Enterprise
-          only. zeroheight Starter is $59 billed monthly, and its Free and Starter plans cap agent
-          access at 500 calls a month. Storybook’s agent docs are in preview and React only. Corpus
-          pricing is planned and gets tested on the landing page.
-        </Source>
-      </Body>
-    </Slide>
-  );
-}
-
-/* 9. Business model ------------------------------------------------------ */
-
-function BusinessModel() {
-  const terms: [string, ReactNode][] = [
-    ["Price", "$79 to $99 for a one-time license per site. The landing page tests both prices."],
-    [
-      "Cost to serve",
-      "Close to zero. Customers run Corpus on their own server with their own AI key, so there’s no hosting or AI bill per customer.",
+      "Founder, Charged Labs",
+      "Developer tools for Drupal and WordPress, including Charged UI, the design system in the prototype.",
     ],
     [
-      "Who buys",
-      <>
-        Teams that keep a design system for Drupal, WordPress, or web components: agencies,
-        universities, and product companies. <Fill value={FACTS.market} todo="how many teams" />
-      </>,
+      "Staff-level frontend engineer",
+      "Flipgrid (acquired by Microsoft), OurFamilyWizard, and Parsley Health.",
     ],
-    ["Reach", "The Drupal and WordPress communities I’ve sold into for years, then X."],
-    ["Room to grow", "Web components (Lit) next, then React Native and WordPress blocks."],
-    ["Goal", "Bootstrapped and profitable. Not raising venture capital."],
+    [
+      "Elite author on ThemeForest",
+      "More than $75,000 in lifetime sales of one-time-priced products, Envato’s bar for Elite. Corpus uses the same model.",
+    ],
+    [
+      "15 years in the Drupal community",
+      "People I already know how to reach when the Drupal and WordPress plugins ship.",
+    ],
   ];
   return (
-    <Slide section="Business model">
+    <Slide section="Team">
       <Body>
-        <Title>Pay once, run it yourself. Each sale is nearly all margin.</Title>
-        <div className="mt-10 grid grid-cols-[1fr_300px] gap-14">
-          <dl className="divide-y border-y text-[16px] leading-[1.45]">
-            {terms.map(([k, v]) => (
-              <div key={k} className="grid grid-cols-[150px_1fr] gap-6 py-3">
-                <dt className="font-medium">{k}</dt>
-                <dd className="text-pretty text-muted">{v}</dd>
-              </div>
-            ))}
-          </dl>
-          <div className="self-start rounded-xl border p-6">
-            <p className="text-[14px] text-muted">I’ve run this model before</p>
-            <p className="mt-3 text-[44px] leading-none font-semibold tracking-[-0.03em] tabular-nums">
-              $75,000+
+        <Title>Solo founder. I’ve built docs, design systems, and products people pay for.</Title>
+        <div className="mt-12 grid grid-cols-[372px_1fr] gap-16">
+          <div>
+            <div className="grid size-[72px] place-items-center rounded-full bg-neutral-100 text-[24px] font-medium text-neutral-600">
+              MK
+            </div>
+            <p className="mt-5 text-[28px] font-semibold tracking-[-0.02em]">Mitch Kostelecky</p>
+            <p className="mt-1 text-[17px] text-muted">
+              Founder. Product, design, and engineering.
             </p>
-            <p className="mt-3 text-[15px] leading-[1.45] text-pretty">
-              in lifetime sales of one-time-priced products on ThemeForest, the bar for Envato’s
-              Elite authors.
-            </p>
+            <dl className="mt-7 grid gap-2.5 text-[15px] leading-snug">
+              <Fact k="USC">
+                IYA graduate student, MS in Integrated Design, Business and Technology
+              </Fact>
+              <Fact k="Enrolled">Fall 2026 and Spring 2027</Fact>
+              <Fact k="Email">
+                <Fill value={FACTS.email} todo="email" />
+              </Fact>
+            </dl>
           </div>
+          <ul className="divide-y border-y">
+            {record.map(([head, body]) => (
+              <li key={head} className="py-[15px]">
+                <p className="text-[18px] font-medium">{head}</p>
+                <p className="mt-1 text-[15.5px] leading-[1.5] text-pretty text-muted">{body}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </Body>
     </Slide>
@@ -672,16 +743,16 @@ function Proceeds() {
     [
       "$2,500",
       "X ads as a demand test",
-      "Posts aimed at design system, frontend, and developer tools audiences, sending people to the corpus.app waitlist. Half the visitors see $79, half see $99.",
+      "Four ad sets, one per job: AI context, support answers, docs, and design systems. Each sends people to the corpus.app waitlist, where half see $79 and half see $99.",
     ],
     [
       "$500",
       "Ten paid user interviews",
-      "30 minutes each, $50 per person, with design system maintainers from the waitlist.",
+      "30 minutes each, $50 per person, with signups from the job that draws the most interest.",
     ],
   ];
   const report = [
-    "Cost per signup",
+    "Cost per signup, by job",
     "Waitlist size",
     "Landing page conversion rate",
     "Share willing to pay $79, and $99",
@@ -690,10 +761,10 @@ function Proceeds() {
   return (
     <Slide section="Use of proceeds">
       <Body>
-        <Title className="max-w-[920px]">
-          $3,000 to learn whether teams will pay, before I build the rest.
+        <Title className="max-w-[960px]">
+          $3,000 to learn who will pay, and for which job, before I build the rest.
         </Title>
-        <div className="mt-12 grid grid-cols-[1fr_360px] gap-16">
+        <div className="mt-11 grid grid-cols-[1fr_360px] gap-16">
           <div>
             <div className="flex h-3 gap-[3px] overflow-hidden rounded-full">
               <span className="w-5/6 rounded-l-full bg-ink" />
@@ -751,35 +822,35 @@ function Milestones() {
     {
       when: "Nov 2026",
       head: "Clickable prototype",
-      body: "Every screen, sample data, and the 8-phase build plan.",
+      body: "Notebook, docs, and design system projects on sample data, plus an 8-phase build plan.",
       done: true,
     },
     {
       when: "Dec 2026",
       head: "Demand test",
-      body: "Ads, waitlist, and interviews. Corpus reads a real repo from disk.",
+      body: "Ads, waitlist, and interviews. Corpus reads a real folder of Markdown.",
     },
     {
       when: "Jan 2027",
-      head: "Agents connect",
-      body: "Claude Code and Cursor get Charged UI answers over MCP.",
+      head: "Any AI connects",
+      body: "Claude, Codex, Cursor, and other MCP clients read real notebooks.",
     },
     {
       when: "Feb 2027",
       head: "Private beta",
-      body: "Waitlist teams on their own repos. AI drafts answers, the editor commits to git.",
+      body: "Waitlist teams, hosted or on their own servers. AI drafts with the model each team picks.",
     },
     {
       when: "Spring 2027",
       head: "Launch",
-      body: "One-container release, first paid licenses, and the IYA Venture Showcase.",
+      body: "Lifetime licenses on sale, support answers, and the IYA Venture Showcase.",
     },
   ];
   return (
     <Slide section="Milestones">
       <Body>
-        <Title>By the Venture Showcase: a working MVP in real teams’ hands.</Title>
-        <div className="relative mt-20">
+        <Title>By the Venture Showcase: a working notebook in real teams’ hands.</Title>
+        <div className="relative mt-16">
           <span className="absolute top-[5px] right-0 left-0 h-px bg-line" />
           <ol className="relative grid grid-cols-5 gap-7">
             {steps.map((s) => (
@@ -800,6 +871,9 @@ function Milestones() {
               </li>
             ))}
           </ol>
+          <p className="mt-6 text-[14.5px] text-muted">
+            After the Showcase: imports from Notion, and plugins for WordPress and Drupal.
+          </p>
         </div>
         <div className="absolute inset-x-0 bottom-0 border-t pt-5">
           <p className="text-[15px] font-medium">Targets for the Showcase</p>
@@ -827,12 +901,14 @@ function Close() {
     <Slide>
       <CorpusLogo className="absolute top-14 left-16 h-[30px]" />
       <div className="absolute top-[176px] left-16 w-[1040px]">
-        <h2 className="text-[58px] leading-[1.05] font-semibold tracking-[-0.035em] text-balance">
-          Documentation your agents actually follow.
+        <h2 className="text-[56px] leading-[1.05] font-semibold tracking-[-0.035em]">
+          Write it once. Own it for life.
+          <br />
+          Use it with any AI.
         </h2>
-        <p className="mt-6 max-w-[620px] text-[21px] leading-[1.45] text-pretty text-muted">
-          Self-hosted design system docs for people and coding agents. Pay once, and the docs stay
-          yours.
+        <p className="mt-6 max-w-[660px] text-[20px] leading-[1.45] text-pretty text-muted">
+          One notebook for your docs, help center, AI context, and design system. Hosted or
+          self-hosted, for a one-time price.
         </p>
       </div>
       <div className="absolute inset-x-16 bottom-14 grid grid-cols-[1fr_440px] gap-16">
@@ -845,7 +921,7 @@ function Close() {
             </li>
             <li className="py-3">
               <span className="font-medium">A mentor</span>
-              <span className="text-muted"> who has taken a developer tool to market</span>
+              <span className="text-muted"> who has sold software to small teams</span>
             </li>
           </ul>
         </div>
@@ -871,14 +947,14 @@ function Close() {
 
 export const SLIDES = [
   Cover,
-  Team,
   Problem,
   WhyNow,
   Solution,
   HowItWorks,
-  Traction,
-  Differentiation,
+  Competition,
   BusinessModel,
+  Traction,
+  Team,
   Proceeds,
   Milestones,
   Close,

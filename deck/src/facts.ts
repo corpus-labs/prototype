@@ -27,4 +27,6 @@ export const FACTS = {
   },
   /** A sourced number for how many teams fit the first market. */
   market: null as string | null,
+  /** What the hosted plan costs, like "$8 a month" or "included the first year". */
+  hostedPrice: null as string | null,
 };
