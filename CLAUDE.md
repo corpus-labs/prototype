@@ -6,7 +6,7 @@ Corpus is one notebook for what a company knows, readable by any AI. The idea in
 
 It does four jobs. Design systems are one of them, not the whole product:
 
-- **AI context.** Claude, Codex, Cursor, or any MCP client reads the team's plans, decisions, and rules over MCP, llms.txt, and Markdown URLs (any page plus `.md`).
+- **AI context.** Claude, Codex, Cursor, or any MCP client reads the team's plans, decisions, and rules over MCP, llms.txt, and Markdown URLs (any page plus `.md`). Planned: one-click plugins for each harness that also save notes back as drafts a person approves (decision 6 in `0001-knowledge-notebook.md`).
 - **Support answers.** A support bot answers customers from the help center's pages, links the page it used, and says it doesn't know instead of guessing.
 - **Docs and help center.** Public docs, a help center, or an internal handbook, published as a site.
 - **Design systems.** Component pages with live previews, usage rules, do and don't examples, props, and tokens.

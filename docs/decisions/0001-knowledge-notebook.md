@@ -51,12 +51,23 @@ It does four jobs, and design systems are one of them:
 
 **Revisit if** customers phrase questions so differently from the pages that real answers get missed. Then add embeddings, as decision 3 in `0000-foundations.md` already allows.
 
+## 6. Plugins for AI harnesses, both ways
+
+**Decision.** This is the planned direction, not built yet. Corpus ships plugins for AI harnesses (Claude, Codex, Cursor, Z.ai, DeepSeek, Gemini CLI, and others) that install in one click. They recall from Corpus through the read-only tools in `0000-foundations.md`, decision 4, and they can also save: a saved note lands as a draft on the page it belongs to, and a person approves it before agents or readers see it. Saving needs a per-person token. The public MCP endpoint stays read-only.
+
+**Why.** Shared memory across tools is the point of owning the knowledge: what one tool learns, every tool can recall, whichever model the team uses next. One-click plugins reach teammates who never open a terminal or edit a config file. Few knowledge tools ship harness plugins yet, so it's an early place to stand out.
+
+**Revisit if** reviewing saved notes becomes a bottleneck, or harnesses converge on one plugin format that makes per-harness plugins unnecessary.
+
+Open: which harness gets the first plugin, how a save picks its page, and how saves show up in `.corpus/events.jsonl`.
+
 ## In the prototype
 
 - A third sample project, **Customer help**, keeps its pages in `fixtures/help`. Its overview has the support bot, simulated in the browser (`src/lib/support.ts`).
 - Docs and help center pages have the People, Split, and Agents reader.
 - The Agents screen shows setup for Codex and any MCP client. AI settings add Z.ai and DeepSeek.
 - General settings show where Corpus runs. Hosting isn't built.
+- `#plugins` shows the plugins for each AI tool, a conversation where one tool saves a note and another recalls it, and the notes agents saved this week waiting for review. Installing and reviewing show a toast.
 - `#site-help` shows the help center as customers would see it once published: a home page with search, articles by topic, and the support bot, and article pages with a sidebar, "Copy page", and "On this page". The docs project's overview links to it with "View site". Publishing itself isn't built.
 
 All of it is sample data and goes away with the rest in Phase 2.
