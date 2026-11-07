@@ -93,7 +93,7 @@ function Hero() {
             src={heroShot}
             width={2560}
             height={1450}
-            address="corpus.charged.dev"
+            address="corpus.app"
             alt="Corpus with three projects side by side: the Charged UI design system, a web team handbook, and a customer help center, each showing questions asked this week and the ones with no answer"
           />
           <Callout className="top-[60%] -left-6">
@@ -324,7 +324,7 @@ function Writing() {
           src={editorShot}
           width={2560}
           height={1600}
-          address="corpus.charged.dev"
+          address="corpus.app"
           alt="Editing a handbook page in Corpus: a formatting toolbar above the page, a selection menu over bold text, and a to-do list with one item checked"
           className="mt-12"
         />
@@ -357,7 +357,7 @@ function Publishing() {
           src={siteShot}
           width={2560}
           height={1600}
-          address="help.charged.dev"
+          address="charged-help.corpus.app"
           alt="A published help center for Charged Labs: a search box, articles grouped by topic, and a support bot that answers from the same pages"
           className="mt-12"
         />
@@ -495,13 +495,15 @@ function AnyAI() {
           </figcaption>
           <div className="grid gap-5 p-5 font-mono text-[13px] leading-[1.7]">
             <Command tool="Claude Code">
-              claude mcp add --transport http acme https://docs.acme.com/mcp
+              claude mcp add --transport http charged-help https://charged-help.corpus.app/mcp
             </Command>
-            <Command tool="Codex">codex mcp add acme --url https://docs.acme.com/mcp</Command>
+            <Command tool="Codex">
+              codex mcp add charged-help --url https://charged-help.corpus.app/mcp
+            </Command>
             <Command tool="Anything else">
-              GET https://docs.acme.com/llms.txt
+              GET https://charged-help.corpus.app/llms.txt
               <br />
-              GET https://docs.acme.com/billing/refunds.md
+              GET https://charged-help.corpus.app/billing/refunds.md
             </Command>
           </div>
         </figure>

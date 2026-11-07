@@ -46,11 +46,11 @@ export type ComponentDoc = {
 export const workspace = {
   name: "Charged UI",
   description: "Component library for Drupal sites, shipped as single directory components.",
-  site: "docs.charged.dev",
+  site: "charged-ui.corpus.app",
   repo: "charged-labs/charged-ui",
   branch: "main",
-  mcp: "https://docs.charged.dev/mcp",
-  llms: "https://docs.charged.dev/llms.txt",
+  mcp: "https://charged-ui.corpus.app/mcp",
+  llms: "https://charged-ui.corpus.app/llms.txt",
 };
 
 export const components: ComponentDoc[] = [
@@ -1264,7 +1264,7 @@ export const handbook: DocsProject = {
   kind: "docs",
   name: "Web team handbook",
   description: "How the web team builds, ships, and supports campus sites.",
-  site: "handbook.charged.dev",
+  site: "charged-handbook.corpus.app",
   repo: "charged-labs/handbook",
   requests: 486,
   updated: "Yesterday",
@@ -1296,7 +1296,7 @@ export const helpCenter: DocsProject = {
   name: "Customer help",
   description:
     "Answers for Charged Labs customers. The help site and the support bot read the same pages.",
-  site: "help.charged.dev",
+  site: "charged-help.corpus.app",
   repo: "charged-labs/help",
   requests: 386,
   updated: "Today",
