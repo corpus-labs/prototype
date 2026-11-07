@@ -5,6 +5,7 @@ import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title, To
 import coverShot from "./assets/shots/cover-notebook.png";
 import splitShot from "./assets/shots/how-split.png";
 import projectsShot from "./assets/shots/traction-projects.png";
+import portrait from "./assets/portrait.jpg";
 
 /* Shared pieces --------------------------------------------------------- */
 
@@ -707,9 +708,11 @@ function Team() {
         <Title>Solo founder. I’ve built docs, design systems, and products people pay for.</Title>
         <div className="mt-12 grid grid-cols-[372px_1fr] gap-16">
           <div>
-            <div className="grid size-[72px] place-items-center rounded-full bg-neutral-100 text-[24px] font-medium text-neutral-600">
-              MK
-            </div>
+            <img
+              src={portrait}
+              alt="Mitch Kostelecky"
+              className="size-[88px] rounded-full object-cover ring-1 ring-black/10"
+            />
             <p className="mt-5 text-[28px] font-semibold tracking-[-0.02em]">Mitch Kostelecky</p>
             <p className="mt-1 text-[17px] text-muted">
               Founder. Product, design, and engineering.
