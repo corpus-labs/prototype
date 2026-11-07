@@ -10,8 +10,6 @@ export const FACTS = {
   demoVideo: null as string | null,
   /** Where judges can click through the prototype, without https://. */
   prototypeUrl: null as string | null,
-  /** The public repo. */
-  repo: "github.com/corpus-labs/prototype",
   waitlist: {
     url: "corpus.app",
     /** When the landing page went live, like "Nov 2026". */

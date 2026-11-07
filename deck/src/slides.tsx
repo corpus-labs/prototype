@@ -779,9 +779,6 @@ function Traction() {
                   <Todo>live date, signups</Todo>
                 )}
               </Fact>
-              <Fact k="Code">
-                <code className="text-[13px]">{FACTS.repo}</code>
-              </Fact>
             </dl>
           </div>
         </div>
@@ -1049,9 +1046,6 @@ function Close() {
             <Fact k="Waitlist">{FACTS.waitlist.url}</Fact>
             <Fact k="Demo">
               <Fill value={FACTS.demoVideo} todo="link" />
-            </Fact>
-            <Fact k="Code">
-              <code className="text-[14px]">{FACTS.repo}</code>
             </Fact>
           </dl>
         </div>
