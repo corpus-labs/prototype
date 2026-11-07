@@ -17,8 +17,7 @@ export const CONFIG = {
   betaOpens: "February 2027",
   launches: "spring 2027",
 
-  /** Shown in the footer. */
-  repo: "github.com/corpus-labs/prototype",
+  /** Shown in the footer as "Email us" once it's set. */
   contactEmail: null as string | null,
 };
 

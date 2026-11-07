@@ -748,34 +748,51 @@ function Join() {
 }
 
 function Footer() {
+  const link = "rounded-sm text-muted transition-colors hover:text-ink";
   return (
-    <footer className="border-t py-10 pb-16">
-      <div
-        className={cn(
-          WRAP,
-          "flex flex-col gap-4 text-[14px] text-muted sm:flex-row sm:items-center sm:justify-between",
-        )}
-      >
-        <div className="flex items-center gap-2.5">
-          <CorpusMark className="size-4 text-ink" />
-          <span>Corpus, built at the USC Iovine Young Academy</span>
-        </div>
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          <a
-            className="underline-offset-4 hover:text-ink hover:underline"
-            href={`https://${CONFIG.repo}`}
-          >
-            Prototype on GitHub
+    <footer className="border-t">
+      <div className={cn(WRAP, "grid gap-10 py-12 sm:grid-cols-[1fr_auto] sm:gap-16")}>
+        <div>
+          <a href="#top" aria-label="Corpus, back to top" className="inline-block rounded-md">
+            <CorpusLogo className="h-[22px]" />
           </a>
-          {CONFIG.contactEmail && (
-            <a
-              className="underline-offset-4 hover:text-ink hover:underline"
-              href={`mailto:${CONFIG.contactEmail}`}
-            >
-              {CONFIG.contactEmail}
+          <p className="mt-3 max-w-[320px] text-[14.5px] leading-[1.55] text-pretty text-muted">
+            One notebook for what your company knows. Use it with any AI.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-16 gap-y-2 text-[14.5px]">
+          <nav aria-label="Product" className="grid content-start gap-2">
+            <p className="mb-1 font-medium">Product</p>
+            <a className={link} href="#how">
+              How it works
             </a>
-          )}
-          <span>© 2026</span>
+            <a className={link} href="#plugins">
+              Plugins
+            </a>
+            <a className={link} href="#pricing">
+              Pricing
+            </a>
+            <a className={link} href="#faq">
+              FAQ
+            </a>
+          </nav>
+          <div className="grid content-start gap-2">
+            <p className="mb-1 font-medium">Early access</p>
+            <button type="button" onClick={joinNow} className={cn(link, "text-left")}>
+              Join the waitlist
+            </button>
+            {CONFIG.contactEmail && (
+              <a className={link} href={`mailto:${CONFIG.contactEmail}`}>
+                Email us
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className={WRAP}>
+        <div className="flex flex-col gap-2 border-t py-6 pb-14 text-[13px] text-muted sm:flex-row sm:justify-between">
+          <span>© 2026 Corpus</span>
+          <span>Private beta opens {CONFIG.betaOpens}</span>
         </div>
       </div>
     </footer>
