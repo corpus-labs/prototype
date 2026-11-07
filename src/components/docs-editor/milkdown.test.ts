@@ -79,6 +79,11 @@ describe("docs editor round-trip", () => {
     expect(normalizeMarkdown(out)).toBe(out);
   });
 
+  it("reads back to-dos and strikethrough exactly as written", async () => {
+    const body = "- [x] Check the preview link\n- [ ] Tell the team\n\nThe ~~old~~ new way.\n";
+    expect(readMarkdown(await open(body))).toBe(body);
+  });
+
   it("keeps raw HTML as inert text", async () => {
     const editor = await open('<script>alert("hi")</script>\n');
     const root = editor.action((ctx) => ctx.get(editorViewCtx).dom);

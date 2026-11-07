@@ -347,13 +347,15 @@ body::before {
   .docs-prose > * + * {
     @apply mt-5;
   }
-  .docs-prose h1,
+  .docs-prose h1 {
+    @apply mt-12 text-[26px] leading-tight font-semibold tracking-[-0.025em];
+  }
   .docs-prose h2 {
     @apply mt-10 text-xl leading-snug font-semibold tracking-[-0.02em];
   }
   .docs-prose h3,
   .docs-prose h4 {
-    @apply mt-8 text-base font-semibold;
+    @apply mt-8 text-[17px] font-semibold;
   }
   .docs-prose > :first-child {
     @apply mt-0;
@@ -372,6 +374,32 @@ body::before {
   }
   .docs-prose li > p {
     @apply m-0;
+  }
+  /* To-dos (GFM task items): a checkbox in the marker's place, which the editor lets you click. */
+  .docs-prose li[data-item-type="task"] {
+    @apply relative list-none;
+  }
+  .docs-prose li[data-item-type="task"]::before {
+    content: "";
+    @apply absolute top-[0.32em] -left-[1.45em] size-[15px] cursor-pointer rounded-[4px] border-[1.5px] border-foreground/30 bg-background transition-colors;
+  }
+  .docs-prose li[data-item-type="task"][data-checked="true"]::before {
+    @apply border-foreground bg-foreground;
+  }
+  /* The tick is a mask filled with the page color, so it reads in light and dark. */
+  .docs-prose li[data-item-type="task"][data-checked="true"]::after {
+    content: "";
+    @apply pointer-events-none absolute top-[0.32em] -left-[1.45em] size-[15px] bg-background;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 8.5 2.5 2.5L12 5.5'/%3E%3C/svg%3E")
+      center / 100% no-repeat;
+  }
+  .docs-prose li[data-item-type="task"][data-checked="true"] > p {
+    @apply text-muted-foreground line-through decoration-muted-foreground/50;
+  }
+  /* The hint on the empty line being typed in. */
+  .docs-prose p.is-empty::before {
+    content: attr(data-placeholder);
+    @apply pointer-events-none float-left h-0 text-muted-foreground/60;
   }
   .docs-prose a {
     @apply font-medium underline decoration-border underline-offset-4;

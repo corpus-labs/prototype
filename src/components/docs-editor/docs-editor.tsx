@@ -7,33 +7,43 @@ import { TooltipProvider, tooltipFactory } from "@milkdown/plugin-tooltip";
 import {
   createCodeBlockCommand,
   insertHrCommand,
+  liftListItemCommand,
   toggleEmphasisCommand,
   toggleInlineCodeCommand,
   toggleLinkCommand,
   toggleStrongCommand,
+  turnIntoTextCommand,
   updateLinkCommand,
   wrapInBlockquoteCommand,
   wrapInBulletListCommand,
   wrapInHeadingCommand,
   wrapInOrderedListCommand,
 } from "@milkdown/preset-commonmark";
-import { insertTableCommand } from "@milkdown/preset-gfm";
-import type { EditorState } from "@milkdown/prose/state";
-import type { EditorView } from "@milkdown/prose/view";
-import { callCommand } from "@milkdown/utils";
+import { insertTableCommand, toggleStrikethroughCommand } from "@milkdown/preset-gfm";
+import { redoCommand, undoCommand } from "@milkdown/plugin-history";
+import { lift } from "@milkdown/prose/commands";
+import { redoDepth, undoDepth } from "@milkdown/prose/history";
+import { Plugin, TextSelection, type EditorState } from "@milkdown/prose/state";
+import { Decoration, DecorationSet, type EditorView } from "@milkdown/prose/view";
+import { $prose, callCommand } from "@milkdown/utils";
 import {
   BoldIcon,
   CodeIcon,
   FileTextIcon,
+  Heading1Icon,
   Heading2Icon,
   Heading3Icon,
   ItalicIcon,
   LinkIcon,
   ListIcon,
   ListOrderedIcon,
+  ListTodoIcon,
   MinusIcon,
+  PilcrowIcon,
+  PlusIcon,
   QuoteIcon,
   SquareCodeIcon,
+  StrikethroughIcon,
   TableIcon,
 } from "lucide-react";
 import "@milkdown/prose/view/style/prosemirror.css";
@@ -42,11 +52,18 @@ import "@milkdown/prose/tables/style/tables.css";
 import { relativeLink } from "@core/markdown/links";
 import { cn } from "@/lib/utils";
 import { createDocsEditor } from "./milkdown";
+import { EMPTY_TOOLBAR, EditorToolbar, type ToolbarAction, type ToolbarState } from "./toolbar";
 
 export type LinkTarget = { title: string; path: string; folder: string };
 
 type Menu = { kind: "slash" | "page"; query: string; from: number; to: number } | null;
-type Marks = { strong: boolean; emphasis: boolean; code: boolean; link: string | null };
+type Marks = {
+  strong: boolean;
+  emphasis: boolean;
+  strike: boolean;
+  code: boolean;
+  link: string | null;
+};
 
 type Block = {
   id: string;
@@ -59,15 +76,29 @@ type Block = {
 // Milkdown gives commands their keys when the editor starts, so each block looks its command up when it runs.
 const BLOCKS: Block[] = [
   {
+    id: "text",
+    label: "Text",
+    hint: "",
+    icon: PilcrowIcon,
+    run: (ctx) => callCommand(turnIntoTextCommand.key)(ctx),
+  },
+  {
+    id: "h1",
+    label: "Heading 1",
+    hint: "#",
+    icon: Heading1Icon,
+    run: (ctx) => callCommand(wrapInHeadingCommand.key, 1)(ctx),
+  },
+  {
     id: "h2",
-    label: "Heading",
+    label: "Heading 2",
     hint: "##",
     icon: Heading2Icon,
     run: (ctx) => callCommand(wrapInHeadingCommand.key, 2)(ctx),
   },
   {
     id: "h3",
-    label: "Subheading",
+    label: "Heading 3",
     hint: "###",
     icon: Heading3Icon,
     run: (ctx) => callCommand(wrapInHeadingCommand.key, 3)(ctx),
@@ -86,6 +117,7 @@ const BLOCKS: Block[] = [
     icon: ListOrderedIcon,
     run: (ctx) => callCommand(wrapInOrderedListCommand.key)(ctx),
   },
+  { id: "todo", label: "To-do list", hint: "[ ]", icon: ListTodoIcon, run: toggleTaskList },
   {
     id: "quote",
     label: "Quote",
@@ -118,7 +150,132 @@ const BLOCKS: Block[] = [
   { id: "page", label: "Link to a page", hint: "[[", icon: FileTextIcon },
 ];
 
-const NO_MARKS: Marks = { strong: false, emphasis: false, code: false, link: null };
+const NO_MARKS: Marks = { strong: false, emphasis: false, strike: false, code: false, link: null };
+
+/** The list item around the cursor, if any, and where it starts. */
+function listItemAround(state: EditorState) {
+  const { $from } = state.selection;
+  for (let d = $from.depth; d > 0; d--) {
+    if ($from.node(d).type.name === "list_item")
+      return { node: $from.node(d), pos: $from.before(d) };
+  }
+  return null;
+}
+
+/**
+ * Turns the selected list items into to-dos, or back into plain items. Outside a
+ * list it starts a bulleted one first. GFM writes these as `- [ ]` and `- [x]`.
+ */
+function toggleTaskList(ctx: Ctx) {
+  const view = ctx.get(editorViewCtx);
+  if (!listItemAround(view.state)) callCommand(wrapInBulletListCommand.key)(ctx);
+  const { state } = view;
+  const { from, to } = state.selection;
+  const tr = state.tr;
+  let toTask: boolean | null = null;
+  state.doc.nodesBetween(from, to, (node, pos) => {
+    if (node.type.name !== "list_item") return;
+    if (toTask === null) toTask = node.attrs.checked == null;
+    tr.setNodeMarkup(pos, undefined, { ...node.attrs, checked: toTask ? false : null });
+  });
+  if (!tr.docChanged) return false;
+  view.dispatch(tr);
+  return true;
+}
+
+/** Everything the formatting bar shows: block type, marks, list, quote, and history. */
+function readToolbar(view: EditorView): ToolbarState {
+  const { state } = view;
+  const { $from } = state.selection;
+  const parent = $from.parent;
+  const block: ToolbarState["block"] =
+    parent.type.name === "heading"
+      ? (`h${Math.min(Math.max(parent.attrs.level as number, 1), 3)}` as "h1" | "h2" | "h3")
+      : parent.type.name === "code_block"
+        ? "code"
+        : parent.type.name === "paragraph"
+          ? "paragraph"
+          : "other";
+  let list: ToolbarState["list"] = null;
+  let quote = false;
+  // Innermost first, so a to-do item wins over the bulleted list it sits in.
+  for (let d = $from.depth; d > 0; d--) {
+    const node = $from.node(d);
+    const name = node.type.name;
+    if (!list && name === "list_item" && node.attrs.checked != null) list = "task";
+    if (!list && name === "bullet_list") list = "bullet";
+    if (!list && name === "ordered_list") list = "ordered";
+    if (name === "blockquote") quote = true;
+  }
+  const marks = readMarks(view);
+  return {
+    block,
+    strong: marks.strong,
+    emphasis: marks.emphasis,
+    strike: marks.strike,
+    code: marks.code,
+    link: !!marks.link,
+    list,
+    quote,
+    canUndo: undoDepth(state) > 0,
+    canRedo: redoDepth(state) > 0,
+  };
+}
+
+const PLACEHOLDER = "Type / for blocks, or [[ to link a page";
+
+/**
+ * Editor behavior that isn't a command: reports the cursor's state to the
+ * formatting bar, shows a hint on the empty line being typed in, and lets the
+ * checkbox beside a to-do toggle it.
+ */
+function editingAids(onState: (state: ToolbarState) => void) {
+  return $prose(
+    () =>
+      new Plugin({
+        view: (view) => {
+          onState(readToolbar(view));
+          return { update: (v) => onState(readToolbar(v)) };
+        },
+        props: {
+          decorations(state) {
+            const { $from, empty } = state.selection;
+            const node = $from.parent;
+            if (!empty || node.type.name !== "paragraph" || node.content.size > 0) return null;
+            const start = $from.before();
+            return DecorationSet.create(state.doc, [
+              Decoration.node(start, start + node.nodeSize, {
+                class: "is-empty",
+                "data-placeholder": PLACEHOLDER,
+              }),
+            ]);
+          },
+          handleDOMEvents: {
+            mousedown(view, event) {
+              const li = event.target instanceof HTMLElement ? event.target : null;
+              if (!li || li.dataset.itemType !== "task") return false;
+              // The checkbox is drawn just left of the item's own box.
+              if (event.clientX > li.getBoundingClientRect().left + 2) return false;
+              const $pos = view.state.doc.resolve(view.posAtDOM(li, 0));
+              for (let d = $pos.depth; d > 0; d--) {
+                const node = $pos.node(d);
+                if (node.type.name !== "list_item") continue;
+                view.dispatch(
+                  view.state.tr.setNodeMarkup($pos.before(d), undefined, {
+                    ...node.attrs,
+                    checked: !node.attrs.checked,
+                  }),
+                );
+                event.preventDefault();
+                return true;
+              }
+              return false;
+            },
+          },
+        },
+      }),
+  );
+}
 
 /** A slash command: `/` at the start of a line or after a space, then a few words. */
 const SLASH = /(?:^|\s)(\/[\p{L}\p{N} ]{0,24})$/u;
@@ -171,7 +328,13 @@ function readMarks(view: EditorView): Marks {
     const mark = node.marks.find((m) => m.type.name === "link");
     if (mark) link = mark.attrs.href as string;
   });
-  return { strong: has("strong"), emphasis: has("emphasis"), code: has("inlineCode"), link };
+  return {
+    strong: has("strong"),
+    emphasis: has("emphasis"),
+    strike: has("strike_through"),
+    code: has("inlineCode"),
+    link,
+  };
 }
 
 /** The `/command` or `[[page` text right before the cursor, read from the document as it is now. */
@@ -238,6 +401,15 @@ export function DocsEditor({
   const [menu, setMenuState] = React.useState<Menu>(null);
   const [active, setActiveState] = React.useState(0);
   const [marks, setMarks] = React.useState<Marks>(NO_MARKS);
+  const [toolbar, setToolbarState] = React.useState<ToolbarState>(EMPTY_TOOLBAR);
+  // The bar updates on every keystroke, so only re-render when something it shows changed.
+  const toolbarKey = React.useRef("");
+  const setToolbar = React.useCallback((next: ToolbarState) => {
+    const key = JSON.stringify(next);
+    if (key === toolbarKey.current) return;
+    toolbarKey.current = key;
+    setToolbarState(next);
+  }, []);
   const [linking, setLinking] = React.useState(false);
   // Where the reader pressed Escape, so the same menu doesn't reopen until they start over.
   const dismissed = React.useRef<number | null>(null);
@@ -375,7 +547,7 @@ export function DocsEditor({
       root: host.current,
       value,
       onChange: (markdown) => latest.current.onChange(markdown),
-      plugins: [...selection, ...slash, ...pageLink],
+      plugins: [...selection, ...slash, ...pageLink, editingAids(setToolbar)],
       configure: (ctx) => {
         ctx.update(editorViewOptionsCtx, (prev) => ({ ...prev, handleKeyDown }));
         ctx.set(selection.key, {
@@ -446,6 +618,108 @@ export function DocsEditor({
     // The editor loads `value` once. The parent remounts it to load new content.
   }, []);
 
+  // The block the pointer is over, for the "+" beside it.
+  const hoverBlock = React.useRef<{ el: HTMLElement } | null>(null);
+  const [handleTop, setHandleTop] = React.useState<number | null>(null);
+
+  /** Opens an empty line below the hovered block and starts a slash command there. */
+  const addBelow = () => {
+    const el = hoverBlock.current?.el;
+    if (!el) return;
+    run((ctx) => {
+      const view = ctx.get(editorViewCtx);
+      const inside = view.state.doc.resolve(view.posAtDOM(el, 0));
+      const after = inside.depth > 0 ? inside.after(1) : inside.pos;
+      const { paragraph } = view.state.schema.nodes;
+      let tr = view.state.tr.insert(after, paragraph.create());
+      tr = tr.setSelection(TextSelection.create(tr.doc, after + 1)).insertText("/");
+      view.dispatch(tr.scrollIntoView());
+      view.focus();
+    });
+  };
+
+  // The formatting bar's buttons, mapped to Milkdown commands.
+  const act = (action: ToolbarAction) => {
+    const toggleList = (kind: "bullet" | "ordered", wrap: typeof wrapInBulletListCommand.key) =>
+      run((ctx) => {
+        const view = ctx.get(editorViewCtx);
+        const now = readToolbar(view).list;
+        // A to-do list switches back to plain items; the same list type again lifts it out.
+        if (now === "task" && kind === "bullet") return toggleTaskList(ctx);
+        if (now === kind) return callCommand(liftListItemCommand.key)(ctx);
+        return callCommand(wrap)(ctx);
+      });
+    switch (action) {
+      case "paragraph":
+        run(callCommand(turnIntoTextCommand.key));
+        break;
+      case "h1":
+      case "h2":
+      case "h3":
+        run(callCommand(wrapInHeadingCommand.key, Number(action[1])));
+        break;
+      case "strong":
+        run(callCommand(toggleStrongCommand.key));
+        break;
+      case "emphasis":
+        run(callCommand(toggleEmphasisCommand.key));
+        break;
+      case "strike":
+        run(callCommand(toggleStrikethroughCommand.key));
+        break;
+      case "code":
+        run(callCommand(toggleInlineCodeCommand.key));
+        break;
+      case "link":
+        run((ctx) => {
+          const view = ctx.get(editorViewCtx);
+          // With nothing selected, a link means a page link at the cursor.
+          if (view.state.selection.empty) view.dispatch(view.state.tr.insertText("[["));
+          else {
+            setMarks(readMarks(view));
+            setLinking(true);
+          }
+        });
+        break;
+      case "bullet":
+        toggleList("bullet", wrapInBulletListCommand.key);
+        break;
+      case "ordered":
+        toggleList("ordered", wrapInOrderedListCommand.key);
+        break;
+      case "task":
+        run(toggleTaskList);
+        break;
+      case "quote":
+        run((ctx) => {
+          const view = ctx.get(editorViewCtx);
+          if (readToolbar(view).quote) return lift(view.state, view.dispatch);
+          return callCommand(wrapInBlockquoteCommand.key)(ctx);
+        });
+        break;
+      case "codeBlock":
+        run((ctx) =>
+          readToolbar(ctx.get(editorViewCtx)).block === "code"
+            ? callCommand(turnIntoTextCommand.key)(ctx)
+            : callCommand(createCodeBlockCommand.key)(ctx),
+        );
+        break;
+      case "divider":
+        run(callCommand(insertHrCommand.key));
+        break;
+      case "table":
+        run(callCommand(insertTableCommand.key, { row: 3, col: 3 }));
+        break;
+      case "undo":
+        run(callCommand(undoCommand.key));
+        break;
+      case "redo":
+        run(callCommand(redoCommand.key));
+        break;
+    }
+    run((ctx) => ctx.get(editorViewCtx).focus());
+  };
+
   const applyLink = (href: string) => {
     const clean = href.trim();
     if (!clean) return;
@@ -456,7 +730,43 @@ export function DocsEditor({
 
   return (
     <>
-      <div ref={host} data-docs-editor className="relative" />
+      <EditorToolbar state={toolbar} onAction={act} className="sticky top-14 z-10 mb-6 md:top-14" />
+      <div
+        className="group/editor relative"
+        onMouseMove={(e) => {
+          const root = host.current?.querySelector(".docs-prose");
+          if (!root) return;
+          // The top-level block under the pointer, like a paragraph, heading, or list.
+          let el = e.target instanceof Element ? e.target : null;
+          while (el && el.parentElement !== root) el = el.parentElement;
+          if (el instanceof HTMLElement && el !== hoverBlock.current?.el) {
+            const hostTop = host.current!.getBoundingClientRect().top;
+            const box = el.getBoundingClientRect();
+            const line = parseFloat(getComputedStyle(el).lineHeight) || 24;
+            hoverBlock.current = { el };
+            setHandleTop(box.top - hostTop + Math.min(line, box.height) / 2 - 12);
+          }
+        }}
+        onMouseLeave={() => {
+          hoverBlock.current = null;
+          setHandleTop(null);
+        }}
+      >
+        {handleTop !== null && (
+          <button
+            type="button"
+            aria-label="Add a block below"
+            title="Add a block below"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={addBelow}
+            style={{ top: handleTop }}
+            className="absolute -left-9 hidden size-6 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity outline-none group-hover/editor:opacity-100 hover:bg-accent hover:text-foreground focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50 md:flex [&_svg]:size-4"
+          >
+            <PlusIcon />
+          </button>
+        )}
+        <div ref={host} data-docs-editor className="relative" />
+      </div>
 
       {createPortal(
         linking ? (
@@ -488,6 +798,12 @@ export function DocsEditor({
                   ItalicIcon,
                   marks.emphasis,
                   () => run(callCommand(toggleEmphasisCommand.key)),
+                ],
+                [
+                  "Strikethrough",
+                  StrikethroughIcon,
+                  marks.strike,
+                  () => run(callCommand(toggleStrikethroughCommand.key)),
                 ],
                 ["Code", CodeIcon, marks.code, () => run(callCommand(toggleInlineCodeCommand.key))],
                 ["Link", LinkIcon, !!marks.link, () => setLinking(true)],
@@ -575,11 +891,19 @@ function MenuList<T>({
   render: (item: T) => React.ReactNode;
   empty: string;
 }) {
+  const list = React.useRef<HTMLDivElement>(null);
+  // Arrow keys move the highlight past the menu's edge, so keep it in view.
+  React.useEffect(() => {
+    list.current
+      ?.querySelector<HTMLElement>('[aria-selected="true"]')
+      ?.scrollIntoView({ block: "nearest" });
+  }, [active]);
   return (
     <div
+      ref={list}
       role="listbox"
       aria-label={label}
-      className="w-64 rounded-lg bg-popover p-1 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10"
+      className="max-h-72 w-64 overflow-y-auto rounded-lg bg-popover p-1 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10"
     >
       {items.length === 0 ? (
         <p className="px-2 py-1.5 text-muted-foreground">{empty}</p>
