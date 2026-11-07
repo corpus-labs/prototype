@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { CONFIG, JOBS, type JobId } from "./config";
 import { cn } from "./lib/utils";
 import { ToolLogo, type ToolId } from "./tool-logo";
-import { AppWindow, CorpusLogo, CorpusMark, Dot, Heading, Shot } from "./ui";
+import { AppWindow, CorpusLogo, CorpusMark, Dot, Heading, Lattice, Shot } from "./ui";
 import { BotDemo } from "./bot-demo";
 import { visit } from "./visit";
 import { PreviewNotice, WaitlistForm } from "./waitlist";
@@ -73,7 +73,12 @@ const DEFAULT_LEAD =
 
 function Hero() {
   return (
-    <section id="top" className="pt-14 sm:pt-24">
+    <section id="top" className="relative isolate pt-14 sm:pt-24">
+      {/* Texture behind the headline: strongest at the top right, gone before the screenshot. */}
+      <Lattice
+        className="h-[760px]"
+        fade="radial-gradient(ellipse 58% 75% at 100% 0%, black 0%, rgb(0 0 0 / 0.5) 40%, transparent 78%)"
+      />
       <div className={WRAP}>
         <div className="max-w-[860px]">
           <Dot tone="good" className="text-[14.5px] text-muted">
@@ -719,7 +724,11 @@ function Faq() {
 
 function Join() {
   return (
-    <section id="join" className="border-t bg-subtle py-24 sm:py-32">
+    <section
+      id="join"
+      className="relative isolate overflow-hidden border-t bg-subtle py-24 sm:py-32"
+    >
+      <Lattice fade="radial-gradient(ellipse 70% 120% at 100% 100%, black 0%, rgb(0 0 0 / 0.5) 40%, transparent 75%)" />
       <div className={WRAP}>
         <div className="max-w-[920px]">
           <h2 className="text-[38px] leading-[1.05] font-semibold tracking-[-0.04em] text-balance sm:text-[56px]">

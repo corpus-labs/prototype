@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { cn } from "./lib/utils";
 
 // The Corpus mark and wordmark, copied from the product (src/components/corpus-logo.tsx).
@@ -207,5 +207,49 @@ export function AppWindow({
         className="block h-auto w-full"
       />
     </div>
+  );
+}
+
+/**
+ * The mark, tiled into a lattice: each mark sits half a tile off its neighbors, so
+ * their petals interlock. Faded with a mask and kept pale, it's texture, not a picture.
+ */
+export function Lattice({
+  className,
+  size = 72,
+  fade,
+}: {
+  className?: string;
+  /** One mark's width in pixels. */
+  size?: number;
+  /** A CSS mask image that fades the lattice out. */
+  fade: string;
+}) {
+  // useId can contain characters that break url(#id) references.
+  const id = `lattice-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  const offsets = [
+    [0, 0],
+    [24, 24],
+    [-24, 24],
+    [24, -24],
+    [-24, -24],
+  ];
+  return (
+    <svg
+      aria-hidden
+      className={cn("pointer-events-none absolute inset-0 -z-10 size-full", className)}
+      style={{ maskImage: fade, WebkitMaskImage: fade }}
+    >
+      <defs>
+        <pattern id={id} width={size} height={size} patternUnits="userSpaceOnUse">
+          <g transform={`scale(${size / 48})`} className="fill-mist-200">
+            {offsets.map(([x, y]) => (
+              <path key={`${x} ${y}`} d={MARK} transform={`translate(${x} ${y})`} />
+            ))}
+          </g>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill={`url(#${id})`} />
+    </svg>
   );
 }
