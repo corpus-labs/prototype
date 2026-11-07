@@ -1,6 +1,6 @@
 // Exploration: docs projects' pages are real Markdown files in fixtures/, read here
 // the way Phase 1's loader will read them from a content repository.
-// See docs/decisions/proposed-docs-editor.md and proposed-knowledge-notebook.md.
+// See docs/decisions/proposed-docs-editor.md and 0001-knowledge-notebook.md.
 import { readPageMeta, splitFrontmatter } from "@core/markdown/frontmatter";
 import type { DocPage } from "@/data/workspace";
 

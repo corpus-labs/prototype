@@ -1,6 +1,6 @@
 // Exploration: docs projects (a handbook, a help center). See
 // docs/decisions/proposed-projects-and-docs.md, proposed-docs-editor.md,
-// and proposed-knowledge-notebook.md.
+// and 0001-knowledge-notebook.md.
 import * as React from "react";
 import { PlusIcon } from "lucide-react";
 

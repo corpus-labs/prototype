@@ -1,6 +1,6 @@
 # 0000: Foundations
 
-Date: November 4, 2026. Status: accepted.
+Date: November 4, 2026. Status: accepted. `0001-knowledge-notebook.md` widens what Corpus is; these six decisions still hold, and where they speak of components they apply to design system projects.
 
 These six decisions shape everything from Phase 1 on. Change them only by writing a new decision record that supersedes this one.
 

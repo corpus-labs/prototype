@@ -1217,7 +1217,7 @@ export const integrations = [
 /*
   Exploration: one Corpus install with several projects: a design system, a team
   handbook, and a customer help center. See docs/decisions/proposed-projects-and-docs.md
-  and proposed-knowledge-notebook.md. This extends the sample data on purpose, with the
+  and 0001-knowledge-notebook.md. This extends the sample data on purpose, with the
   owner's go-ahead, and goes away with it in Phase 2.
 */
 
