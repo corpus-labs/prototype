@@ -890,7 +890,7 @@ export function AppShell({ route, children }: { route: string; children: React.R
       */}
       <SidebarInset
         data-scroll-root
-        className="min-w-0 md:h-[calc(100svh-0.5rem)] md:overflow-y-auto md:ring-1 md:ring-black/[0.06] md:peer-data-[variant=inset]:mb-0 md:peer-data-[variant=inset]:rounded-b-none dark:md:ring-white/[0.08]"
+        className="min-w-0 md:h-[calc(100svh-0.5rem)] md:overflow-y-auto md:ring-1 md:ring-black/[0.06] md:peer-data-[variant=inset]:mb-0 md:peer-data-[variant=inset]:rounded-b-none md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0 dark:md:ring-white/[0.08]"
       >
         <DesktopTopbar route={route} />
         <MobileTopbar route={route} />
