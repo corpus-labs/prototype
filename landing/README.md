@@ -10,7 +10,7 @@ npm run build   # one self-contained file: dist/index.html
 
 ## Before it goes live
 
-Set `waitlistEndpoint` in `src/config.ts`. Until then, signups stay in the visitor's browser and an amber notice says so at the bottom of the page.
+Set `waitlistEndpoint` in `src/config.ts`. Until then, signups stay in the visitor's browser and an amber notice says so at the bottom of the page. The plan for collecting signups on Cloudflare (Pages, a Pages Function, and D1) is in [WAITLIST.md](WAITLIST.md).
 
 The page sends a form POST with these fields, so a Formspree form URL (or Basin, Getform, or your own endpoint) works as is:
 
