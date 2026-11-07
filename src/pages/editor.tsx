@@ -45,9 +45,19 @@ import { Dot, Facts, PageHeader, SegmentedControl } from "@/components/common";
 import { drafts, questions } from "@/data/workspace";
 import { slug } from "@/lib/mdx-lite";
 import { navigate } from "@/lib/router";
-import { fileMeta, templateFor, useStore } from "@/lib/store";
+import { fileMeta, templateFor, useStore, type Provider } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { MdxPeople } from "@/pages/guidelines";
+
+/** How each AI provider is named in the UI. Corpus works with whichever one the owner picks. */
+export const PROVIDER_LABEL: Record<Provider, string> = {
+  anthropic: "Anthropic",
+  openai: "OpenAI",
+  zai: "Z.ai",
+  deepseek: "DeepSeek",
+  openrouter: "OpenRouter",
+  ollama: "Ollama",
+};
 
 export function modelLabel(provider: string, model: string) {
   const m = model.match(/^claude-(sonnet|haiku|opus)-(\d+)-(\d+)$/);
@@ -307,7 +317,9 @@ export function Editor({ id }: { id: string }) {
           <h2 className="text-[15px] font-semibold">Writing assistant</h2>
           <p className="text-sm text-muted-foreground">
             {ai.editor
-              ? `${model} on your ${ai.provider === "anthropic" ? "Anthropic" : ai.provider} key`
+              ? ai.provider === "ollama"
+                ? `${model} on your own server`
+                : `${model} on your ${PROVIDER_LABEL[ai.provider]} key`
               : "Turned off in Settings"}
           </p>
         </div>

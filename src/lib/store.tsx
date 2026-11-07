@@ -11,7 +11,7 @@ import {
 export type Theme = "system" | "light" | "dark";
 export type Base = "neutral" | "zinc" | "stone" | "slate" | "gray";
 export type Reader = "people" | "split" | "agents";
-export type Provider = "anthropic" | "openai" | "openrouter" | "ollama";
+export type Provider = "anthropic" | "openai" | "zai" | "deepseek" | "openrouter" | "ollama";
 
 type Publishing = {
   buildOnPush: boolean;

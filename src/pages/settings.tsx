@@ -122,6 +122,7 @@ function General() {
             Point a CNAME at your server. Corpus issues the certificate.
           </FieldDescription>
         </Field>
+        <Hosting />
         <Button
           className="justify-self-start"
           onClick={() => toast.add({ type: "success", title: "Settings saved" })}
@@ -133,12 +134,62 @@ function General() {
   );
 }
 
+const HOSTING = [
+  {
+    value: "self",
+    title: "Your server",
+    body: "One container you run. Your files and keys never leave it.",
+  },
+  {
+    value: "cloud",
+    title: "Corpus cloud",
+    body: "We run it for you. Your pages stay a folder of Markdown you can take anywhere.",
+  },
+];
+
+/** Where Corpus runs. The content is the same folder of Markdown either way. */
+function Hosting() {
+  const [where, setWhere] = React.useState("self");
+  return (
+    <Field>
+      <FieldLabel id="hosting-label">Where Corpus runs</FieldLabel>
+      <RadioGroup
+        value={where}
+        onValueChange={(v) => setWhere(v as string)}
+        aria-labelledby="hosting-label"
+        className="grid-cols-1 sm:grid-cols-2"
+      >
+        {HOSTING.map((h) => (
+          <ChoiceTile key={h.value} value={h.value} className="grid gap-1 text-left">
+            <span className="flex items-center justify-between font-medium">
+              {h.title}
+              {where === h.value && <CheckIcon className="size-4" />}
+            </span>
+            <span className="text-muted-foreground">{h.body}</span>
+          </ChoiceTile>
+        ))}
+      </RadioGroup>
+      <FieldDescription>
+        Moving between the two means copying a folder. Hosting arrives with the private beta.
+      </FieldDescription>
+    </Field>
+  );
+}
+
 const PROVIDERS: { label: string; value: Provider }[] = [
   { label: "Anthropic", value: "anthropic" },
   { label: "OpenAI", value: "openai" },
+  { label: "Z.ai", value: "zai" },
+  { label: "DeepSeek", value: "deepseek" },
   { label: "OpenRouter", value: "openrouter" },
   { label: "Ollama on this server", value: "ollama" },
 ];
+
+/** The model a provider starts on. Empty means the owner types a model ID. */
+const DEFAULT_MODEL: Partial<Record<Provider, string>> = {
+  anthropic: "claude-sonnet-5-5",
+  deepseek: "deepseek-chat",
+};
 
 const CLAUDE = ["claude-sonnet-5-5", "claude-haiku-5-5", "claude-opus-5-5"].map((v) => ({
   value: v,
@@ -153,8 +204,9 @@ function AISettings() {
     <FieldSet>
       <FieldLegend>Bring your own key</FieldLegend>
       <FieldDescription>
-        Corpus calls the provider straight from your server with your key. Usage is billed by the
-        provider, and nothing passes through Corpus.
+        Use any provider, and switch whenever you like. Your docs stay the same. Corpus calls the
+        provider straight from your server with your key, so usage is billed by the provider and
+        nothing passes through Corpus.
       </FieldDescription>
       <FieldGroup className="mt-2">
         <Field>
@@ -166,7 +218,7 @@ function AISettings() {
               v &&
               setAI({
                 provider: v as Provider,
-                model: v === "anthropic" ? "claude-sonnet-5-5" : "",
+                model: DEFAULT_MODEL[v as Provider] ?? "",
               })
             }
           >
