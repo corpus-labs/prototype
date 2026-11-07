@@ -17,7 +17,7 @@ Content lives as files in the customer's git repo: Markdown and MDX pages, compo
 
 Competitors are Mintlify, GitBook, Obsidian, Zendesk, and zeroheight. Corpus wins on ownership and on price (pay once). See `docs/decisions/0001-knowledge-notebook.md`.
 
-The sample content belongs to Charged Labs: the Charged UI design system (Drupal single directory components and Lit web components, with Charged Native coming later, all built to one spec per component), a web team handbook, and a customer help center.
+The sample content belongs to Acme, Inc, a made-up example company: the Charged UI design system (Drupal single directory components and Lit web components, with Charged Native coming later, all built to one spec per component), a web team handbook, and a customer help center.
 
 ## Current state
 

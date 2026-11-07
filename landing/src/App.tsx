@@ -363,8 +363,8 @@ function Publishing() {
           src={siteShot}
           width={2560}
           height={1600}
-          address="charged-help.corpus.app"
-          alt="A published help center for Charged Labs: a search box, articles grouped by topic, and a support bot that answers from the same pages"
+          address="acme-help.corpus.app"
+          alt="A published help center for Acme, Inc: a search box, articles grouped by topic, and a support bot that answers from the same pages"
           className="mt-12"
         />
       </div>
@@ -418,11 +418,7 @@ function HowItWorks() {
               <span className="text-muted">get the same words</span>
             </Dot>
           </div>
-          <SplitView
-            pageId="refunds"
-            site="charged-help.corpus.app"
-            start="How long refunds take"
-          />
+          <SplitView pageId="refunds" site="acme-help.corpus.app" start="How long refunds take" />
           <p className="mt-3 text-[14px] text-muted">
             <span className="md:hidden">
               Top, the page people read. Below, the Markdown agents and the support bot get.{" "}
@@ -566,7 +562,7 @@ function PluginsSection() {
             Prefer the terminal? Any MCP client connects in one line:
             <code className="mt-1 block font-mono text-[13px] text-ink">
               {/* Wraps between words, never at the hyphens inside them. */}
-              {"claude mcp add --transport http charged-help https://charged-help.corpus.app/mcp"
+              {"claude mcp add --transport http acme-help https://acme-help.corpus.app/mcp"
                 .split(" ")
                 .map((word, i) => (
                   <Fragment key={i}>

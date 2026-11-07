@@ -500,8 +500,7 @@ export function Editor({ id }: { id: string }) {
           <DialogHeader>
             <DialogTitle>Commit changes</DialogTitle>
             <DialogDescription>
-              Commits go to {`charged-labs/charged-ui`}. The site and agent context rebuild from
-              main.
+              Commits go to {`acme/charged-ui`}. The site and agent context rebuild from main.
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 font-mono text-xs">

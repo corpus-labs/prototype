@@ -47,7 +47,7 @@ export const workspace = {
   name: "Charged UI",
   description: "Component library for Drupal sites, shipped as single directory components.",
   site: "charged-ui.corpus.app",
-  repo: "charged-labs/charged-ui",
+  repo: "acme/charged-ui",
   branch: "main",
   mcp: "https://charged-ui.corpus.app/mcp",
   llms: "https://charged-ui.corpus.app/llms.txt",
@@ -1180,7 +1180,7 @@ export const integrations = [
     id: "github",
     name: "GitHub",
     status: "connected",
-    detail: "charged-labs/charged-ui on main. Every push rebuilds the site and agent context.",
+    detail: "acme/charged-ui on main. Every push rebuilds the site and agent context.",
   },
   {
     id: "sdc",
@@ -1264,8 +1264,8 @@ export const handbook: DocsProject = {
   kind: "docs",
   name: "Web team handbook",
   description: "How the web team builds, ships, and supports campus sites.",
-  site: "charged-handbook.corpus.app",
-  repo: "charged-labs/handbook",
+  site: "acme-handbook.corpus.app",
+  repo: "acme/handbook",
   requests: 486,
   updated: "Yesterday",
   questions: [
@@ -1294,10 +1294,9 @@ export const helpCenter: DocsProject = {
   id: "help",
   kind: "help-center",
   name: "Customer help",
-  description:
-    "Answers for Charged Labs customers. The help site and the support bot read the same pages.",
-  site: "charged-help.corpus.app",
-  repo: "charged-labs/help",
+  description: "Answers for Acme customers. The help site and the support bot read the same pages.",
+  site: "acme-help.corpus.app",
+  repo: "acme/help",
   requests: 386,
   updated: "Today",
   questions: [

@@ -14,7 +14,6 @@ import {
   SunIcon,
   ThumbsDownIcon,
   ThumbsUpIcon,
-  ZapIcon,
 } from "lucide-react";
 
 import { toast } from "@/components/ui/toast";
@@ -71,9 +70,9 @@ function Brand({ project }: { project: DocsProject }) {
   return (
     <a href={href(project)} className="flex items-center gap-2.5 rounded-md outline-none">
       <span className="grid size-7 place-items-center rounded-lg bg-(--cui-charge) text-white">
-        <ZapIcon className="size-4" />
+        <span className="text-[14px] font-bold">A</span>
       </span>
-      <span className="text-[15px] font-semibold tracking-[-0.01em]">Charged Labs</span>
+      <span className="text-[15px] font-semibold tracking-[-0.01em]">Acme</span>
       <span className="text-[15px] text-(--cui-muted)">Help</span>
     </a>
   );
@@ -125,7 +124,7 @@ function SiteFooter({ project }: { project: DocsProject }) {
   return (
     <footer className="border-t border-(--cui-line)">
       <div className="mx-auto flex max-w-[1280px] flex-col gap-4 px-5 py-8 text-sm text-(--cui-muted) sm:flex-row sm:items-center sm:justify-between md:px-8">
-        <span>© 2026 Charged Labs</span>
+        <span>© 2026 Acme, Inc</span>
         <span className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <span>
             For AI tools: <code className="font-mono text-[13px]">{project.site}/llms.txt</code>
@@ -323,7 +322,7 @@ function SiteHome({
               How can we help?
             </h1>
             <p className="mt-3 text-[17px] text-(--cui-muted)">
-              Installing, updating, and paying for Charged Labs themes.
+              Installing, updating, and paying for Acme themes.
             </p>
             <div className="mt-7">
               <SearchBox project={project} inputRef={searchRef} large />

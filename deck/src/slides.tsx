@@ -395,7 +395,7 @@ function HowItWorks() {
         </div>
         <SplitView
           pageId="refunds"
-          site="charged-help.corpus.app"
+          site="acme-help.corpus.app"
           start="How long refunds take"
           className="min-h-0 flex-1 rounded-b-none"
         />
@@ -520,7 +520,7 @@ function Plugins() {
               Prefer the terminal? Any MCP client connects in one line:
               <code className="mt-1 block font-mono text-[12.5px] text-ink">
                 {/* Wraps between words, never at the hyphens inside them. */}
-                {"claude mcp add --transport http charged-help https://charged-help.corpus.app/mcp"
+                {"claude mcp add --transport http acme-help https://acme-help.corpus.app/mcp"
                   .split(" ")
                   .map((word, i) => (
                     <Fragment key={i}>
@@ -807,19 +807,20 @@ function Traction() {
     <Slide section="Traction">
       <Body>
         <Title>What’s built: a clickable prototype of the whole notebook.</Title>
-        <div className="mt-9 grid grid-cols-[664px_1fr] gap-12">
+        <div className="mt-8 grid grid-cols-[600px_1fr] gap-14">
           <figure>
             <Shot
               src={siteShot}
-              alt="The help center Corpus publishes for Charged Labs: a search box, articles by topic, and a support bot that answers from the same pages"
+              alt="The help center Corpus publishes for Acme, Inc: a search box, articles by topic, and a support bot that answers from the same pages"
+              className="h-[340px]"
+              imgClassName="h-full object-cover object-top"
             />
             <figcaption className="mt-3 text-[13.5px] leading-snug text-pretty text-muted">
-              The help center Corpus publishes from Charged Labs’ pages, with search and a support
-              bot that answers from those same pages. Sample data; AI, git, and MCP calls are
-              simulated until their build phases land.
+              The help center Corpus publishes from Acme’s pages, with search and a support bot.
+              Sample data; AI, git, and MCP calls are simulated until they’re built.
             </figcaption>
           </figure>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-6">
             <div className="grid gap-4">
               {groups.map((g) => (
                 <div key={g.label}>
