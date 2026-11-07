@@ -53,7 +53,7 @@ It does four jobs, and design systems are one of them:
 
 ## 6. Plugins for AI harnesses, both ways
 
-**Decision.** This is the planned direction, not built yet. Corpus ships plugins for AI harnesses (Claude, Codex, Cursor, Z.ai, DeepSeek, Gemini CLI, and others) that install in one click. They recall from Corpus through the read-only tools in `0000-foundations.md`, decision 4, and they can also save: a saved note lands as a draft on the page it belongs to, and a person approves it before agents or readers see it. Saving needs a per-person token. The public MCP endpoint stays read-only.
+**Decision.** This is the planned direction, not built yet. Corpus ships plugins for AI harnesses (Claude, Codex, Cursor, Z.ai, DeepSeek, Grok, and others) that install in one click. They recall from Corpus through the read-only tools in `0000-foundations.md`, decision 4, and they can also save: a saved note lands as a draft on the page it belongs to, and a person approves it before agents or readers see it. Saving needs a per-person token. The public MCP endpoint stays read-only.
 
 **Why.** Shared memory across tools is the point of owning the knowledge: what one tool learns, every tool can recall, whichever model the team uses next. One-click plugins reach teammates who never open a terminal or edit a config file. Few knowledge tools ship harness plugins yet, so it's an early place to stand out.
 

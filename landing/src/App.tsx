@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { CONFIG, JOBS, type JobId } from "./config";
 import { cn } from "./lib/utils";
+import { ToolLogo, type ToolId } from "./tool-logo";
 import { AppWindow, CorpusLogo, CorpusMark, Dot, Heading, Shot } from "./ui";
 import { BotDemo } from "./bot-demo";
 import { visit } from "./visit";
@@ -459,26 +460,26 @@ function SupportBot() {
 
 /* Any AI ------------------------------------------------------------------- */
 
-function Tile({ tile, className }: { tile: string; className?: string }) {
+function Tile({ tile, className }: { tile: ToolId; className?: string }) {
   return (
     <span
       aria-hidden
       className={cn(
-        "grid size-9 shrink-0 place-items-center rounded-lg border bg-white text-[13px] font-semibold",
+        "grid size-9 shrink-0 place-items-center rounded-lg border bg-white text-ink",
         className,
       )}
     >
-      {tile}
+      <ToolLogo id={tile} className="size-1/2" />
     </span>
   );
 }
 
 /** One fact, saved from one tool on Monday and recalled from another today. */
 function SharedMemory() {
-  const turn = (tile: string, tool: string, when: string, ask: string, reply: ReactNode) => (
+  const turn = (tile: ToolId, tool: string, when: string, ask: string, reply: ReactNode) => (
     <div className="grid gap-3 px-5 py-4">
       <p className="flex items-center gap-2 text-[13px] text-muted">
-        <Tile tile={tile} className="size-6 rounded-md text-[11px]" />
+        <Tile tile={tile} className="size-6 rounded-md" />
         <span className="font-medium text-ink">{tool}</span>
         {when}
       </p>
@@ -491,7 +492,7 @@ function SharedMemory() {
   return (
     <figure className="shot divide-y overflow-hidden bg-white">
       {turn(
-        "Cl",
+        "claude",
         "Claude Code",
         "Monday",
         "Remember that refunds now take 3 business days.",
@@ -503,7 +504,7 @@ function SharedMemory() {
         </>,
       )}
       {turn(
-        "Cx",
+        "codex",
         "Codex",
         "Today",
         "How long do refunds take?",
@@ -517,13 +518,13 @@ function SharedMemory() {
 }
 
 function PluginsSection() {
-  const tools: [string, string][] = [
-    ["Cl", "Claude"],
-    ["Cx", "Codex"],
-    ["Cu", "Cursor"],
-    ["Z", "Z.ai"],
-    ["DS", "DeepSeek"],
-    ["Ge", "Gemini CLI"],
+  const tools: [ToolId, string][] = [
+    ["claude", "Claude"],
+    ["codex", "Codex"],
+    ["cursor", "Cursor"],
+    ["zai", "Z.ai"],
+    ["deepseek", "DeepSeek"],
+    ["grok", "Grok"],
   ];
   const rows: [string, string][] = [
     ["Recall", "Agents answer from your notebook and cite the page they used."],
@@ -536,7 +537,7 @@ function PluginsSection() {
         <div>
           <Heading
             title="Plugins give every AI tool the same memory."
-            lead="Install Corpus in Claude, Codex, Cursor, Z.ai, or DeepSeek. What one tool saves, every other tool can recall, so switching models never means starting over."
+            lead="Install Corpus in Claude, Codex, Cursor, Z.ai, DeepSeek, or Grok. What one tool saves, every other tool can recall, so switching models never means starting over."
           />
           <ul className="mt-10 grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
             {tools.map(([tile, name]) => (
@@ -671,7 +672,7 @@ function Faq() {
     ],
     [
       "Which AI tools does it work with?",
-      "Plugins for Claude, Codex, Cursor, Z.ai, DeepSeek, and Gemini CLI install in one click. Any other tool that speaks MCP or reads llms.txt works too. Drafting and the support bot run on your own key with Anthropic, OpenAI, Z.ai, DeepSeek, OpenRouter, or a local model.",
+      "Plugins for Claude, Codex, Cursor, Z.ai, DeepSeek, and Grok install in one click. Any other tool that speaks MCP or reads llms.txt works too. Drafting and the support bot run on your own key with Anthropic, OpenAI, Z.ai, DeepSeek, OpenRouter, or a local model.",
     ],
     [
       "Why a one-time price?",

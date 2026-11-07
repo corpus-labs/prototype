@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { FACTS } from "./facts";
 import { cn } from "./lib/utils";
+import { ToolLogo, type ToolId } from "./tool-logo";
 import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title, Todo } from "./ui";
 import coverShot from "./assets/shots/cover-notebook.png";
 import splitShot from "./assets/shots/how-split.png";
@@ -357,26 +358,26 @@ function Step({ n, head, children }: { n: number; head: string; children: ReactN
 
 /* 6. Plugins ------------------------------------------------------------ */
 
-function Tile({ tile, className }: { tile: string; className?: string }) {
+function Tile({ tile, className }: { tile: ToolId; className?: string }) {
   return (
     <span
       aria-hidden
       className={cn(
-        "grid size-9 shrink-0 place-items-center rounded-lg border bg-subtle text-[13px] font-semibold",
+        "grid size-9 shrink-0 place-items-center rounded-lg border bg-subtle text-ink",
         className,
       )}
     >
-      {tile}
+      <ToolLogo id={tile} className="size-1/2" />
     </span>
   );
 }
 
 /** One fact, saved from one tool on Monday and recalled from another today. */
 function SharedMemory() {
-  const turn = (tile: string, tool: string, when: string, ask: string, reply: ReactNode) => (
+  const turn = (tile: ToolId, tool: string, when: string, ask: string, reply: ReactNode) => (
     <div className="grid gap-3 px-5 py-4">
       <p className="flex items-center gap-2 text-[13px] text-muted">
-        <Tile tile={tile} className="size-6 rounded-md text-[11px]" />
+        <Tile tile={tile} className="size-6 rounded-md" />
         <span className="font-medium text-ink">{tool}</span>
         {when}
       </p>
@@ -389,7 +390,7 @@ function SharedMemory() {
   return (
     <figure className="divide-y overflow-hidden rounded-xl border bg-white">
       {turn(
-        "Cl",
+        "claude",
         "Claude Code",
         "Monday",
         "Remember that refunds now take 3 business days.",
@@ -401,7 +402,7 @@ function SharedMemory() {
         </>,
       )}
       {turn(
-        "Cx",
+        "codex",
         "Codex",
         "Today",
         "How long do refunds take?",
@@ -415,13 +416,13 @@ function SharedMemory() {
 }
 
 function Plugins() {
-  const tools: [string, string][] = [
-    ["Cl", "Claude"],
-    ["Cx", "Codex"],
-    ["Cu", "Cursor"],
-    ["Z", "Z.ai"],
-    ["DS", "DeepSeek"],
-    ["Ge", "Gemini CLI"],
+  const tools: [ToolId, string][] = [
+    ["claude", "Claude"],
+    ["codex", "Codex"],
+    ["cursor", "Cursor"],
+    ["zai", "Z.ai"],
+    ["deepseek", "DeepSeek"],
+    ["grok", "Grok"],
   ];
   const rows: [string, string][] = [
     ["Recall", "Agents answer from the notebook and cite the page they used."],

@@ -1,11 +1,13 @@
+import type { ToolId } from "@/components/tool-logo";
+
 // Exploration: plugins for AI harnesses, two-way. Sample data only.
 // See docs/decisions/0001-knowledge-notebook.md, decision 6.
 
 export type Plugin = {
   id: string;
   name: string;
-  /** Two letters for the tile, since the prototype doesn't carry other companies' logos. */
-  tile: string;
+  /** Which logo the tile shows. */
+  tile: ToolId;
   covers: string;
   installed: boolean;
   /** Who on the team has it, when installed. */
@@ -16,7 +18,7 @@ export const plugins: Plugin[] = [
   {
     id: "claude",
     name: "Claude",
-    tile: "Cl",
+    tile: "claude",
     covers: "Claude Code and Claude Desktop",
     installed: true,
     people: 6,
@@ -24,25 +26,31 @@ export const plugins: Plugin[] = [
   {
     id: "codex",
     name: "Codex",
-    tile: "Cx",
+    tile: "codex",
     covers: "The Codex CLI and app",
     installed: true,
     people: 3,
   },
-  { id: "cursor", name: "Cursor", tile: "Cu", covers: "Cursor’s agent and chat", installed: false },
-  { id: "zai", name: "Z.ai", tile: "Z", covers: "Z.ai’s GLM coding tools", installed: false },
+  {
+    id: "cursor",
+    name: "Cursor",
+    tile: "cursor",
+    covers: "Cursor’s agent and chat",
+    installed: false,
+  },
+  { id: "zai", name: "Z.ai", tile: "zai", covers: "Z.ai’s GLM coding tools", installed: false },
   {
     id: "deepseek",
     name: "DeepSeek",
-    tile: "DS",
+    tile: "deepseek",
     covers: "Harnesses running DeepSeek models",
     installed: false,
   },
   {
-    id: "gemini",
-    name: "Gemini CLI",
-    tile: "Ge",
-    covers: "Google’s terminal agent",
+    id: "grok",
+    name: "Grok",
+    tile: "grok",
+    covers: "xAI’s Grok models and agents",
     installed: false,
   },
 ];

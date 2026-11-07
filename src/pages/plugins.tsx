@@ -8,17 +8,18 @@ import { toast } from "@/components/ui/toast";
 import { Dot, PageHeader, Section, linkClass } from "@/components/common";
 import { plugins, savedNotes, type Plugin } from "@/data/plugins";
 import { cn } from "@/lib/utils";
+import { ToolLogo, type ToolId } from "@/components/tool-logo";
 
-export function PluginTile({ tile, className }: { tile: string; className?: string }) {
+export function PluginTile({ tile, className }: { tile: ToolId; className?: string }) {
   return (
     <span
       aria-hidden
       className={cn(
-        "grid size-9 shrink-0 place-items-center rounded-lg border bg-muted text-[13px] font-semibold tracking-[-0.01em]",
+        "grid size-9 shrink-0 place-items-center rounded-lg border bg-background text-foreground",
         className,
       )}
     >
-      {tile}
+      <ToolLogo id={tile} className="size-1/2" />
     </span>
   );
 }
@@ -57,10 +58,10 @@ function PluginRow({ p }: { p: Plugin }) {
 
 /** One fact, saved from one tool and recalled from another: the point of a shared memory. */
 export function MemoryDemo({ className }: { className?: string }) {
-  const turn = (tile: string, tool: string, when: string, ask: string, reply: React.ReactNode) => (
+  const turn = (tile: ToolId, tool: string, when: string, ask: string, reply: React.ReactNode) => (
     <div className="grid gap-3 p-4">
       <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
-        <PluginTile tile={tile} className="size-6 rounded-md text-[11px]" />
+        <PluginTile tile={tile} className="size-6 rounded-md" />
         <span className="font-medium text-foreground">{tool}</span>
         {when}
       </p>
@@ -73,7 +74,7 @@ export function MemoryDemo({ className }: { className?: string }) {
   return (
     <div className={cn("divide-y overflow-hidden rounded-xl border bg-card", className)}>
       {turn(
-        "Cl",
+        "claude",
         "Claude Code",
         "Monday",
         "Remember that refunds now take 3 business days.",
@@ -85,7 +86,7 @@ export function MemoryDemo({ className }: { className?: string }) {
         </>,
       )}
       {turn(
-        "Cx",
+        "codex",
         "Codex",
         "Today",
         "How long do refunds take?",
