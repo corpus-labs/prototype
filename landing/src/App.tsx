@@ -76,8 +76,8 @@ function Hero() {
     <section id="top" className="relative isolate pt-14 sm:pt-24">
       {/* Texture behind the headline: strongest at the top right, gone before the screenshot. */}
       <Lattice
-        className="h-[760px]"
-        fade="radial-gradient(ellipse 58% 75% at 100% 0%, black 0%, rgb(0 0 0 / 0.5) 40%, transparent 78%)"
+        className="top-20 h-[640px] opacity-55"
+        fade="linear-gradient(to bottom, transparent, black 30%), radial-gradient(ellipse 55% 70% at 100% 25%, black 0%, rgb(0 0 0 / 0.45) 40%, transparent 75%)"
       />
       <div className={WRAP}>
         <div className="max-w-[860px]">

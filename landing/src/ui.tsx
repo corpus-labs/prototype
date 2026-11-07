@@ -222,7 +222,7 @@ export function Lattice({
   className?: string;
   /** One mark's width in pixels. */
   size?: number;
-  /** A CSS mask image that fades the lattice out. */
+  /** CSS mask images that fade the lattice out. Several are intersected, so each one fades an edge. */
   fade: string;
 }) {
   // useId can contain characters that break url(#id) references.
@@ -238,7 +238,12 @@ export function Lattice({
     <svg
       aria-hidden
       className={cn("pointer-events-none absolute inset-0 -z-10 size-full", className)}
-      style={{ maskImage: fade, WebkitMaskImage: fade }}
+      style={{
+        maskImage: fade,
+        WebkitMaskImage: fade,
+        maskComposite: "intersect",
+        WebkitMaskComposite: "source-in",
+      }}
     >
       <defs>
         <pattern id={id} width={size} height={size} patternUnits="userSpaceOnUse">
