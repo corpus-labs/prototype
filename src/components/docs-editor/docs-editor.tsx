@@ -732,7 +732,7 @@ export function DocsEditor({
     <>
       <EditorToolbar state={toolbar} onAction={act} className="sticky top-14 z-10 mb-6 md:top-14" />
       <div
-        className="group/editor relative"
+        className="group/editor relative md:-ml-12 md:pl-12"
         onMouseMove={(e) => {
           const root = host.current?.querySelector(".docs-prose");
           if (!root) return;
@@ -760,7 +760,7 @@ export function DocsEditor({
             onMouseDown={(e) => e.preventDefault()}
             onClick={addBelow}
             style={{ top: handleTop }}
-            className="absolute -left-9 hidden size-6 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity outline-none group-hover/editor:opacity-100 hover:bg-accent hover:text-foreground focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50 md:flex [&_svg]:size-4"
+            className="absolute left-3 hidden size-6 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity outline-none group-hover/editor:opacity-100 hover:bg-accent hover:text-foreground focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50 md:flex [&_svg]:size-4"
           >
             <PlusIcon />
           </button>

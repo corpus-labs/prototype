@@ -285,11 +285,6 @@ export function EditorToolbar({
         disabled={!state.canRedo}
         onAction={() => onAction("redo")}
       />
-
-      <span className="ml-auto hidden shrink-0 pr-2 pl-4 text-[13px] text-muted-foreground lg:block">
-        Type <kbd className="font-mono text-[12px]">/</kbd> for blocks,{" "}
-        <kbd className="font-mono text-[12px]">[[</kbd> to link a page
-      </span>
     </div>
   );
 }

@@ -361,7 +361,7 @@ function PageEditor({
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-12">
+    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-14 md:py-12">
       <header className="grid gap-6">
         <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between md:gap-10">
           <div className="min-w-0 flex-1">
