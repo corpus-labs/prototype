@@ -43,8 +43,8 @@ function Header() {
           <a className={link} href="#how">
             How it works
           </a>
-          <a className={link} href="#ai">
-            Any AI
+          <a className={link} href="#plugins">
+            Plugins
           </a>
           <a className={link} href="#pricing">
             Pricing
@@ -253,7 +253,7 @@ function Jobs() {
   const jobs: { id: JobId; body: string; instead: string }[] = [
     {
       id: "ai",
-      body: "Claude, Codex, Cursor, or any tool that speaks MCP reads your plans, decisions, and rules.",
+      body: "Plugins for Claude, Codex, and more recall your plans and decisions, and save new ones back.",
       instead: "a prompt file copied into every AI tool",
     },
     {
@@ -459,65 +459,116 @@ function SupportBot() {
 
 /* Any AI ------------------------------------------------------------------- */
 
-function AnyAI() {
+function Tile({ tile, className }: { tile: string; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "grid size-9 shrink-0 place-items-center rounded-lg border bg-white text-[13px] font-semibold",
+        className,
+      )}
+    >
+      {tile}
+    </span>
+  );
+}
+
+/** One fact, saved from one tool on Monday and recalled from another today. */
+function SharedMemory() {
+  const turn = (tile: string, tool: string, when: string, ask: string, reply: ReactNode) => (
+    <div className="grid gap-3 px-5 py-4">
+      <p className="flex items-center gap-2 text-[13px] text-muted">
+        <Tile tile={tile} className="size-6 rounded-md text-[11px]" />
+        <span className="font-medium text-ink">{tool}</span>
+        {when}
+      </p>
+      <p className="max-w-[85%] justify-self-end rounded-2xl rounded-br-md bg-ink px-3.5 py-2 text-[15px] text-white">
+        {ask}
+      </p>
+      <div className="text-[15px] leading-[1.5]">{reply}</div>
+    </div>
+  );
+  return (
+    <figure className="shot divide-y overflow-hidden bg-white">
+      {turn(
+        "Cl",
+        "Claude Code",
+        "Monday",
+        "Remember that refunds now take 3 business days.",
+        <>
+          <Dot tone="good">Saved to Customer help, Refunds</Dot>
+          <p className="mt-1 pl-4 text-[13.5px] text-muted">
+            As a draft. Mitch approved it the same day.
+          </p>
+        </>,
+      )}
+      {turn(
+        "Cx",
+        "Codex",
+        "Today",
+        "How long do refunds take?",
+        <>
+          <p>3 business days once the refund is approved.</p>
+          <p className="mt-1 text-[13.5px] text-muted">From Customer help, Refunds</p>
+        </>,
+      )}
+    </figure>
+  );
+}
+
+function PluginsSection() {
+  const tools: [string, string][] = [
+    ["Cl", "Claude"],
+    ["Cx", "Codex"],
+    ["Cu", "Cursor"],
+    ["Z", "Z.ai"],
+    ["DS", "DeepSeek"],
+    ["Ge", "Gemini CLI"],
+  ];
   const rows: [string, string][] = [
-    [
-      "Agents that read it",
-      "Claude Code, Codex, Cursor, VS Code, ChatGPT, and harnesses running GLM, DeepSeek, Gemini, or local models.",
-    ],
-    ["How they connect", "MCP, llms.txt, or any page’s URL plus .md."],
-    [
-      "Your AI key",
-      "Drafting and the support bot use the provider you pick: Anthropic, OpenAI, Z.ai, DeepSeek, OpenRouter, or a local model with Ollama.",
-    ],
+    ["Recall", "Agents answer from your notebook and cite the page they used."],
+    ["Save", "They save decisions and fixes back as drafts your team approves."],
+    ["One click", "No terminal or config file, so it works for everyone, not just engineers."],
   ];
   return (
-    <section id="ai" className="border-t bg-subtle py-24 sm:py-32">
+    <section id="plugins" className="border-t bg-subtle py-24 sm:py-32">
       <div className={cn(WRAP, "grid gap-12 lg:grid-cols-[1fr_520px] lg:gap-16")}>
         <div>
           <Heading
-            title="Works with the AI you use now, and the one you switch to next."
-            lead="Models change every year. Your company’s knowledge shouldn’t have to move with them."
+            title="Plugins give every AI tool the same memory."
+            lead="Install Corpus in Claude, Codex, Cursor, Z.ai, or DeepSeek. What one tool saves, every other tool can recall, so switching models never means starting over."
           />
-          <dl className="mt-10 divide-y border-y">
+          <ul className="mt-10 grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
+            {tools.map(([tile, name]) => (
+              <li key={name} className="flex items-center gap-2.5 text-[15px] font-medium">
+                <Tile tile={tile} />
+                {name}
+              </li>
+            ))}
+          </ul>
+          <dl className="mt-8 divide-y border-y">
             {rows.map(([k, v]) => (
-              <div key={k} className="grid gap-1 py-4 sm:grid-cols-[180px_1fr] sm:gap-6">
+              <div key={k} className="grid gap-1 py-3.5 sm:grid-cols-[120px_1fr] sm:gap-6">
                 <dt className="text-[15.5px] font-medium">{k}</dt>
                 <dd className="text-[15.5px] leading-[1.55] text-pretty text-muted">{v}</dd>
               </div>
             ))}
           </dl>
-        </div>
-        <figure className="self-center overflow-hidden rounded-2xl border bg-white">
-          <figcaption className="flex items-center justify-between border-b bg-subtle px-5 py-3 text-[14px]">
-            <span className="font-medium">Connect an agent</span>
-            <span className="font-mono text-[12.5px] text-muted">Terminal</span>
-          </figcaption>
-          <div className="grid gap-5 p-5 font-mono text-[13px] leading-[1.7]">
-            <Command tool="Claude Code">
+          <p className="mt-5 text-[14px] leading-[1.6] text-muted">
+            Prefer the terminal? Any MCP client connects in one line:{" "}
+            <code className="font-mono text-[13px] break-all text-ink">
               claude mcp add --transport http charged-help https://charged-help.corpus.app/mcp
-            </Command>
-            <Command tool="Codex">
-              codex mcp add charged-help --url https://charged-help.corpus.app/mcp
-            </Command>
-            <Command tool="Anything else">
-              GET https://charged-help.corpus.app/llms.txt
-              <br />
-              GET https://charged-help.corpus.app/billing/refunds.md
-            </Command>
-          </div>
-        </figure>
+            </code>
+          </p>
+        </div>
+        <div className="self-center">
+          <SharedMemory />
+          <p className="mt-3 text-[13.5px] text-muted">
+            Saved in one tool on Monday, recalled in another today.
+          </p>
+        </div>
       </div>
     </section>
-  );
-}
-
-function Command({ tool, children }: { tool: string; children: ReactNode }) {
-  return (
-    <div>
-      <p className="font-sans text-[13px] text-muted">{tool}</p>
-      <code className="mt-1 block break-words">{children}</code>
-    </div>
   );
 }
 
@@ -620,7 +671,7 @@ function Faq() {
     ],
     [
       "Which AI tools does it work with?",
-      "Any tool that speaks MCP or reads llms.txt, including Claude Code, Codex, Cursor, VS Code, and ChatGPT. Drafting and the support bot run on your own key with Anthropic, OpenAI, Z.ai, DeepSeek, OpenRouter, or a local model.",
+      "Plugins for Claude, Codex, Cursor, Z.ai, DeepSeek, and Gemini CLI install in one click. Any other tool that speaks MCP or reads llms.txt works too. Drafting and the support bot run on your own key with Anthropic, OpenAI, Z.ai, DeepSeek, OpenRouter, or a local model.",
     ],
     [
       "Why a one-time price?",
@@ -731,7 +782,7 @@ export default function App() {
         <Publishing />
         <HowItWorks />
         <SupportBot />
-        <AnyAI />
+        <PluginsSection />
         <Pricing />
         <Faq />
         <Join />
