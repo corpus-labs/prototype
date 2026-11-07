@@ -427,7 +427,7 @@ function HowItWorks() {
             <span className="md:hidden">
               Top, the page people read. Below, the Markdown agents and the support bot get.{" "}
             </span>
-            Point at a section to see it in both.
+            Hover over any part of the page to highlight the same lines in the Markdown.
           </p>
         </div>
       </div>
