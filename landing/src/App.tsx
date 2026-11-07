@@ -520,32 +520,6 @@ function Pricing() {
   );
 }
 
-/* Founder ------------------------------------------------------------------ */
-
-function Founder() {
-  return (
-    <section className="border-t bg-subtle py-20 sm:py-24">
-      <div className={cn(WRAP, "grid gap-6 sm:grid-cols-[64px_1fr] sm:gap-8")}>
-        <div className="grid size-16 place-items-center rounded-full border bg-white text-[20px] font-medium text-neutral-600">
-          MK
-        </div>
-        <div className="max-w-[760px]">
-          <p className="text-[20px] leading-[1.5] text-pretty sm:text-[22px]">
-            Corpus is built by Mitch Kostelecky, a frontend engineer who has shipped design systems,
-            developer tools, and one-time-priced products that developers buy.
-          </p>
-          <p className="mt-3 text-[15px] leading-[1.6] text-pretty text-muted">
-            Staff-level frontend engineer at Flipgrid (acquired by Microsoft), OurFamilyWizard, and
-            Parsley Health. Founder of Charged Labs, maker of the Charged UI design system you see
-            in these screens. Elite author on ThemeForest. Building Corpus at the USC Iovine Young
-            Academy.
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* FAQ ---------------------------------------------------------------------- */
 
 function Faq() {
@@ -671,7 +645,6 @@ export default function App() {
         <SupportBot />
         <AnyAI />
         <Pricing />
-        <Founder />
         <Faq />
         <Join />
       </main>
