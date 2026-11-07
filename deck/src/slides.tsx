@@ -1,714 +1,868 @@
-import { Check, FileText, Minus, Server } from "lucide-react";
-import { Badge } from "./components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./components/ui/table";
-import { CorpusMark, Kicker, LinkSlot, ShotFrame, Slide, SlideHeading, Stat, Stop } from "./ui";
-import overview from "./assets/shots/overview.png";
-import editorShot from "./assets/shots/editor.png";
-import buttonShot from "./assets/shots/component-button.png";
-import agentsShot from "./assets/shots/agents.png";
-import openaiLogo from "./assets/logos/openai.svg";
-import anthropicLogo from "./assets/logos/anthropic.svg";
-import cursorLogo from "./assets/logos/cursor.svg";
-import figmaLogo from "./assets/logos/figma.svg";
-import notionLogo from "./assets/logos/notion.svg";
-import slackLogo from "./assets/logos/slack.svg";
-import mintlifyLogo from "./assets/logos/mintlify.svg";
-import gitbookLogo from "./assets/logos/gitbook.svg";
-import obsidianLogo from "./assets/logos/obsidian.svg";
+import type { ReactNode } from "react";
+import { FACTS } from "./facts";
+import { cn } from "./lib/utils";
+import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title, Todo } from "./ui";
+import titleShot from "./assets/shots/title-button.png";
+import solutionShot from "./assets/shots/solution-split.png";
+import tractionShot from "./assets/shots/traction-draft.png";
 
-/* 01 — Title */
-function Title() {
+/* Shared pieces --------------------------------------------------------- */
+
+/** Content area below the running header. */
+function Body({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <Slide n={1} dark>
-      <CorpusMark
-        aria-hidden="true"
-        className="absolute -right-28 -bottom-36 size-[560px] text-neutral-900"
+    <div className={cn("absolute inset-x-16 top-[108px] bottom-14", className)}>{children}</div>
+  );
+}
+
+/** A label and value pair, like the product's Facts line, stacked. */
+function Fact({ k, children, wide = false }: { k: string; children: ReactNode; wide?: boolean }) {
+  return (
+    <div
+      className={cn(
+        "grid items-baseline gap-4",
+        wide ? "grid-cols-[132px_1fr]" : "grid-cols-[96px_1fr]",
+      )}
+    >
+      <dt className="text-muted">{k}</dt>
+      <dd>{children}</dd>
+    </div>
+  );
+}
+
+/** A rule as the product shows it: the keyword, then the sentence. */
+function Rule({ kw, children }: { kw: string; children: ReactNode }) {
+  return (
+    <li className="grid grid-cols-[44px_1fr] items-baseline gap-3">
+      <code className="text-[11.5px] font-medium">{kw}</code>
+      <span>{children}</span>
+    </li>
+  );
+}
+
+/* 1. Cover --------------------------------------------------------------- */
+
+function Cover() {
+  return (
+    <Slide>
+      <CorpusLogo className="absolute top-14 left-16 h-[30px]" />
+      <div className="absolute top-[178px] left-16 w-[560px]">
+        <h1 className="text-[58px] leading-[1.05] font-semibold tracking-[-0.035em] text-balance">
+          Design system docs that AI agents follow.
+        </h1>
+        <p className="mt-6 text-[21px] leading-[1.45] text-pretty text-muted">
+          Document a design system once. People read it as a website, and coding agents like Claude
+          Code and Cursor read the same source.
+        </p>
+      </div>
+      <div className="absolute bottom-14 left-16 grid gap-1 text-[15px]">
+        <p className="font-medium">Mitch Kostelecky</p>
+        <p className="text-muted">USC Iovine Young Academy</p>
+        <p className="text-muted">Ignite Grant, GenAI track, Fall 2026</p>
+      </div>
+      <Shot
+        src={titleShot}
+        alt="The Corpus prototype showing the Button component page"
+        className="absolute top-[150px] bottom-0 left-[676px] w-[940px] rounded-b-none"
+        imgClassName="h-full object-cover object-top-left"
       />
-      <div className="relative flex h-full flex-col justify-between px-20 py-16">
-        <div className="flex items-center gap-3">
-          <CorpusMark duo className="size-7 text-neutral-50" />
-          <span className="text-lg font-medium tracking-[-0.01em]">Corpus</span>
-        </div>
-        <div>
-          <Kicker dark>IYA Ignite Grant · GenAI Category · Fall 2026</Kicker>
-          <h1 className="mt-7 text-[76px] leading-[1.28] font-semibold tracking-[-0.035em]">
-            One source of truth
-            <Stop />
-          </h1>
-          <p className="mt-5 text-[29px] leading-snug font-medium tracking-[-0.015em] text-neutral-400">
-            Two readers: <span className="text-neutral-50">your team</span> and{" "}
-            <span className="text-emerald-400">your AI agents</span>.
-          </p>
-          <p className="mt-7 max-w-xl text-[15.5px] leading-relaxed text-neutral-500">
-            A context control plane for small teams and solo builders: capture knowledge in a
-            familiar editor, publish it as your docs, and connect every agent and support bot —
-            live, via MCP and marketplace apps. Owned, not rented.
-          </p>
-        </div>
-        <div className="flex items-end justify-between font-mono text-[11px] tracking-[0.14em] text-neutral-600 uppercase">
-          <span>[ Your name ] · USC graduate student · Spring 2027</span>
-          <span>November 2026</span>
-        </div>
-      </div>
     </Slide>
   );
 }
 
-/* 02 — Team */
+/* 2. Team ---------------------------------------------------------------- */
+
 function Team() {
-  const ledger = [
-    {
-      tag: "Agent-leveraged build",
-      body: "The prototype — 12,254 lines, 44 passing tests — was built solo with AI coding agents. The product's thesis, applied to itself.",
-    },
-    {
-      tag: "Open-source core",
-      body: "Milkdown editor, React, Tailwind — proven parts assembled, not reinvented.",
-    },
-    {
-      tag: "One mentor ask",
-      body: "An IYA mentor in dev-tools or go-to-market to pressure-test the launch plan.",
-    },
+  const record: [string, ReactNode][] = [
+    [
+      "Founder, Charged Labs",
+      "Developer tools for Drupal and WordPress, including Charged UI, the first design system documented in Corpus.",
+    ],
+    [
+      "Staff-level frontend engineer",
+      "Flipgrid (acquired by Microsoft), OurFamilyWizard, and Parsley Health.",
+    ],
+    [
+      "Elite author on ThemeForest",
+      "More than $75,000 in lifetime sales, Envato’s bar for Elite. I’ve sold one-time-priced products to developers before.",
+    ],
+    [
+      "15 years in the Drupal community",
+      "Corpus launches there first, with people I already know how to reach.",
+    ],
   ];
   return (
-    <Slide n={2}>
-      <div className="relative flex h-full flex-col px-20 py-16">
-        <SlideHeading kicker="01 · Team" title="Solo founder, agent-leveraged." />
-        <div className="mt-12 grid flex-1 grid-cols-2 gap-16">
-          <div className="flex flex-col justify-center">
-            <div className="rounded-2xl bg-neutral-50 p-9">
-              <div className="flex items-center gap-3.5">
-                <CorpusMark className="size-6 text-neutral-950" />
-                <span className="text-[28px] font-semibold tracking-[-0.02em]">[ Your name ]</span>
-              </div>
-              <p className="mt-3 text-[14.5px] text-neutral-500">
-                USC graduate student · graduating Spring 2027 · enrolled Fall 26 – Spring 27
-              </p>
-              <div className="mt-5 flex gap-2">
-                {["Product", "Design", "Engineering"].map((r) => (
-                  <Badge key={r} variant="secondary" className="font-mono text-[10.5px]">
-                    {r}
-                  </Badge>
-                ))}
-              </div>
-              <p className="mt-5 border-t border-neutral-200 pt-4 text-[13.5px] leading-relaxed text-neutral-500">
-                No hires planned — the grant goes entirely to market validation (slide 09). One
-                person ships; the budget buys distribution.
-              </p>
+    <Slide section="Team">
+      <Body>
+        <Title>Solo founder, already inside the market Corpus serves first.</Title>
+        <div className="mt-12 grid grid-cols-[372px_1fr] gap-16">
+          <div>
+            <div className="grid size-[72px] place-items-center rounded-full bg-neutral-100 text-[24px] font-medium text-neutral-600">
+              MK
             </div>
-          </div>
-          <div className="flex flex-col justify-center">
-            {ledger.map((l, i) => (
-              <div key={l.tag} className={i > 0 ? "border-t border-neutral-100 pt-6" : ""}>
-                <p className="font-mono text-[10.5px] tracking-[0.18em] text-neutral-400 uppercase">
-                  {l.tag}
-                </p>
-                <p className="mt-2 max-w-sm text-[14px] leading-relaxed">{l.body}</p>
-                {i < ledger.length - 1 && <div className="h-6" />}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </Slide>
-  );
-}
-
-/* 03 — Problem */
-function Problem() {
-  const pains = [
-    {
-      head: "Docs are rented — or raw",
-      body: "Mintlify's agent features jump from $0 to $450/mo, and self-hosting is enterprise-only. The free route is markdown files and a git repo. Neither works for everyone.",
-    },
-    {
-      head: "Knowledge fragments everywhere",
-      body: "Notes stay personal in Obsidian — publishing is a paid, hosted add-on — docs sit in someone else's cloud, answers rot in Slack.",
-    },
-    {
-      head: "Agents have protocols, not a source",
-      body: "MCP servers and marketplace apps are how harnesses consume context now. But a protocol needs a home to point at — and yours is split across tools that each hold a slice.",
-    },
-  ];
-  const leaves: [string, number, number][] = [
-    [anthropicLogo, 250, 0],
-    [openaiLogo, 262, 58],
-    [cursorLogo, 246, 116],
-    [figmaLogo, 264, 174],
-    [notionLogo, 248, 232],
-    [slackLogo, 262, 290],
-  ];
-  const labels: Record<string, string> = {
-    [anthropicLogo]: "session logs",
-    [openaiLogo]: "threads",
-    [cursorLogo]: "rules file",
-    [figmaLogo]: "comments",
-    [notionLogo]: "docs copy",
-    [slackLogo]: "history",
-  };
-  return (
-    <Slide n={3}>
-      <div className="relative flex h-full flex-col px-20 py-16">
-        <SlideHeading
-          kicker="02 · Problem"
-          title="Documentation now has two readers. Every existing tool serves one."
-        />
-        <div className="mt-12 grid flex-1 grid-cols-[1.15fr_1fr] gap-16">
-          <div className="flex flex-col justify-center gap-9">
-            {pains.map((p, i) => (
-              <div key={p.head} className="flex items-start gap-5">
-                <span className="mt-0.5 w-8 shrink-0 font-mono text-[26px] leading-[1.15] font-medium text-neutral-200 tabular">
-                  {i + 1}
-                </span>
-                <div>
-                  <p className="text-[16.5px] font-medium">{p.head}</p>
-                  <p className="mt-1.5 max-w-md text-[13.5px] leading-relaxed text-neutral-500">
-                    {p.body}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-col items-center justify-center">
-            <div className="relative h-[360px] w-[430px]">
-              <svg viewBox="0 0 430 360" className="absolute inset-0" aria-hidden="true">
-                {leaves.map(([, left, top]) => {
-                  const y = top + 18;
-                  return (
-                    <path
-                      key={`b${left}`}
-                      d={`M132 180 C 196 180, ${left - 72} ${y}, ${left} ${y}`}
-                      fill="none"
-                      stroke="#d4d4d4"
-                      strokeWidth="1.5"
-                      strokeDasharray="6 5"
-                      className="beam"
-                    />
-                  );
-                })}
-              </svg>
-              <div className="absolute top-[158px] left-0 flex h-11 items-center gap-2 rounded-xl bg-neutral-950 px-4 text-neutral-50">
-                <FileText className="size-3.5 text-neutral-400" />
-                <span className="font-mono text-[11px] tracking-[0.06em]">your knowledge</span>
-              </div>
-              {leaves.map(([logo, left, top]) => (
-                <div
-                  key={logo}
-                  className="absolute flex h-9 w-[168px] items-center gap-2.5 rounded-lg bg-white pr-3 pl-2.5 shadow-[0_2px_10px_rgb(0_0_0/0.07)] ring-1 ring-neutral-200"
-                  style={{ left, top }}
-                >
-                  <img src={logo} alt="" className="size-3.5" />
-                  <span className="font-mono text-[10px] text-neutral-500">
-                    {labels[logo] ?? ""}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <p className="mt-4 text-[12.5px] text-neutral-400 italic">
-              Copies pushed out. Conversations trapped in.
+            <p className="mt-5 text-[28px] font-semibold tracking-[-0.02em]">Mitch Kostelecky</p>
+            <p className="mt-1 text-[17px] text-muted">
+              Founder. Product, design, and engineering.
             </p>
+            <dl className="mt-7 grid gap-2.5 text-[15px] leading-snug">
+              <Fact k="USC">
+                IYA graduate student, MS in Integrated Design, Business and Technology
+              </Fact>
+              <Fact k="Enrolled">Fall 2026 and Spring 2027</Fact>
+              <Fact k="Email">
+                <Fill value={FACTS.email} todo="email" />
+              </Fact>
+            </dl>
           </div>
+          <ul className="divide-y border-y">
+            {record.map(([head, body]) => (
+              <li key={head} className="py-[15px]">
+                <p className="text-[18px] font-medium">{head}</p>
+                <p className="mt-1 text-[15.5px] leading-[1.5] text-pretty text-muted">{body}</p>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
+      </Body>
     </Slide>
   );
 }
 
-/* 04 — Solution (dark centerpiece) */
+/* 3. Problem ------------------------------------------------------------- */
+
+function Problem() {
+  return (
+    <Slide section="Problem">
+      <Body>
+        <Title className="max-w-[880px]">
+          AI agents write UI code now. They don’t follow your design system.
+        </Title>
+        <div className="mt-11 grid grid-cols-[1fr_588px] gap-14">
+          <div className="flex flex-col">
+            <ul className="divide-y border-y text-[18.5px] leading-[1.45]">
+              <li className="py-4">
+                Design system rules live in docs written for people. Agents can’t use them, so they
+                guess.
+              </li>
+              <li className="py-4">
+                The guess is almost right: the wrong component, a hardcoded color, a vague label.
+              </li>
+              <li className="py-4">
+                Someone fixes it in review, again and again. Nobody sees which answers were missing.
+              </li>
+            </ul>
+            <div className="mt-auto">
+              <p className="text-[15px] leading-snug text-pretty text-muted">
+                <span className="font-semibold text-ink">66%</span> of developers say their top
+                frustration with AI tools is answers that are “almost right, but not quite.”
+              </p>
+              <Source className="mt-1.5">Stack Overflow Developer Survey 2025</Source>
+            </div>
+          </div>
+          <CodeCompare />
+        </div>
+      </Body>
+    </Slide>
+  );
+}
+
+function CodeCompare() {
+  return (
+    <figure className="overflow-hidden rounded-xl border bg-white">
+      <figcaption className="border-b bg-subtle px-5 py-3 text-[14px] text-muted">
+        Asked to “add a checkout button to the cart page”
+      </figcaption>
+      <div className="px-5 pt-4 pb-4">
+        <Dot tone="bad" className="text-[14px] font-medium text-bad">
+          What the agent wrote
+        </Dot>
+        <pre className="mt-2 text-[13.5px] leading-[1.6]">{`<a class="btn btn-primary" href="/checkout">
+  Checkout
+</a>`}</pre>
+      </div>
+      <div className="border-t px-5 pt-4 pb-5">
+        <Dot tone="good" className="text-[14px] font-medium text-good">
+          What Charged UI’s docs say
+        </Dot>
+        <pre className="mt-2 text-[13.5px] leading-[1.6]">{`{{ include('charged_ui:button', {
+  variant: 'primary',
+  label: 'Go to checkout',
+  href: '/checkout',
+}) }}`}</pre>
+        <ul className="mt-3 grid gap-1.5 border-t border-dashed pt-3 text-[13px] leading-snug text-muted">
+          <Rule kw="MUST">pass href to Button for links styled as buttons.</Rule>
+          <Rule kw="MUST">write labels as a verb phrase, three words or fewer.</Rule>
+        </ul>
+      </div>
+    </figure>
+  );
+}
+
+/* 4. Why now ------------------------------------------------------------- */
+
+function WhyNow() {
+  const shifts: [string, ReactNode][] = [
+    [
+      "Agents got a standard plug",
+      "The Model Context Protocol (MCP) lets an agent ask an outside source for context. Claude Code, Cursor, VS Code, and Codex all support it.",
+    ],
+    [
+      "Design system tools are adding it",
+      "zeroheight, Supernova, and Storybook now ship MCP servers. Teams are asking for this, and vendors are answering.",
+    ],
+    [
+      "Without a source, agents fill the gaps",
+      "An agent that can’t find your rules falls back on what it saw in training: other teams’ components, not yours.",
+    ],
+  ];
+  return (
+    <Slide section="Why now">
+      <Body>
+        <Title className="max-w-[960px]">
+          Agents became an everyday tool, and they now have a standard way to read context.
+        </Title>
+        <div className="absolute inset-x-0 bottom-0 grid grid-cols-[420px_1fr] items-end gap-16">
+          <div className="pb-5">
+            <p className="text-[136px] leading-[0.85] font-semibold tracking-[-0.05em] tabular-nums">
+              84%
+            </p>
+            <p className="mt-7 text-[20px] leading-[1.45] text-pretty">
+              of developers use or plan to use AI tools. Half of professional developers use them
+              every day.
+            </p>
+            <Source className="mt-3">
+              Stack Overflow Developer Survey 2025 (51% use them daily)
+            </Source>
+          </div>
+          <ul className="divide-y border-y">
+            {shifts.map(([head, body]) => (
+              <li key={head} className="py-[18px]">
+                <p className="text-[18.5px] font-medium">{head}</p>
+                <p className="mt-1 text-[16px] leading-[1.5] text-pretty text-muted">{body}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Body>
+    </Slide>
+  );
+}
+
+/* 5. Solution ------------------------------------------------------------ */
+
 function Solution() {
   return (
-    <Slide n={4} dark>
-      <div className="relative flex h-full flex-col px-20 py-14">
-        <SlideHeading
-          dark
-          kicker="03 · Solution"
-          title="A context control plane: capture once, serve every reader."
+    <Slide section="Solution">
+      <Body>
+        <Title className="max-w-[900px]">
+          Corpus: write the docs once. People and agents read the same source.
+        </Title>
+      </Body>
+      <div className="absolute inset-x-16 top-[240px] bottom-0 flex flex-col">
+        <div className="mb-3.5 grid grid-cols-[53.9%_1fr] px-1 text-[15.5px]">
+          <Dot tone="off">
+            <span className="font-medium">People</span>
+            <span className="text-muted">read the published page</span>
+          </Dot>
+          <Dot tone="good">
+            <span className="font-medium">Agents</span>
+            <span className="text-muted">get the same rules, word for word</span>
+          </Dot>
+        </div>
+        <Shot
+          src={solutionShot}
+          alt="Corpus split view: the Button page for people beside the Markdown an agent receives, with the Rules section highlighted on both sides"
+          className="min-h-0 flex-1 rounded-b-none"
+          imgClassName="h-full object-cover object-top"
         />
-        <div className="mt-10 flex flex-1 items-center justify-between gap-6">
-          {/* The editor */}
-          <div className="w-[440px] shrink-0">
-            <ShotFrame src={editorShot} url="corpus.local/#editor" imgClassName="max-h-[280px]" />
-            <p className="mt-3.5 text-[13px] leading-relaxed text-neutral-400">
-              Write in a familiar editor — headings, links, tables, no syntax to learn. Markdown
-              lives underneath, invisible unless you want it.
-            </p>
-          </div>
-
-          <svg width="56" height="12" viewBox="0 0 56 12" className="shrink-0" aria-hidden="true">
-            <line x1="0" y1="6" x2="48" y2="6" stroke="#525252" strokeWidth="1.5" />
-            <path d="M48 1.5 L55 6 L48 10.5 Z" fill="#525252" />
-          </svg>
-
-          {/* Hub */}
-          <div className="flex w-40 shrink-0 flex-col items-center rounded-2xl bg-neutral-900 px-6 py-7 ring-1 ring-neutral-700">
-            <CorpusMark duo className="size-10" />
-            <p className="mt-3 text-[15px] font-medium">Corpus</p>
-            <p className="mt-1 font-mono text-[10px] tracking-[0.16em] text-neutral-500 uppercase">
-              control plane
-            </p>
-          </div>
-
-          <svg width="56" height="12" viewBox="0 0 56 12" className="shrink-0" aria-hidden="true">
-            <line x1="0" y1="6" x2="48" y2="6" stroke="#525252" strokeWidth="1.5" />
-            <path d="M48 1.5 L55 6 L48 10.5 Z" fill="#525252" />
-          </svg>
-
-          {/* Outputs */}
-          <div className="flex w-[400px] flex-col gap-5">
-            <div className="rounded-2xl bg-neutral-900 p-6 ring-1 ring-neutral-700">
-              <p className="flex items-center gap-2 font-mono text-[10.5px] tracking-[0.16em] text-neutral-400 uppercase">
-                <span className="size-1.5 rounded-full bg-neutral-200" />
-                People
-              </p>
-              <p className="mt-2.5 text-[14px] leading-relaxed text-neutral-300">
-                Published documentation + help desk — handbooks, product docs, support articles
-              </p>
-            </div>
-            <div className="rounded-2xl bg-emerald-950/50 p-6 ring-1 ring-emerald-900">
-              <p className="flex items-center gap-2 font-mono text-[10.5px] tracking-[0.16em] text-emerald-400 uppercase">
-                <span className="size-1.5 rounded-full bg-emerald-400" />
-                Agents + bots
-              </p>
-              <p className="mt-2.5 text-[14px] leading-relaxed text-emerald-100/90">
-                Live over MCP and marketplace apps — agents read on demand; sessions sync back as
-                knowledge
-              </p>
-            </div>
-          </div>
-        </div>
-        <p className="mt-4 font-mono text-[11.5px] tracking-[0.02em] text-neutral-500">
-          One home for ideas and organizational data. Same plane, next stops: shared conversations,
-          shared components, design systems.
-        </p>
       </div>
     </Slide>
   );
 }
 
-/* 05 — The product today */
-function Today() {
-  return (
-    <Slide n={5}>
-      <div className="relative flex h-full flex-col px-20 py-14">
-        <SlideHeading kicker="04 · The product today" title="A working prototype, not a mockup." />
-        <div className="mt-9 grid flex-1 grid-cols-[1.55fr_1fr] gap-12">
-          <ShotFrame
-            src={overview}
-            url="corpus.local/#overview"
-            label="Sample workspace: a component library documented end to end"
-            imgClassName="max-h-[300px]"
-          />
-          <div className="flex flex-col justify-between py-1">
-            <Stat value="12,254" label="lines of TypeScript" />
-            <Stat value="44" label="tests passing" size="md" rule />
-            <Stat value="10" label="screens" size="md" rule />
-            <Stat value="1" label="self-contained build" size="md" rule />
-            <div className="flex flex-wrap items-center gap-2 border-t border-neutral-200 pt-4">
-              <span className="font-mono text-[10.5px] tracking-[0.16em] text-neutral-400 uppercase">
-                demo
-              </span>
-              <LinkSlot label="[ add url ]" />
-              <span className="font-mono text-[10.5px] tracking-[0.16em] text-neutral-400 uppercase">
-                repo
-              </span>
-              <LinkSlot label="github.com/corpus-labs/prototype" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </Slide>
-  );
-}
+/* 6. How it works -------------------------------------------------------- */
 
-/* 06 — Write once, read everywhere */
-function TwoReaders() {
-  return (
-    <Slide n={6}>
-      <div className="relative flex h-full flex-col px-20 py-14">
-        <SlideHeading
-          kicker="05 · Write once, read everywhere"
-          title="Write it once — the editor handles the markdown."
-        />
-        <div className="mt-8 grid flex-1 grid-cols-3 gap-7">
-          <ShotFrame
-            src={editorShot}
-            url="corpus.local/#editor"
-            label="Write — no markdown required"
-            imgClassName="max-h-[250px]"
-          />
-          <ShotFrame
-            src={buttonShot}
-            url="corpus.local/#component-button"
-            label="People — published view"
-            imgClassName="max-h-[250px]"
-          />
-          <ShotFrame
-            src={agentsShot}
-            url="corpus.local/#agents"
-            label="Agents — structured payloads"
-            dark
-            accent
-            imgClassName="max-h-[250px]"
-          />
-        </div>
-        <p className="mt-5 text-[13.5px] text-neutral-500">
-          One page, three surfaces: captured in the editor, published for people, emitted for agents
-          — llms.txt, Markdown, JSON today; MCP tools in Phase 3.
-        </p>
-      </div>
-    </Slide>
-  );
-}
-
-/* 07 — Positioning */
-function Positioning() {
-  const rows = [
-    {
-      logo: mintlifyLogo,
-      tool: "Mintlify",
-      people: true,
-      agents: "at $450/mo",
-      selfHosted: false,
-      price: "free · pro $450/mo",
-    },
-    {
-      logo: gitbookLogo,
-      tool: "GitBook",
-      people: true,
-      agents: false,
-      selfHosted: false,
-      price: "free (1) · $65/site/mo",
-    },
-    {
-      logo: notionLogo,
-      tool: "Notion",
-      people: true,
-      agents: false,
-      selfHosted: false,
-      price: "per-seat / mo",
-    },
-    {
-      logo: obsidianLogo,
-      tool: "Obsidian",
-      people: "add-on",
-      agents: "community",
-      selfHosted: "local app",
-      price: "free · publish $8/mo",
-    },
-    {
-      logo: null,
-      tool: "Memory MCPs",
-      people: false,
-      agents: "convos only",
-      selfHosted: "varies",
-      price: "$0–20/mo",
-    },
-    {
-      logo: "corpus",
-      tool: "Corpus",
-      people: true,
-      agents: "generated",
-      selfHosted: true,
-      price: "$99 once*",
-      corpus: true,
-    },
+function HowItWorks() {
+  const steps: [string, string][] = [
+    [
+      "Point it at your repo",
+      "Component schemas, docs, and tokens stay as files in your git repo, on your server.",
+    ],
+    [
+      "Every reader, one source",
+      "People browse a site. Agents connect over MCP and ask for exactly the component they need.",
+    ],
+    [
+      "Gaps become drafts",
+      "When agents ask something the docs can’t answer, AI drafts the answer for you to review.",
+    ],
   ];
-  const mark = (v: boolean | string, corpus = false) => {
-    const inner =
-      v === true ? (
-        <Check className={corpus ? "size-4 text-emerald-400" : "size-4 text-emerald-500"} />
-      ) : v === false ? (
-        <Minus className={corpus ? "size-4 text-neutral-700" : "size-4 text-neutral-300"} />
-      ) : (
-        <span
-          className={
-            corpus
-              ? "font-mono text-[11px] text-neutral-300"
-              : "font-mono text-[11px] text-neutral-500"
-          }
-        >
-          {v}
-        </span>
-      );
-    return <span className="flex items-center justify-center">{inner}</span>;
-  };
-  const toolCell = (r: (typeof rows)[number]) => (
-    <span className="flex items-center gap-3">
-      <span
-        className={
-          r.corpus
-            ? "flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-neutral-900 ring-1 ring-neutral-700"
-            : "flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-white shadow-[0_1px_4px_rgb(0_0_0/0.08)] ring-1 ring-neutral-200"
-        }
-      >
-        {r.logo === "corpus" ? (
-          <CorpusMark duo className="size-4" />
-        ) : r.logo ? (
-          <img src={r.logo} alt="" className="size-4" />
-        ) : (
-          <Server className="size-4 text-neutral-400" />
-        )}
-      </span>
-      <span className={r.corpus ? "text-[15px] font-semibold" : "text-[14px] font-medium"}>
-        {r.tool}
-      </span>
-    </span>
-  );
   return (
-    <Slide n={7}>
-      <div className="relative flex h-full flex-col px-20 py-14">
-        <SlideHeading
-          kicker="06 · Where Corpus sits"
-          title="Owned docs that people and agents both read — nobody else does both."
-        />
-        <div className="mt-9 flex-1">
-          <Table className="[&_tr]:border-0">
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="h-10 px-3" />
-                <TableHead className="h-10 px-3 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">
-                  People docs
-                </TableHead>
-                <TableHead className="h-10 px-3 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">
-                  Agent outputs
-                </TableHead>
-                <TableHead className="h-10 px-3 text-center font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">
-                  Self-hosted
-                </TableHead>
-                <TableHead className="h-10 px-3 font-mono text-[9.5px] tracking-[0.14em] text-neutral-400 uppercase">
-                  Price
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((r) => (
-                <TableRow
-                  key={r.tool}
-                  className={
-                    r.corpus
-                      ? "bg-neutral-950 text-neutral-50 hover:bg-neutral-950 [&>td:first-child]:rounded-l-xl [&>td]:px-3 [&>td:last-child]:rounded-r-xl"
-                      : "hover:bg-transparent"
-                  }
-                >
-                  <TableCell className="py-[15px] px-3">{toolCell(r)}</TableCell>
-                  <TableCell className="py-[15px] px-3 text-center">
-                    {mark(r.people, r.corpus)}
-                  </TableCell>
-                  <TableCell className="py-[15px] px-3 text-center">
-                    {mark(r.agents, r.corpus)}
-                  </TableCell>
-                  <TableCell className="py-[15px] px-3 text-center">
-                    {mark(r.selfHosted, r.corpus)}
-                  </TableCell>
-                  <TableCell className="py-[15px] px-3">
-                    {r.corpus ? (
-                      <span className="inline-block rounded-md bg-emerald-500/15 px-2.5 py-1 font-mono text-[11.5px] text-emerald-300">
-                        {r.price}
-                      </span>
-                    ) : (
-                      <span className="font-mono text-[12px] text-neutral-500">{r.price}</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        <p className="mt-4 text-[11px] leading-relaxed text-neutral-400">
-          *Planned launch pricing. Prices from vendor sites, Nov 2026. Mintlify: Starter free (5
-          editors); agent features from Pro, $450/mo annual; self-hosting is an Enterprise add-on.
-          GitBook: free for one user, then $65/site + $12/user/mo. Obsidian: local and free; Publish
-          ($8/mo) is hosted; agent access via community MCP plugins — local, single-user,
-          unsupported. Memory MCPs store conversations — not published docs.
-        </p>
-      </div>
+    <Slide section="How it works">
+      <Body>
+        <Title className="max-w-[920px]">
+          Docs stay in your repo. Corpus serves every reader and flags what’s missing.
+        </Title>
+      </Body>
+      <Diagram />
+      <ol className="absolute inset-x-16 bottom-14 grid grid-cols-3 gap-10">
+        {steps.map(([head, body], i) => (
+          <li key={head} className="grid grid-cols-[28px_1fr] gap-1">
+            <span className="text-[15px] font-medium text-faint tabular-nums">{i + 1}</span>
+            <div>
+              <p className="text-[16px] font-medium">{head}</p>
+              <p className="mt-1 text-[14.5px] leading-[1.5] text-pretty text-muted">{body}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
     </Slide>
   );
 }
 
-/* 08 — Roadmap */
-function Roadmap() {
-  const phases = [
+function Diagram() {
+  // A 1152 x 300 canvas under the title. Boxes are HTML, connectors are one SVG.
+  const line = "stroke-neutral-300";
+  return (
+    <div className="absolute top-[250px] left-16 h-[300px] w-[1152px]">
+      <svg viewBox="0 0 1152 300" className="absolute inset-0 overflow-visible" aria-hidden>
+        <defs>
+          <marker
+            id="arrow"
+            viewBox="0 0 8 8"
+            refX="7"
+            refY="4"
+            markerWidth="8"
+            markerHeight="8"
+            orient="auto"
+          >
+            <path d="M0 0 8 4 0 8z" className="fill-neutral-400" />
+          </marker>
+          <marker
+            id="arrow-good"
+            viewBox="0 0 8 8"
+            refX="7"
+            refY="4"
+            markerWidth="8"
+            markerHeight="8"
+            orient="auto"
+          >
+            <path d="M0 0 8 4 0 8z" className="fill-good" />
+          </marker>
+        </defs>
+        {/* repo to Corpus */}
+        <path
+          d="M338 104 H 418"
+          className={line}
+          strokeWidth="1.5"
+          fill="none"
+          markerEnd="url(#arrow)"
+        />
+        {/* Corpus to people and agents */}
+        <path
+          d="M606 104 C 650 104, 650 50, 700 50"
+          className={line}
+          strokeWidth="1.5"
+          fill="none"
+          markerEnd="url(#arrow)"
+        />
+        <path
+          d="M606 104 C 650 104, 650 166, 700 166"
+          className={line}
+          strokeWidth="1.5"
+          fill="none"
+          markerEnd="url(#arrow)"
+        />
+        {/* the loop: agent questions come back to the repo as drafts */}
+        <path
+          d="M926 222 V 268 Q 926 282 912 282 H 183 Q 169 282 169 268 V 166"
+          className="stroke-good"
+          strokeWidth="1.5"
+          strokeDasharray="5 5"
+          fill="none"
+          markerEnd="url(#arrow-good)"
+        />
+      </svg>
+
+      {/* Your repo */}
+      <div className="absolute top-0 left-0 w-[338px] rounded-xl border bg-white">
+        <div className="flex items-baseline justify-between border-b px-4 py-2.5">
+          <span className="text-[14.5px] font-medium">Your git repo</span>
+          <span className="text-[12.5px] text-muted">files you own</span>
+        </div>
+        <ul className="grid gap-1 px-4 py-3 font-mono text-[12.5px] leading-[1.55]">
+          <li>components/button/button.component.yml</li>
+          <li>components/button/button.twig</li>
+          <li>docs/components/button.mdx</li>
+          <li>tokens/charged-ui.tokens.json</li>
+        </ul>
+      </div>
+
+      {/* Corpus */}
+      <div className="absolute top-[52px] left-[418px] flex h-[104px] w-[188px] flex-col items-center justify-center rounded-xl bg-ink text-white">
+        <CorpusMark className="size-6" />
+        <p className="mt-2 text-[16px] font-semibold">Corpus</p>
+        <p className="text-[12.5px] text-neutral-400">on your server</p>
+      </div>
+
+      {/* People */}
+      <div className="absolute top-0 left-[700px] w-[452px] rounded-xl border bg-white px-4 py-3">
+        <Dot tone="off" className="text-[14.5px] font-medium">
+          People
+        </Dot>
+        <p className="mt-1 text-[14px] text-muted">
+          A docs site with live previews:{" "}
+          <code className="text-[12.5px] text-ink">docs.charged.dev</code>
+        </p>
+      </div>
+
+      {/* Agents */}
+      <div className="absolute top-[116px] left-[700px] w-[452px] rounded-xl border border-emerald-200 bg-white px-4 py-3">
+        <Dot tone="good" className="text-[14.5px] font-medium">
+          Agents
+        </Dot>
+        <p className="mt-1 text-[14px] text-muted">Claude Code, Cursor, and Codex over MCP</p>
+        <code className="mt-1.5 block text-[12.5px]">get_component {'{ name: "button" }'}</code>
+      </div>
+
+      {/* The loop label, sitting on the dashed line */}
+      <div className="absolute top-[266px] left-[338px] flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-1.5 text-[13.5px] whitespace-nowrap">
+        <span className="font-medium">Questions the docs couldn’t answer</span>
+        <span className="text-muted">come back as AI drafts to review</span>
+      </div>
+    </div>
+  );
+}
+
+/* 7. Traction ------------------------------------------------------------ */
+
+function Traction() {
+  const groups: { tone: "good" | "warn" | "off"; label: string; items: ReactNode[] }[] = [
+    {
+      tone: "good",
+      label: "Built",
+      items: [
+        "Ten screens: components, tokens, agents, editor, and more",
+        "Agent output from the same source: Markdown, JSON, llms.txt",
+        "An 8-phase build plan, each phase with a pass or fail check",
+      ],
+    },
+    { tone: "warn", label: "Next", items: ["Phase 1: read a real design system repo from disk"] },
+    { tone: "off", label: "Not yet", items: ["User research. This grant pays for it."] },
+  ];
+  return (
+    <Slide section="Traction">
+      <Body>
+        <Title>What’s built: the whole product, as a clickable prototype.</Title>
+        <div className="mt-9 grid grid-cols-[664px_1fr] gap-12">
+          <figure>
+            <Shot
+              src={tractionShot}
+              alt="The Corpus editor with the writing assistant, which has drafted an answer to a question agents asked 14 times"
+            />
+            <figcaption className="mt-3 text-[13.5px] leading-snug text-pretty text-muted">
+              The editor drafting an answer agents asked for 14 times. Sample data from Charged UI;
+              AI, git, and MCP calls are simulated until their build phases land.
+            </figcaption>
+          </figure>
+          <div className="flex flex-col">
+            <div className="grid gap-5">
+              {groups.map((g) => (
+                <div key={g.label}>
+                  <Dot tone={g.tone} className="text-[15px] font-medium">
+                    {g.label}
+                  </Dot>
+                  <ul className="mt-1.5 grid gap-1.5 pl-4 text-[15px] leading-[1.4]">
+                    {g.items.map((it, i) => (
+                      <li key={i}>{it}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            <dl className="mt-auto grid gap-2 border-t pt-4 text-[14px]">
+              <Fact k="Demo video">
+                <Fill value={FACTS.demoVideo} todo="link" />
+              </Fact>
+              <Fact k="Prototype">
+                <Fill value={FACTS.prototypeUrl} todo="link" />
+              </Fact>
+              <Fact k="Waitlist">
+                {FACTS.waitlist.url}{" "}
+                {FACTS.waitlist.liveSince && FACTS.waitlist.signups ? (
+                  <span className="text-muted">
+                    live since {FACTS.waitlist.liveSince}, {FACTS.waitlist.signups} signups
+                  </span>
+                ) : (
+                  <Todo>live date, signups</Todo>
+                )}
+              </Fact>
+              <Fact k="Code">
+                <code className="text-[13px]">{FACTS.repo}</code>
+              </Fact>
+            </dl>
+          </div>
+        </div>
+      </Body>
+    </Slide>
+  );
+}
+
+/* 8. Differentiation ----------------------------------------------------- */
+
+type Cell = [tone: "good" | "warn" | "off", text: string];
+
+function Differentiation() {
+  const rows: { name: string; ds: Cell; home: Cell; agents: Cell; price: string; us?: boolean }[] =
+    [
+      {
+        name: "Mintlify",
+        ds: ["off", "No, general product docs"],
+        home: ["off", "Their cloud"],
+        agents: ["good", "Yes"],
+        price: "Free, or $450/mo for Pro",
+      },
+      {
+        name: "zeroheight",
+        ds: ["good", "Yes"],
+        home: ["off", "Their cloud"],
+        agents: ["good", "Yes, 500 calls a month"],
+        price: "Free for 1 editor, then $49/editor/mo",
+      },
+      {
+        name: "Supernova",
+        ds: ["good", "Yes"],
+        home: ["off", "Their cloud"],
+        agents: ["good", "Yes"],
+        price: "Free tier, or $399/mo for Pro",
+      },
+      {
+        name: "Storybook",
+        ds: ["good", "Yes, for developers"],
+        home: ["good", "Your repo"],
+        agents: ["warn", "Preview, React only"],
+        price: "Free, open source",
+      },
+      {
+        name: "Corpus",
+        ds: ["good", "Yes, Drupal first"],
+        home: ["good", "Your repo, your server"],
+        agents: ["good", "Yes, built in"],
+        price: "$79 to $99, once",
+        us: true,
+      },
+    ];
+  const cell = ([tone, text]: Cell, us?: boolean) => (
+    <Dot tone={tone} className={us ? "font-medium" : undefined}>
+      {text}
+    </Dot>
+  );
+  return (
+    <Slide section="Differentiation">
+      <Body>
+        <Title className="max-w-[960px]">
+          The design system docs you own: your repo, your server, one price.
+        </Title>
+        <Lead className="max-w-[900px]">
+          Every other option with agent access keeps your docs in its cloud, or only reads React.
+        </Lead>
+        <table className="mt-9 w-full table-fixed border-collapse text-left text-[15px]">
+          <colgroup>
+            <col className="w-[150px]" />
+            <col className="w-[270px]" />
+            <col className="w-[210px]" />
+            <col className="w-[220px]" />
+            <col />
+          </colgroup>
+          <thead>
+            <tr className="border-b text-[13.5px] text-muted">
+              <th className="pb-2.5 font-normal" />
+              <th className="pb-2.5 font-normal">Built for design systems</th>
+              <th className="pb-2.5 font-normal">Where your docs live</th>
+              <th className="pb-2.5 font-normal">Agents can read it</th>
+              <th className="pb-2.5 font-normal">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.name} className={cn("border-b", r.us && "border-b-0 bg-subtle")}>
+                <td className={cn("py-[13px]", r.us ? "pl-3 font-semibold" : "font-medium")}>
+                  {r.us ? (
+                    <span className="inline-flex items-center gap-2">
+                      <CorpusMark className="size-4" />
+                      {r.name}
+                    </span>
+                  ) : (
+                    r.name
+                  )}
+                </td>
+                <td>{cell(r.ds, r.us)}</td>
+                <td>{cell(r.home, r.us)}</td>
+                <td>{cell(r.agents, r.us)}</td>
+                <td className={r.us ? "font-medium" : "text-muted"}>{r.price}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <Source className="absolute bottom-0 max-w-[1080px] text-pretty">
+          From each vendor’s pricing page and docs, November 2026. Prices billed yearly where both
+          are listed. Mintlify Pro is $540 a month billed monthly, and self-hosting is Enterprise
+          only. zeroheight Starter is $59 billed monthly, and its Free and Starter plans cap agent
+          access at 500 calls a month. Storybook’s agent docs are in preview and React only. Corpus
+          pricing is planned and gets tested on the landing page.
+        </Source>
+      </Body>
+    </Slide>
+  );
+}
+
+/* 9. Business model ------------------------------------------------------ */
+
+function BusinessModel() {
+  const terms: [string, ReactNode][] = [
+    ["Price", "$79 to $99 for a one-time license per site. The landing page tests both prices."],
+    [
+      "Cost to serve",
+      "Close to zero. Customers run Corpus on their own server with their own AI key, so there’s no hosting or AI bill per customer.",
+    ],
+    [
+      "Who buys",
+      <>
+        Teams that keep a design system for Drupal, WordPress, or web components: agencies,
+        universities, and product companies. <Fill value={FACTS.market} todo="how many teams" />
+      </>,
+    ],
+    ["Reach", "The Drupal and WordPress communities I’ve sold into for years, then X."],
+    ["Room to grow", "Web components (Lit) next, then React Native and WordPress blocks."],
+    ["Goal", "Bootstrapped and profitable. Not raising venture capital."],
+  ];
+  return (
+    <Slide section="Business model">
+      <Body>
+        <Title>Pay once, run it yourself. Each sale is nearly all margin.</Title>
+        <div className="mt-10 grid grid-cols-[1fr_300px] gap-14">
+          <dl className="divide-y border-y text-[16px] leading-[1.45]">
+            {terms.map(([k, v]) => (
+              <div key={k} className="grid grid-cols-[150px_1fr] gap-6 py-3">
+                <dt className="font-medium">{k}</dt>
+                <dd className="text-pretty text-muted">{v}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="self-start rounded-xl border p-6">
+            <p className="text-[14px] text-muted">I’ve run this model before</p>
+            <p className="mt-3 text-[44px] leading-none font-semibold tracking-[-0.03em] tabular-nums">
+              $75,000+
+            </p>
+            <p className="mt-3 text-[15px] leading-[1.45] text-pretty">
+              in lifetime sales of one-time-priced products on ThemeForest, the bar for Envato’s
+              Elite authors.
+            </p>
+          </div>
+        </div>
+      </Body>
+    </Slide>
+  );
+}
+
+/* 10. Use of proceeds ---------------------------------------------------- */
+
+function Proceeds() {
+  const spend: [string, string, string][] = [
+    [
+      "$2,500",
+      "X ads as a demand test",
+      "Posts aimed at design system, frontend, and developer tools audiences, sending people to the corpus.app waitlist. Half the visitors see $79, half see $99.",
+    ],
+    [
+      "$500",
+      "Ten paid user interviews",
+      "30 minutes each, $50 per person, with design system maintainers from the waitlist.",
+    ],
+  ];
+  const report = [
+    "Cost per signup",
+    "Waitlist size",
+    "Landing page conversion rate",
+    "Share willing to pay $79, and $99",
+    "What teams use now, and what it costs them",
+  ];
+  return (
+    <Slide section="Use of proceeds">
+      <Body>
+        <Title className="max-w-[920px]">
+          $3,000 to learn whether teams will pay, before I build the rest.
+        </Title>
+        <div className="mt-12 grid grid-cols-[1fr_360px] gap-16">
+          <div>
+            <div className="flex h-3 gap-[3px] overflow-hidden rounded-full">
+              <span className="w-5/6 rounded-l-full bg-ink" />
+              <span className="w-1/6 rounded-r-full bg-good" />
+            </div>
+            <ul className="mt-6 divide-y border-y">
+              {spend.map(([amount, head, body], i) => (
+                <li key={head} className="grid grid-cols-[120px_1fr] gap-5 py-5">
+                  <p className="text-[28px] leading-[1.05] font-semibold tracking-[-0.025em] tabular-nums">
+                    {amount}
+                  </p>
+                  <div>
+                    <p className="flex items-center gap-2.5 text-[18px] font-medium">
+                      <span
+                        className={cn("size-2.5 rounded-[3px]", i === 0 ? "bg-ink" : "bg-good")}
+                      />
+                      {head}
+                    </p>
+                    <p className="mt-1.5 text-[15.5px] leading-[1.5] text-pretty text-muted">
+                      {body}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-5 text-[15.5px] leading-[1.5] text-pretty text-muted">
+              No hires. I build Corpus with AI coding agents, so the money goes to learning from
+              users instead of buying engineering hours.
+            </p>
+          </div>
+          <div>
+            <p className="text-[16px] font-medium">What I’ll report back</p>
+            <ul className="mt-3 divide-y border-y text-[16px]">
+              {report.map((r) => (
+                <li key={r} className="py-3">
+                  {r}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-[14px] leading-[1.5] text-pretty text-muted">
+              If teams won’t sign up at these prices, I find out for $3,000 instead of a year of
+              building.
+            </p>
+          </div>
+        </div>
+      </Body>
+    </Slide>
+  );
+}
+
+/* 11. Milestones --------------------------------------------------------- */
+
+function Milestones() {
+  const steps: { when: string; head: string; body: string; done?: boolean }[] = [
     {
       when: "Nov 2026",
-      title: "Prototype + tests",
-      body: "Working editor, agent views, 44 tests. You are looking at it.",
+      head: "Clickable prototype",
+      body: "Every screen, sample data, and the 8-phase build plan.",
       done: true,
     },
     {
       when: "Dec 2026",
-      title: "Content on disk",
-      body: "Markdown files + server: edit anywhere, live reload, git-friendly.",
+      head: "Demand test",
+      body: "Ads, waitlist, and interviews. Corpus reads a real repo from disk.",
     },
     {
       when: "Jan 2027",
-      title: "Agents, first class",
-      body: "MCP server, first marketplace app, session sync-back, usage log.",
+      head: "Agents connect",
+      body: "Claude Code and Cursor get Charged UI answers over MCP.",
+    },
+    {
+      when: "Feb 2027",
+      head: "Private beta",
+      body: "Waitlist teams on their own repos. AI drafts answers, the editor commits to git.",
     },
     {
       when: "Spring 2027",
-      title: "Launch + Showcase",
-      body: "Landing page, X ad campaign, private beta, IYA Venture Showcase.",
+      head: "Launch",
+      body: "One-container release, first paid licenses, and the IYA Venture Showcase.",
     },
   ];
   return (
-    <Slide n={8}>
-      <div className="relative flex h-full flex-col px-20 py-16">
-        <SlideHeading
-          kicker="07 · Roadmap"
-          title="Phased build — every phase gated by a “done when” check."
-        />
-        <div className="relative mt-16 flex-1">
-          <span className="absolute top-[7px] right-0 left-0 h-[2px] bg-neutral-200" />
-          <span className="absolute top-[7px] left-0 h-[2px] w-[25%] bg-emerald-500" />
-          <div className="grid grid-cols-4 gap-10">
-            {phases.map((p) => (
-              <div key={p.title} className="relative pt-9">
+    <Slide section="Milestones">
+      <Body>
+        <Title>By the Venture Showcase: a working MVP in real teams’ hands.</Title>
+        <div className="relative mt-20">
+          <span className="absolute top-[5px] right-0 left-0 h-px bg-line" />
+          <ol className="relative grid grid-cols-5 gap-7">
+            {steps.map((s) => (
+              <li key={s.when}>
                 <span
-                  className={
-                    p.done
-                      ? "absolute top-0 left-0 size-[15px] rounded-full bg-emerald-500 ring-4 ring-emerald-100"
-                      : "absolute top-0 left-0 size-[15px] rounded-full border-[2.5px] border-neutral-300 bg-white"
-                  }
+                  className={cn(
+                    "block size-[11px] rounded-full",
+                    s.done ? "bg-good" : "border-[1.5px] border-neutral-300 bg-white",
+                  )}
                 />
-                <p
-                  className={
-                    p.done
-                      ? "font-mono text-[11px] tracking-[0.16em] text-emerald-600 uppercase"
-                      : "font-mono text-[11px] tracking-[0.16em] text-neutral-400 uppercase"
-                  }
-                >
-                  {p.when}
+                <p className={cn("mt-5 text-[14px]", s.done ? "text-good" : "text-muted")}>
+                  {s.when}
                 </p>
-                <p className="mt-2 flex items-center gap-2 text-[16.5px] font-medium">
-                  {p.title}
-                  {p.done ? (
-                    <Badge className="bg-emerald-500 text-[9.5px] text-white hover:bg-emerald-500">
-                      shipped
-                    </Badge>
-                  ) : null}
+                <p className="mt-1 text-[18px] font-medium">{s.head}</p>
+                <p className="mt-1.5 text-[14.5px] leading-[1.5] text-pretty text-muted">
+                  {s.body}
                 </p>
-                <p className="mt-2 max-w-[230px] text-[13px] leading-relaxed text-neutral-500">
-                  {p.body}
-                </p>
-              </div>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
-        <p className="mt-2 text-[12.5px] text-neutral-400">
-          The full phase plan, with acceptance checks per phase, lives in the repo (PLAN.md).
-        </p>
-      </div>
+        <div className="absolute inset-x-0 bottom-0 border-t pt-5">
+          <p className="text-[15px] font-medium">Targets for the Showcase</p>
+          <dl className="mt-2.5 grid grid-cols-3 gap-8 text-[15px]">
+            <Fact k="Waitlist" wide>
+              <Fill value={FACTS.targets.waitlist} todo="signups" />
+            </Fact>
+            <Fact k="Beta teams" wide>
+              <Fill value={FACTS.targets.betaTeams} todo="teams" />
+            </Fact>
+            <Fact k="Paid licenses" wide>
+              <Fill value={FACTS.targets.paidLicenses} todo="licenses" />
+            </Fact>
+          </dl>
+        </div>
+      </Body>
     </Slide>
   );
 }
 
-/* 09 — Use of proceeds */
-function Proceeds() {
-  const items = [
-    [
-      "X ad campaign",
-      "$2,250",
-      "Sponsored posts aimed at developers, indie hackers and AI-tooling buyers, driving to the landing page",
-    ],
-    ["Landing page + email", "$300", "Domain, hosting, and email-capture / automation tooling"],
-    [
-      "Creative testing",
-      "$450",
-      "Ad variants and retargeting, reallocated by measured CPC and CTR",
-    ],
-  ];
-  const byMarch = [
-    "2,000+ landing-page visits from paid",
-    "500+ waitlist emails collected",
-    "50-user private beta from the waitlist",
-    "First $99 sales — real CPC and conversion data",
-  ];
-  return (
-    <Slide n={9}>
-      <div className="relative flex h-full flex-col px-20 py-14">
-        <SlideHeading
-          kicker="08 · Use of proceeds"
-          title="No hires. $3,000 buys distribution and real market data."
-        />
-        <div className="mt-8 grid flex-1 grid-cols-[1.35fr_1fr] gap-16">
-          <div className="flex flex-col justify-center">
-            {items.map(([what, cost, detail]) => (
-              <div
-                key={what}
-                className="flex items-baseline justify-between gap-8 border-b border-neutral-100 py-4"
-              >
-                <div>
-                  <p className="text-[15.5px] font-medium">{what}</p>
-                  <p className="mt-0.5 max-w-[400px] text-[12.5px] leading-relaxed text-neutral-500">
-                    {detail}
-                  </p>
-                </div>
-                <p className="shrink-0 font-mono text-[24px] font-semibold tracking-[-0.02em] tabular">
-                  {cost}
-                </p>
-              </div>
-            ))}
-            <div className="flex items-baseline justify-between border-t-2 border-neutral-950 pt-4">
-              <p className="text-[16px] font-semibold">Total</p>
-              <p className="font-mono text-[34px] leading-[1.2] font-semibold tracking-[-0.03em] tabular">
-                $3,000
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col justify-center">
-            <p className="font-mono text-[10.5px] tracking-[0.18em] text-neutral-400 uppercase">
-              Targets by March
-            </p>
-            <div className="mt-5 space-y-4">
-              {byMarch.map((b) => (
-                <div key={b} className="flex items-start gap-3">
-                  <Check className="mt-0.5 size-4 shrink-0 text-emerald-500" />
-                  <p className="text-[14px] leading-relaxed">{b}</p>
-                </div>
-              ))}
-            </div>
-            <p className="mt-7 text-[11.5px] leading-relaxed text-neutral-400">
-              Targets, not results — the campaign exists to buy real conversion data (CPC, email
-              rate, sales) before the IYA Venture Showcase.
-            </p>
-          </div>
-        </div>
-      </div>
-    </Slide>
-  );
-}
+/* 12. Close -------------------------------------------------------------- */
 
-/* 10 — Close */
 function Close() {
   return (
-    <Slide n={10} dark>
-      <CorpusMark
-        aria-hidden="true"
-        className="absolute -top-32 -left-28 size-[520px] text-neutral-900"
-      />
-      <div className="relative flex h-full flex-col items-center justify-center gap-7 px-20 text-center">
-        <CorpusMark duo className="size-14" />
-        <h2 className="max-w-3xl text-[54px] leading-[1.2] font-semibold tracking-[-0.03em] text-balance">
-          Documentation your agents actually follow
-          <Stop />
+    <Slide>
+      <CorpusLogo className="absolute top-14 left-16 h-[30px]" />
+      <div className="absolute top-[176px] left-16 w-[1040px]">
+        <h2 className="text-[58px] leading-[1.05] font-semibold tracking-[-0.035em] text-balance">
+          Documentation your agents actually follow.
         </h2>
-        <p className="max-w-lg text-[16px] leading-relaxed text-neutral-400">
-          Docs, agent context, and support answers — from markdown you own. $99 once.
+        <p className="mt-6 max-w-[620px] text-[21px] leading-[1.45] text-pretty text-muted">
+          Self-hosted design system docs for people and coding agents. Pay once, and the docs stay
+          yours.
         </p>
-        <div className="mt-3 flex items-center gap-3 border-t border-neutral-800 pt-6 font-mono text-[11px] tracking-[0.14em] text-neutral-600 uppercase">
-          <span>[ demo url ]</span>
-          <span>·</span>
-          <span>github.com/corpus-labs/prototype</span>
-          <span>·</span>
-          <span>[ your name ] · IYA Ignite Grant · November 2026</span>
+      </div>
+      <div className="absolute inset-x-16 bottom-14 grid grid-cols-[1fr_440px] gap-16">
+        <div>
+          <p className="text-[15px] font-medium">The ask</p>
+          <ul className="mt-3 divide-y border-y text-[17px] leading-[1.45]">
+            <li className="py-3">
+              <span className="font-medium">$3,000 Ignite Grant, GenAI track</span>
+              <span className="text-muted"> for the demand test and ten user interviews</span>
+            </li>
+            <li className="py-3">
+              <span className="font-medium">A mentor</span>
+              <span className="text-muted"> who has taken a developer tool to market</span>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <p className="text-[15px] font-medium">Mitch Kostelecky</p>
+          <dl className="mt-3 grid gap-2 border-t pt-3 text-[15px]">
+            <Fact k="Email">
+              <Fill value={FACTS.email} todo="email" />
+            </Fact>
+            <Fact k="Waitlist">{FACTS.waitlist.url}</Fact>
+            <Fact k="Demo">
+              <Fill value={FACTS.demoVideo} todo="link" />
+            </Fact>
+            <Fact k="Code">
+              <code className="text-[14px]">{FACTS.repo}</code>
+            </Fact>
+          </dl>
         </div>
       </div>
     </Slide>
@@ -716,14 +870,16 @@ function Close() {
 }
 
 export const SLIDES = [
-  Title,
+  Cover,
   Team,
   Problem,
+  WhyNow,
   Solution,
-  Today,
-  TwoReaders,
-  Positioning,
-  Roadmap,
+  HowItWorks,
+  Traction,
+  Differentiation,
+  BusinessModel,
   Proceeds,
+  Milestones,
   Close,
 ];
