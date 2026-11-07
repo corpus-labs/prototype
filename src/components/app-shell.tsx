@@ -71,7 +71,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarRail,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
@@ -404,7 +403,6 @@ function AppSidebar({ route }: { route: string }) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   );
 }
@@ -886,10 +884,13 @@ export function AppShell({ route, children }: { route: string; children: React.R
   return (
     <SidebarProvider>
       <AppSidebar route={route} />
-      {/* On desktop the content is a panel on the tinted canvas, like an app window, and scrolls on its own. */}
+      {/*
+        On desktop the content is a panel on the tinted canvas, like an app window, and scrolls on its own.
+        It runs off the bottom of the screen, so only the top corners are rounded and text never meets a curve.
+      */}
       <SidebarInset
         data-scroll-root
-        className="min-w-0 md:h-[calc(100svh-1rem)] md:overflow-y-auto md:ring-1 md:ring-black/[0.06] dark:md:ring-white/[0.08]"
+        className="min-w-0 md:h-[calc(100svh-0.5rem)] md:overflow-y-auto md:ring-1 md:ring-black/[0.06] md:peer-data-[variant=inset]:mb-0 md:peer-data-[variant=inset]:rounded-b-none dark:md:ring-white/[0.08]"
       >
         <DesktopTopbar route={route} />
         <MobileTopbar route={route} />
