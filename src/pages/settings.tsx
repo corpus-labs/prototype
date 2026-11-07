@@ -510,7 +510,7 @@ function License() {
   );
 }
 
-const PALETTES: Base[] = ["neutral", "zinc", "stone", "slate", "gray"];
+const PALETTES: Base[] = ["mist", "neutral", "zinc", "stone", "slate", "gray"];
 
 function Appearance() {
   const { theme, setTheme, base, setBase } = useStore();
@@ -555,7 +555,7 @@ function Appearance() {
           value={base}
           onValueChange={(v) => setBase(v as Base)}
           aria-labelledby="palette-label"
-          className="mt-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+          className="mt-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"
         >
           {PALETTES.map((p) => (
             <ChoiceTile key={p} value={p} className="grid gap-2.5 text-left">

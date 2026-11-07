@@ -51,7 +51,22 @@
 }
 
 /* ---------- Neutral palettes (Tailwind 4) ---------- */
+/* Mist, a gray with a trace of blue-green, is the default. It gives the app canvas some depth. */
 :root,
+:root[data-base="mist"] {
+  --base-50: var(--color-mist-50);
+  --base-100: var(--color-mist-100);
+  --base-200: var(--color-mist-200);
+  --base-300: var(--color-mist-300);
+  --base-400: var(--color-mist-400);
+  --base-500: var(--color-mist-500);
+  --base-600: var(--color-mist-600);
+  --base-700: var(--color-mist-700);
+  --base-800: var(--color-mist-800);
+  --base-900: var(--color-mist-900);
+  --base-950: var(--color-mist-950);
+}
+
 :root[data-base="neutral"] {
   --base-50: var(--color-neutral-50);
   --base-100: var(--color-neutral-100);
@@ -144,11 +159,12 @@
   --border: var(--base-200);
   --input: var(--base-200);
   --ring: var(--base-400);
-  --sidebar: var(--base-50);
+  /* The sidebar color is also the canvas the content panel sits on. */
+  --sidebar: var(--base-100);
   --sidebar-foreground: var(--base-950);
   --sidebar-primary: var(--base-900);
   --sidebar-primary-foreground: var(--base-50);
-  --sidebar-accent: color-mix(in oklch, var(--base-200) 70%, var(--base-50));
+  --sidebar-accent: var(--base-200);
   --sidebar-accent-foreground: var(--base-950);
   --sidebar-border: var(--base-200);
   --sidebar-ring: var(--base-400);
@@ -183,7 +199,7 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: var(--base-500);
-    --sidebar: var(--base-950);
+    --sidebar: color-mix(in oklch, var(--base-950) 72%, black);
     --sidebar-foreground: var(--base-50);
     --sidebar-primary: var(--base-100);
     --sidebar-primary-foreground: var(--base-900);
@@ -221,7 +237,7 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: var(--base-500);
-  --sidebar: var(--base-950);
+  --sidebar: color-mix(in oklch, var(--base-950) 72%, black);
   --sidebar-foreground: var(--base-50);
   --sidebar-primary: var(--base-100);
   --sidebar-primary-foreground: var(--base-900);

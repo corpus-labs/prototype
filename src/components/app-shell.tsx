@@ -326,7 +326,7 @@ function AppSidebar({ route }: { route: string }) {
   const docs = docsProjectOf(route);
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader>
         <a
           href="#projects"
@@ -886,7 +886,11 @@ export function AppShell({ route, children }: { route: string; children: React.R
   return (
     <SidebarProvider>
       <AppSidebar route={route} />
-      <SidebarInset className="min-w-0">
+      {/* On desktop the content is a panel on the tinted canvas, like an app window, and scrolls on its own. */}
+      <SidebarInset
+        data-scroll-root
+        className="min-w-0 md:h-[calc(100svh-1rem)] md:overflow-y-auto md:ring-1 md:ring-black/[0.06] dark:md:ring-white/[0.08]"
+      >
         <DesktopTopbar route={route} />
         <MobileTopbar route={route} />
         <div className="flex-1 pb-24 md:pb-12">{children}</div>

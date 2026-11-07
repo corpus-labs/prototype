@@ -9,7 +9,7 @@ import {
 } from "@/data/workspace";
 
 export type Theme = "system" | "light" | "dark";
-export type Base = "neutral" | "zinc" | "stone" | "slate" | "gray";
+export type Base = "mist" | "neutral" | "zinc" | "stone" | "slate" | "gray";
 export type Reader = "people" | "split" | "agents";
 export type Provider = "anthropic" | "openai" | "zai" | "deepseek" | "openrouter" | "ollama";
 
@@ -142,7 +142,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     read("corpus.theme", "system", ["system", "light", "dark"] as const),
   );
   const [base, setBaseState] = React.useState<Base>(() =>
-    read("corpus.base", "neutral", ["neutral", "zinc", "stone", "slate", "gray"] as const),
+    read("corpus.base", "mist", ["mist", "neutral", "zinc", "stone", "slate", "gray"] as const),
   );
   const [reader, setReaderState] = React.useState<Reader>(() =>
     read("corpus.reader", "people", ["people", "split", "agents"] as const),

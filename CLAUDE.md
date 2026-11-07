@@ -104,7 +104,7 @@ Agent payloads are product UI. Treat formatter changes like UI changes.
   - `scroll-area.tsx` drops the unused `React` import the CLI adds, which strict `noUnusedLocals` rejects.
 - shadcn components import `cn` from the `cn` package (pinned). App code imports it from `@/lib/utils`.
 - If `npx shadcn add` times out reaching the registry, run it with `NODE_OPTIONS=--dns-result-order=ipv4first`.
-- Tailwind CSS 4. Theme tokens live in `src/index.css`. Grays come from Tailwind 4 palettes through `--base-*` variables, switched with `data-base` on `<html>` (neutral, zinc, stone, slate, gray). Dark mode: `data-theme` on `<html>` wins, otherwise `prefers-color-scheme`. Use the `dark:` variant and semantic tokens. Don't hard-code colors in components.
+- Tailwind CSS 4. Theme tokens live in `src/index.css`. Grays come from Tailwind 4 palettes through `--base-*` variables, switched with `data-base` on `<html>` (mist by default, then neutral, zinc, stone, slate, gray). Dark mode: `data-theme` on `<html>` wins, otherwise `prefers-color-scheme`. Use the `dark:` variant and semantic tokens. Don't hard-code colors in components.
 - The Corpus chrome stays neutral. Color appears only in previews of the documented design system and in the good, bad, and warn signals (`text-good`, `bg-bad-soft`, `text-warn`, and so on).
 - Geist for the UI. Geist Mono only for literal code, token names, file paths, and endpoints. Never for labels.
 - Previews of the documented system render inside `CuiScope` with `--cui-*` tokens so they never leak into the chrome. Their canvas is the system's own surface, `bg-(--cui-subtle)`, so a preview's Light and Dark switch changes the background too.
