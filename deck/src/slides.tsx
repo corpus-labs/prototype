@@ -4,7 +4,7 @@ import { cn } from "./lib/utils";
 import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title, Todo } from "./ui";
 import coverShot from "./assets/shots/cover-notebook.png";
 import splitShot from "./assets/shots/how-split.png";
-import projectsShot from "./assets/shots/traction-projects.png";
+import siteShot from "./assets/shots/traction-site.png";
 import portrait from "./assets/portrait.jpg";
 
 /* Shared pieces --------------------------------------------------------- */
@@ -610,7 +610,7 @@ function Traction() {
       items: [
         "A notebook editor: toolbar, slash menu, to-dos, page links",
         "Handbook, help center, and design system projects",
-        "A support bot that cites its page, or says it doesn’t know",
+        "A published help center with search and a support bot",
         "Every page served to any AI: MCP, llms.txt, Markdown",
         "Unanswered questions become drafts from any AI provider",
       ],
@@ -629,12 +629,12 @@ function Traction() {
         <div className="mt-9 grid grid-cols-[664px_1fr] gap-12">
           <figure>
             <Shot
-              src={projectsShot}
-              alt="The Corpus projects screen: a design system, a team handbook, and a customer help center side by side, with questions asked and unanswered"
+              src={siteShot}
+              alt="The help center Corpus publishes for Charged Labs: a search box, articles by topic, and a support bot that answers from the same pages"
             />
             <figcaption className="mt-3 text-[13.5px] leading-snug text-pretty text-muted">
-              A design system, a team handbook, and a customer help center in one workspace, with
-              the questions nobody could answer yet. Sample data; AI, git, and MCP calls are
+              The help center Corpus publishes from Charged Labs’ pages, with search and a support
+              bot that answers from those same pages. Sample data; AI, git, and MCP calls are
               simulated until their build phases land.
             </figcaption>
           </figure>
