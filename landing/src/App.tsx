@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useState, type ReactNode } from "react";
 import { CONFIG, JOBS, type JobId } from "./config";
 import { cn } from "./lib/utils";
 import { ToolLogo, type ToolId } from "./tool-logo";
@@ -69,7 +69,7 @@ function Header() {
 /* Hero --------------------------------------------------------------------- */
 
 const DEFAULT_LEAD =
-  "Corpus is one notebook for your docs, help center, AI context, and design system. People, support bots, and every AI tool read the same pages. Host it yourself or with us, and pay once.";
+  "Corpus is one notebook for your docs, help center, AI context, and design system. People, support bots, and every AI tool read the same pages. Pay once to run it yourself, or let us host it for $7 a month.";
 
 function Hero() {
   return (
@@ -563,9 +563,17 @@ function PluginsSection() {
             ))}
           </dl>
           <p className="mt-5 text-[14px] leading-[1.6] text-muted">
-            Prefer the terminal? Any MCP client connects in one line:{" "}
-            <code className="font-mono text-[13px] break-all text-ink">
-              claude mcp add --transport http charged-help https://charged-help.corpus.app/mcp
+            Prefer the terminal? Any MCP client connects in one line:
+            <code className="mt-1 block font-mono text-[13px] text-ink">
+              {/* Wraps between words, never at the hyphens inside them. */}
+              {"claude mcp add --transport http charged-help https://charged-help.corpus.app/mcp"
+                .split(" ")
+                .map((word, i) => (
+                  <Fragment key={i}>
+                    {i > 0 && " "}
+                    <span className="whitespace-nowrap">{word}</span>
+                  </Fragment>
+                ))}
             </code>
           </p>
         </div>
@@ -592,7 +600,7 @@ function Pricing() {
   ];
   const included = [
     "Docs, help center, AI context, and design systems",
-    "Self-host on your server, or let us host it",
+    "Self-host on your server, or let us host it for $7 a month",
     "Any AI on your own key, with no usage fees",
     "Your content stays a folder of Markdown",
   ];
@@ -601,7 +609,7 @@ function Pricing() {
       <div className={WRAP}>
         <Heading
           title="Pay once. Own it for life."
-          lead="Corpus is a one-time license, not a subscription. Bring your own server and AI key, or let us host it. Hosted plans are priced at launch."
+          lead="Corpus is a one-time license, not a subscription. Bring your own server and AI key, or let us host it for $7 a month."
         />
         <div className="mt-12 grid gap-12 lg:grid-cols-[440px_1fr] lg:gap-16">
           <div className="self-start rounded-2xl border p-6 sm:p-8">
@@ -683,7 +691,7 @@ function Faq() {
     ],
     [
       "Why a one-time price?",
-      "When you self-host, you bring the server and the AI key, so there’s nothing for Corpus to bill you for each month. Pay once, and the version you bought keeps working. Hosted plans are priced at launch.",
+      "When you self-host, you bring the server and the AI key, so there’s nothing for Corpus to bill you for each month. Pay once, and the version you bought keeps working. If we host it for you, that’s $7 a month, since we run the server.",
     ],
     [
       "Do I need Drupal, WordPress, or Notion?",

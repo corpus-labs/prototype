@@ -41,7 +41,7 @@ It does four jobs, and design systems are one of them:
 
 **Why.** Owning the files is the point. One image keeps hosted and self-hosted from drifting apart.
 
-**Revisit if** hosting costs can't be covered without a recurring fee. How hosting is priced is still open.
+**Revisit if** $7 a month doesn't cover hosting. Hosting is $7 a month on top of the license (decided November 7, 2026); self-hosting stays a one-time price.
 
 ## 5. The support bot answers from pages or says it doesn't know
 
@@ -74,6 +74,5 @@ All of it is sample data and goes away with the rest in Phase 2.
 
 ## Open questions
 
-- **Hosting price.** A yearly fee, a first year included, or something else.
 - **Support bot in production.** Which model answers by default, how the handoff to a person works, and whether its questions go to `.corpus/events.jsonl` beside MCP calls.
 - **PLAN.md.** Its phases still start from design systems. Decide which kind of project Phase 1 loads first, and whether `list_components` and `get_component` need docs counterparts or `search_docs` and `get_page` are enough.

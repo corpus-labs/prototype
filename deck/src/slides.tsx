@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { FACTS } from "./facts";
 import { SplitView } from "./split-view";
 import { cn } from "./lib/utils";
@@ -43,8 +43,8 @@ function Cover() {
           Own what your company knows. Use it with any AI.
         </h1>
         <p className="mt-6 text-[20px] leading-[1.45] text-pretty text-muted">
-          Corpus is one notebook for your docs, help center, AI context, and design system. Host it
-          with us or on your own server, and pay once.
+          Corpus is one notebook for your docs, help center, AI context, and design system. Pay once
+          to run it yourself, or let us host it for $7 a month.
         </p>
       </div>
       <div className="absolute bottom-14 left-16 grid gap-1 text-[15px]">
@@ -239,26 +239,81 @@ function ShareShift() {
 
 /* 4. Solution ------------------------------------------------------------ */
 
+type JobId = "ai" | "support" | "docs" | "design";
+
+/** The same job icons as the landing page (landing/src/App.tsx). */
+const JOB_ICONS: Record<JobId, ReactNode> = {
+  ai: (
+    <>
+      <path d="M12 8V4H8" />
+      <rect width="16" height="12" x="4" y="8" rx="2" />
+      <path d="M2 14h2M20 14h2M15 13v2M9 13v2" />
+    </>
+  ),
+  support: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="4" />
+      <path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24" />
+    </>
+  ),
+  docs: (
+    <>
+      <path d="M12 7v14" />
+      <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+    </>
+  ),
+  design: (
+    <>
+      <path d="M15.54 11.29a1 1 0 0 0 0 1.42l2.37 2.37a1 1 0 0 0 1.42 0l2.37-2.37a1 1 0 0 0 0-1.42l-2.37-2.37a1 1 0 0 0-1.42 0z" />
+      <path d="M2.3 11.29a1 1 0 0 0 0 1.42l2.37 2.37a1 1 0 0 0 1.42 0l2.37-2.37a1 1 0 0 0 0-1.42L6.09 8.92a1 1 0 0 0-1.42 0z" />
+      <path d="M8.92 17.91a1 1 0 0 0 0 1.42l2.37 2.37a1 1 0 0 0 1.42 0l2.37-2.37a1 1 0 0 0 0-1.42l-2.37-2.37a1 1 0 0 0-1.42 0z" />
+      <path d="M8.92 4.67a1 1 0 0 0 0 1.42l2.37 2.37a1 1 0 0 0 1.42 0l2.37-2.37a1 1 0 0 0 0-1.42l-2.37-2.37a1 1 0 0 0-1.42 0z" />
+    </>
+  ),
+};
+
+function JobIcon({ job }: { job: JobId }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="size-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      {JOB_ICONS[job]}
+    </svg>
+  );
+}
+
 function Solution() {
-  const jobs: [head: string, body: string, instead: string][] = [
+  const jobs: [job: JobId, head: string, body: string, instead: string][] = [
     [
+      "ai",
       "AI context",
       "Plugins for Claude, Codex, and more recall your plans and decisions, and save new ones back.",
       "prompt files in every AI tool",
     ],
     [
+      "support",
       "Support answers",
       "A support bot answers customers from the same pages your team already keeps.",
       "Zendesk AI, at $1.50 an answer",
     ],
     [
+      "docs",
       "Docs and help center",
       "Publish public docs, a help center, or an internal handbook from the notebook.",
       "Mintlify or GitBook",
     ],
     [
+      "design",
       "Design systems",
-      "Components, tokens, and usage rules, with live previews of the real thing.",
+      "Components, tokens, and usage rules, with live previews for people and exact rules for agents.",
       "zeroheight",
     ],
   ];
@@ -281,10 +336,14 @@ function Solution() {
             </span>
           </div>
           <ol className="grid grid-cols-4 gap-8">
-            {jobs.map(([head, body, instead]) => (
+            {jobs.map(([job, head, body, instead]) => (
               <li key={head}>
-                <span className="ml-5 block h-7 w-px bg-neutral-300" />
-                <div className="border-t pt-4">
+                {/* The line from the notebook runs into each job's icon. */}
+                <span className="ml-5 block h-6 w-px bg-neutral-300" />
+                <span className="grid size-10 place-items-center rounded-xl border bg-white text-ink">
+                  <JobIcon job={job} />
+                </span>
+                <div className="mt-4">
                   <p className="text-[18px] font-medium">{head}</p>
                   <p className="mt-1.5 text-[15px] leading-[1.5] text-pretty text-muted">{body}</p>
                   <p className="mt-3 text-[13.5px] leading-snug text-pretty">
@@ -457,6 +516,20 @@ function Plugins() {
                 </div>
               ))}
             </dl>
+            <p className="mt-4 text-[13.5px] leading-[1.6] text-muted">
+              Prefer the terminal? Any MCP client connects in one line:
+              <code className="mt-1 block font-mono text-[12.5px] text-ink">
+                {/* Wraps between words, never at the hyphens inside them. */}
+                {"claude mcp add --transport http charged-help https://charged-help.corpus.app/mcp"
+                  .split(" ")
+                  .map((word, i) => (
+                    <Fragment key={i}>
+                      {i > 0 && " "}
+                      <span className="whitespace-nowrap">{word}</span>
+                    </Fragment>
+                  ))}
+              </code>
+            </p>
           </div>
         </div>
       </Body>
@@ -637,8 +710,7 @@ function BusinessModel() {
     [
       "Who buys",
       <>
-        Small teams priced out of Mintlify and Zendesk: startups, agencies, schools, and nonprofits.{" "}
-        <Fill value={FACTS.market} todo="how many" />
+        Small teams priced out of Mintlify and Zendesk: startups, agencies, schools, and nonprofits.
       </>,
     ],
     [
@@ -1019,8 +1091,8 @@ function Close() {
           Use it with any AI.
         </h2>
         <p className="mt-6 max-w-[660px] text-[20px] leading-[1.45] text-pretty text-muted">
-          One notebook for your docs, help center, AI context, and design system. Hosted or
-          self-hosted, for a one-time price.
+          One notebook for your docs, help center, AI context, and design system. Pay once to
+          self-host, or $7 a month hosted.
         </p>
       </div>
       <div className="absolute inset-x-16 bottom-14 grid grid-cols-[1fr_440px] gap-16">
