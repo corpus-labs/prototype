@@ -2,12 +2,12 @@ import { useEffect, useState, type ReactNode } from "react";
 import { CONFIG, JOBS, type JobId } from "./config";
 import { cn } from "./lib/utils";
 import { ToolLogo, type ToolId } from "./tool-logo";
-import { AppWindow, CorpusLogo, CorpusMark, Dot, Heading, Lattice, Shot } from "./ui";
+import { AppWindow, CorpusLogo, CorpusMark, Dot, Heading, Lattice } from "./ui";
 import { BotDemo } from "./bot-demo";
+import { SplitView } from "./split-view";
 import { visit } from "./visit";
 import { PreviewNotice, WaitlistForm } from "./waitlist";
 import heroShot from "./assets/hero-projects.png";
-import splitShot from "./assets/split.png";
 import editorShot from "./assets/editor.png";
 import siteShot from "./assets/site.png";
 
@@ -418,14 +418,16 @@ function HowItWorks() {
               <span className="text-muted">get the same words</span>
             </Dot>
           </div>
-          <Shot
-            src={splitShot}
-            width={2448}
-            height={800}
-            alt="A help page about refunds in Corpus’s split view: the page as people read it, beside the Markdown agents get, with the same section highlighted on both sides"
+          <SplitView
+            pageId="refunds"
+            site="charged-help.corpus.app"
+            start="How long refunds take"
           />
-          <p className="mt-3 text-[14px] text-muted md:hidden">
-            Left, the page people read. Right, the Markdown agents and the support bot get.
+          <p className="mt-3 text-[14px] text-muted">
+            <span className="md:hidden">
+              Top, the page people read. Below, the Markdown agents and the support bot get.{" "}
+            </span>
+            Point at a section to see it in both.
           </p>
         </div>
       </div>

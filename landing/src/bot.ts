@@ -3,7 +3,13 @@
 // answer from the best-matching section, or say it doesn't know when fewer than
 // half of the question's meaningful words appear there. Keep the two in step.
 
-export type HelpPage = { id: string; title: string; path: string; body: string };
+export type HelpPage = {
+  id: string;
+  title: string;
+  description: string;
+  path: string;
+  body: string;
+};
 
 const files = import.meta.glob<string>("../../fixtures/help/docs/**/*.md", {
   query: "?raw",
@@ -15,9 +21,11 @@ export const helpPages: HelpPage[] = Object.entries(files).map(([file, source]) 
   const path = file.replace(/^.*fixtures\/help\//, "");
   const front = source.match(/^---\n([\s\S]*?)\n---\n?/);
   const title = front?.[1].match(/^title:\s*(.+)$/m)?.[1].trim() ?? path;
+  const description = front?.[1].match(/^description:\s*(.+)$/m)?.[1].trim() ?? "";
   return {
     id: path.replace(/^.*\//, "").replace(/\.md$/, ""),
     title,
+    description,
     path,
     body: front ? source.slice(front[0].length) : source,
   };
