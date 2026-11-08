@@ -95,7 +95,7 @@ export default function App() {
   };
 
   return (
-    <div className="stage">
+    <div className="stage" data-mode={view.mode}>
       <div
         className="deck cursor-pointer select-none"
         data-mode={view.mode}
@@ -112,7 +112,7 @@ export default function App() {
       </div>
 
       {view.mode === "present" && (
-        <nav className="no-print fixed inset-x-0 bottom-0 flex h-11 items-center justify-center gap-1 text-[13px] text-neutral-600">
+        <nav className="no-print row-start-3 flex items-center justify-center gap-1 self-stretch justify-self-stretch text-[13px] text-neutral-600">
           <NavButton label="Previous slide" onClick={() => go(view.i - 1)} disabled={view.i === 0}>
             <path d="M10 3 5 8l5 5" />
           </NavButton>
