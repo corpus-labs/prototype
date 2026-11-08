@@ -570,11 +570,16 @@ function DoDont({
       >
         <span
           className={cn(
-            "inline-flex items-center gap-1 font-medium",
+            // The word sets the baseline, so "Do" lines up with the title after it.
+            "inline-flex items-baseline gap-1 font-medium",
             good ? "text-good" : "text-bad",
           )}
         >
-          {good ? <CheckIcon className="size-4" /> : <XIcon className="size-4" />}
+          {good ? (
+            <CheckIcon className="size-4 self-center" />
+          ) : (
+            <XIcon className="size-4 self-center" />
+          )}
           {good ? "Do" : "Don’t"}
         </span>
         <span className="ml-1.5 font-medium">{title}</span>
@@ -893,9 +898,13 @@ function useScrollSpy(ids: string[]) {
         if (top !== undefined && top <= 112) current = id;
       }
       // Short sections at the end never reach the top, so the end of the page selects the last one.
-      const atEnd =
-        window.scrollY > 0 &&
-        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      // On desktop the content panel scrolls; on phones the window does.
+      const panel = document.querySelector<HTMLElement>("[data-scroll-root]");
+      const inPanel = !!panel && panel.scrollHeight > panel.clientHeight;
+      const atEnd = inPanel
+        ? panel.scrollTop > 0 && panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 4
+        : window.scrollY > 0 &&
+          window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
       setActive(atEnd ? list[list.length - 1] : current);
     };
     const schedule = () => {
@@ -905,6 +914,8 @@ function useScrollSpy(ids: string[]) {
       pinned.current = null;
     };
     measure();
+    const panel = document.querySelector<HTMLElement>("[data-scroll-root]");
+    panel?.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
     window.addEventListener("wheel", release, { passive: true });
@@ -912,6 +923,7 @@ function useScrollSpy(ids: string[]) {
     window.addEventListener("keydown", release);
     return () => {
       cancelAnimationFrame(frame);
+      panel?.removeEventListener("scroll", schedule);
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
       window.removeEventListener("wheel", release);

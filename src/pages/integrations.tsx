@@ -171,7 +171,7 @@ function MintlifyImport({
   open: boolean;
   onOpenChange: (o: boolean) => void;
 }) {
-  const [repo, setRepo] = React.useState("github.com/charged-labs/old-docs");
+  const [repo, setRepo] = React.useState("github.com/acme/old-docs");
   const [found, setFound] = React.useState(false);
   const [busy, run] = useFakeTask();
   return (

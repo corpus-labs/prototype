@@ -1,10 +1,16 @@
-// Exploration: the handbook's pages are real Markdown files in fixtures/handbook,
-// read here the way Phase 1's loader will read them from a content repository.
-// See docs/decisions/proposed-docs-editor.md.
+// Exploration: docs projects' pages are real Markdown files in fixtures/, read here
+// the way Phase 1's loader will read them from a content repository.
+// See docs/decisions/proposed-docs-editor.md and 0001-knowledge-notebook.md.
 import { readPageMeta, splitFrontmatter } from "@core/markdown/frontmatter";
 import type { DocPage } from "@/data/workspace";
 
-const files = import.meta.glob<string>("/fixtures/handbook/docs/**/*.md", {
+// import.meta.glob needs a literal pattern, so each project gets its own line.
+const handbookFiles = import.meta.glob<string>("/fixtures/handbook/docs/**/*.md", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
+const helpFiles = import.meta.glob<string>("/fixtures/help/docs/**/*.md", {
   query: "?raw",
   import: "default",
   eager: true,
@@ -18,27 +24,43 @@ const UPDATED: Record<string, string> = {
   "accessibility-review": "2 weeks ago",
   onboarding: "1 month ago",
   decisions: "2 days ago",
+  refunds: "Today",
+  licenses: "4 days ago",
+  invoices: "2 weeks ago",
+  install: "1 week ago",
+  updates: "1 month ago",
 };
 
-export const handbookPages: DocPage[] = Object.entries(files).flatMap(([file, source]) => {
-  // docs/<folder>/<page>.md. Pages outside a folder aren't part of this sample.
-  const path = file.replace("/fixtures/handbook/", "");
-  const m = path.match(/^docs\/([^/]+)\/([^/]+)\.md$/);
-  if (!m) return [];
-  const [, dir, id] = m;
-  const { lines, body } = splitFrontmatter(source);
-  const meta = readPageMeta(lines);
-  if (!meta.success) throw new Error(`${path}: ${meta.error.issues[0].message}`);
-  return [
-    {
-      id,
-      path,
-      folder: dir[0].toUpperCase() + dir.slice(1),
-      title: meta.data.title,
-      description: meta.data.description,
-      updated: UPDATED[id] ?? "Recently",
-      lines,
-      body,
-    },
-  ];
-});
+/** "getting-started" reads as "Getting started". */
+function folderName(dir: string) {
+  const words = dir.replace(/-/g, " ");
+  return words[0].toUpperCase() + words.slice(1);
+}
+
+function pagesFrom(files: Record<string, string>, root: string): DocPage[] {
+  return Object.entries(files).flatMap(([file, source]) => {
+    // docs/<folder>/<page>.md. Pages outside a folder aren't part of this sample.
+    const path = file.replace(root, "");
+    const m = path.match(/^docs\/([^/]+)\/([^/]+)\.md$/);
+    if (!m) return [];
+    const [, dir, id] = m;
+    const { lines, body } = splitFrontmatter(source);
+    const meta = readPageMeta(lines);
+    if (!meta.success) throw new Error(`${path}: ${meta.error.issues[0].message}`);
+    return [
+      {
+        id,
+        path,
+        folder: folderName(dir),
+        title: meta.data.title,
+        description: meta.data.description,
+        updated: UPDATED[id] ?? "Recently",
+        lines,
+        body,
+      },
+    ];
+  });
+}
+
+export const handbookPages = pagesFrom(handbookFiles, "/fixtures/handbook/");
+export const helpPages = pagesFrom(helpFiles, "/fixtures/help/");

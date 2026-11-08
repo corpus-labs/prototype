@@ -41,6 +41,12 @@ const SETUP = [
     code: `claude mcp add --transport http ${SERVER} ${workspace.mcp}`,
   },
   {
+    id: "codex",
+    label: "Codex",
+    file: "Terminal",
+    code: `codex mcp add ${SERVER} --url ${workspace.mcp}`,
+  },
+  {
     id: "cursor",
     label: "Cursor",
     file: ".cursor/mcp.json",
@@ -51,6 +57,12 @@ const SETUP = [
     label: "VS Code",
     file: ".vscode/mcp.json",
     code: JSON.stringify({ servers: { [SERVER]: { type: "http", url: workspace.mcp } } }, null, 2),
+  },
+  {
+    id: "any",
+    label: "Any MCP client",
+    file: "Connection",
+    code: `URL        ${workspace.mcp}\nTransport  Streamable HTTP\n\nThe same for harnesses that run GLM, DeepSeek,\nGemini, or local models.`,
   },
   {
     id: "agents-md",

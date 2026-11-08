@@ -51,7 +51,22 @@
 }
 
 /* ---------- Neutral palettes (Tailwind 4) ---------- */
+/* Mist, a gray with a trace of blue-green, is the default. It gives the app canvas some depth. */
 :root,
+:root[data-base="mist"] {
+  --base-50: var(--color-mist-50);
+  --base-100: var(--color-mist-100);
+  --base-200: var(--color-mist-200);
+  --base-300: var(--color-mist-300);
+  --base-400: var(--color-mist-400);
+  --base-500: var(--color-mist-500);
+  --base-600: var(--color-mist-600);
+  --base-700: var(--color-mist-700);
+  --base-800: var(--color-mist-800);
+  --base-900: var(--color-mist-900);
+  --base-950: var(--color-mist-950);
+}
+
 :root[data-base="neutral"] {
   --base-50: var(--color-neutral-50);
   --base-100: var(--color-neutral-100);
@@ -144,11 +159,12 @@
   --border: var(--base-200);
   --input: var(--base-200);
   --ring: var(--base-400);
-  --sidebar: var(--base-50);
+  /* The sidebar color is also the canvas the content panel sits on. */
+  --sidebar: var(--base-100);
   --sidebar-foreground: var(--base-950);
   --sidebar-primary: var(--base-900);
   --sidebar-primary-foreground: var(--base-50);
-  --sidebar-accent: color-mix(in oklch, var(--base-200) 70%, var(--base-50));
+  --sidebar-accent: var(--base-200);
   --sidebar-accent-foreground: var(--base-950);
   --sidebar-border: var(--base-200);
   --sidebar-ring: var(--base-400);
@@ -183,7 +199,7 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: var(--base-500);
-    --sidebar: var(--base-950);
+    --sidebar: color-mix(in oklch, var(--base-950) 72%, black);
     --sidebar-foreground: var(--base-50);
     --sidebar-primary: var(--base-100);
     --sidebar-primary-foreground: var(--base-900);
@@ -221,7 +237,7 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: var(--base-500);
-  --sidebar: var(--base-950);
+  --sidebar: color-mix(in oklch, var(--base-950) 72%, black);
   --sidebar-foreground: var(--base-50);
   --sidebar-primary: var(--base-100);
   --sidebar-primary-foreground: var(--base-900);
@@ -315,6 +331,11 @@ body::before {
   samp {
     @apply font-mono;
   }
+  /* Tailwind 4 resets buttons to the default arrow; anything clickable shows the pointer. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
   ::selection {
     background: color-mix(in oklch, var(--foreground) 14%, transparent);
   }
@@ -331,13 +352,15 @@ body::before {
   .docs-prose > * + * {
     @apply mt-5;
   }
-  .docs-prose h1,
+  .docs-prose h1 {
+    @apply mt-12 text-[26px] leading-tight font-semibold tracking-[-0.025em];
+  }
   .docs-prose h2 {
     @apply mt-10 text-xl leading-snug font-semibold tracking-[-0.02em];
   }
   .docs-prose h3,
   .docs-prose h4 {
-    @apply mt-8 text-base font-semibold;
+    @apply mt-8 text-[17px] font-semibold;
   }
   .docs-prose > :first-child {
     @apply mt-0;
@@ -356,6 +379,32 @@ body::before {
   }
   .docs-prose li > p {
     @apply m-0;
+  }
+  /* To-dos (GFM task items): a checkbox in the marker's place, which the editor lets you click. */
+  .docs-prose li[data-item-type="task"] {
+    @apply relative list-none;
+  }
+  .docs-prose li[data-item-type="task"]::before {
+    content: "";
+    @apply absolute top-[0.32em] -left-[1.45em] size-[15px] cursor-pointer rounded-[4px] border-[1.5px] border-foreground/30 bg-background transition-colors;
+  }
+  .docs-prose li[data-item-type="task"][data-checked="true"]::before {
+    @apply border-foreground bg-foreground;
+  }
+  /* The tick is a mask filled with the page color, so it reads in light and dark. */
+  .docs-prose li[data-item-type="task"][data-checked="true"]::after {
+    content: "";
+    @apply pointer-events-none absolute top-[0.32em] -left-[1.45em] size-[15px] bg-background;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 8.5 2.5 2.5L12 5.5'/%3E%3C/svg%3E")
+      center / 100% no-repeat;
+  }
+  .docs-prose li[data-item-type="task"][data-checked="true"] > p {
+    @apply text-muted-foreground line-through decoration-muted-foreground/50;
+  }
+  /* The hint on the empty line being typed in. */
+  .docs-prose p.is-empty::before {
+    content: attr(data-placeholder);
+    @apply pointer-events-none float-left h-0 text-muted-foreground/60;
   }
   .docs-prose a {
     @apply font-medium underline decoration-border underline-offset-4;

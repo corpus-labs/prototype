@@ -35,8 +35,8 @@ describe("resolveLink", () => {
   });
 
   it("returns null for links that leave the repository", () => {
-    expect(resolveLink(from, "https://charged.dev")).toBeNull();
-    expect(resolveLink(from, "mailto:web@charged.dev")).toBeNull();
+    expect(resolveLink(from, "https://corpus.app")).toBeNull();
+    expect(resolveLink(from, "mailto:web@corpus.app")).toBeNull();
     expect(resolveLink(from, "#accounts")).toBeNull();
     expect(resolveLink(from, "../../../outside.md")).toBeNull();
   });
