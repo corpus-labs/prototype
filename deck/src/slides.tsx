@@ -158,18 +158,15 @@ function WhyNow() {
   const shifts: [string, ReactNode, ReactNode][] = [
     [
       "Even big customers switch",
-      "Revolut moved its developers from Claude to self-hosted Z.ai models and cut inference costs by up to 90%, it reported in November 2026. Open-weight models already handle 19% of enterprise AI use.",
-      <>
-        <a
-          href="https://www.techradar.com/pro/we-were-highly-skeptical-about-the-cost-of-ai-revolut-reveals-it-cut-ai-coding-costs-by-cutting-out-claude-entirely"
-          target="_blank"
-          rel="noreferrer"
-          className="underline decoration-neutral-400 underline-offset-2 hover:text-ink"
-        >
-          Revolut, via TechRadar, November 4, 2026
-        </a>
-        . Menlo Ventures, November 2026
-      </>,
+      "Revolut moved its developers from Claude to self-hosted Z.ai models and cut inference costs by up to 90%, it reported in November 2026.",
+      <a
+        href="https://www.techradar.com/pro/we-were-highly-skeptical-about-the-cost-of-ai-revolut-reveals-it-cut-ai-coding-costs-by-cutting-out-claude-entirely"
+        target="_blank"
+        rel="noreferrer"
+        className="underline decoration-neutral-400 underline-offset-2 hover:text-ink"
+      >
+        Revolut, via TechRadar, November 4, 2026
+      </a>,
     ],
     [
       "One plug fits all of them",
@@ -194,7 +191,10 @@ function WhyNow() {
               Share of enterprise AI spend
             </figcaption>
             <ShareShift />
-            <Source className="mt-2">
+            <p className="mt-2 text-[14px] text-muted">
+              Open-weight models: 19% of enterprise AI use, 4% of spend
+            </p>
+            <Source className="mt-1">
               Menlo Ventures, State of Enterprise AI, December 2025 and November 2026
             </Source>
           </figure>
