@@ -4,12 +4,12 @@
  */
 export const CONFIG = {
   /**
-   * Where waitlist signups are sent, as a form POST with an `email` field
-   * (Formspree, Basin, Getform, or your own endpoint all accept this).
+   * Where waitlist signups are sent, as a form POST with an `email` field.
+   * `/api/waitlist` is the Pages Function in functions/, which saves to D1.
    * While it's null, signups stay in the visitor's browser and the page shows
    * a preview notice, so it can't go live without one by accident.
    */
-  waitlistEndpoint: null as string | null,
+  waitlistEndpoint: "/api/waitlist" as string | null,
 
   /** The demand test: each visitor sees one of these prices, kept for their next visit. */
   prices: [79, 99] as const,

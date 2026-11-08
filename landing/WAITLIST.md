@@ -1,6 +1,6 @@
 # Waitlist on Cloudflare
 
-Status, November 7, 2026: not set up. The landing page works, but signups stay in the visitor's browser because `waitlistEndpoint` in `src/config.ts` is still `null`. An amber notice on the page says so.
+Status, November 8, 2026: live. The form posts to `/api/waitlist` (`functions/api/waitlist.ts`), which saves to the `corpus-waitlist` D1 database on the Cloudflare account. The GitHub workflow deploys it with every push to main. The steps below are kept as a record of how it was set up; the commands under "Reading the results" are the ones to use now.
 
 ## Don't wait for the domain
 
