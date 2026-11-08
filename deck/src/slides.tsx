@@ -767,7 +767,7 @@ function BusinessModel() {
               sites, or AI answers.
             </Source>
           </figure>
-          <dl className="divide-y border-y text-[15px] leading-[1.45]">
+          <dl className="self-start divide-y border-y text-[15px] leading-[1.45]">
             {terms.map(([k, v]) => (
               <div key={k} className="grid grid-cols-[96px_1fr] gap-4 py-[9px]">
                 <dt className="font-medium">{k}</dt>
