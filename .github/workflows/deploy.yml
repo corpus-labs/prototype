@@ -1,0 +1,73 @@
+# Builds the prototype, landing page, and deck and deploys each one to its
+# Cloudflare Pages project on every push to main (a merged pull request is a
+# push to main). Run it by hand from the Actions tab with "Run workflow".
+#
+# Needs one repository secret, CLOUDFLARE_API_TOKEN: a Cloudflare API token
+# with the "Cloudflare Pages: Edit" permission on this account.
+
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CLOUDFLARE_ACCOUNT_ID: 4139fc6e3371df53333f15fb12b0344f
+  WRANGLER_VERSION: 4.158.0
+
+jobs:
+  deploy:
+    name: Deploy ${{ matrix.domain }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - domain: demo.corpus.app
+            dir: .
+            build: build:single
+            out: dist
+            project: corpus-demo
+          - domain: corpus.app
+            dir: landing
+            build: build
+            out: landing/dist
+            project: corpus-landing
+          - domain: iya-ignite.corpus.app
+            dir: deck
+            build: build
+            out: deck/dist
+            project: corpus-deck
+    # A newer push to main replaces a deploy of the same site still in progress.
+    concurrency:
+      group: deploy-${{ matrix.project }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - uses: actions/setup-node@v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ matrix.dir }}/package-lock.json
+
+      - name: Install
+        working-directory: ${{ matrix.dir }}
+        run: npm ci
+
+      - name: Build
+        working-directory: ${{ matrix.dir }}
+        run: npm run ${{ matrix.build }}
+
+      - name: Deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: >
+          npx --yes wrangler@${{ env.WRANGLER_VERSION }} pages deploy ${{ matrix.out }}
+          --project-name=${{ matrix.project }}
+          --branch=main
+          --commit-hash=${{ github.sha }}
