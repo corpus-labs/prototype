@@ -3,7 +3,7 @@ import { FACTS } from "./facts";
 import { SplitView } from "./split-view";
 import { cn } from "./lib/utils";
 import { ToolLogo, type ToolId } from "./tool-logo";
-import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title, Todo } from "./ui";
+import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title } from "./ui";
 import coverShot from "./assets/shots/cover-notebook.png";
 import siteShot from "./assets/shots/traction-site.png";
 import portrait from "./assets/portrait.jpg";
@@ -844,13 +844,10 @@ function Traction() {
               </Fact>
               <Fact k="Waitlist">
                 {FACTS.waitlist.url}{" "}
-                {FACTS.waitlist.liveSince && FACTS.waitlist.signups ? (
-                  <span className="text-muted">
-                    live since {FACTS.waitlist.liveSince}, {FACTS.waitlist.signups} signups
-                  </span>
-                ) : (
-                  <Todo>live date, signups</Todo>
-                )}
+                <span className="text-muted">
+                  (live since {FACTS.waitlist.liveSince}
+                  {FACTS.waitlist.signups && `, ${FACTS.waitlist.signups} signups`})
+                </span>
               </Fact>
             </dl>
           </div>

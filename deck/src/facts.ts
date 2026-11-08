@@ -12,9 +12,9 @@ export const FACTS = {
   prototypeUrl: "demo.corpus.app" as string | null,
   waitlist: {
     url: "corpus.app",
-    /** When the landing page went live, like "Nov 2026". */
-    liveSince: null as string | null,
-    /** Signups so far, like "48". */
+    /** When the landing page went live. */
+    liveSince: "Nov 2026",
+    /** Signups so far, like "48". Left out of the slide while null. */
     signups: null as string | null,
   },
   /** Targets for the IYA Venture Showcase. */
