@@ -32,7 +32,7 @@ function Fact({ k, children, wide = false }: { k: string; children: ReactNode; w
   );
 }
 
-/* 1. Cover --------------------------------------------------------------- */
+/* 1. Cover -------------------------------------------------------------- */
 
 function Cover() {
   return (
@@ -62,7 +62,7 @@ function Cover() {
   );
 }
 
-/* 2. Problem ------------------------------------------------------------- */
+/* 2. Problem ------------------------------------------------------------ */
 
 function Problem() {
   const pains: [string, string][] = [
@@ -152,7 +152,7 @@ function MemoryTable() {
   );
 }
 
-/* 3. Why now ------------------------------------------------------------- */
+/* 3. Why now ------------------------------------------------------------ */
 
 function WhyNow() {
   const shifts: [string, ReactNode, string][] = [
@@ -255,7 +255,7 @@ function ShareShift() {
   );
 }
 
-/* 4. Solution ------------------------------------------------------------ */
+/* 4. Solution ----------------------------------------------------------- */
 
 type JobId = "ai" | "support" | "docs" | "design";
 
@@ -385,63 +385,7 @@ function Solution() {
   );
 }
 
-/* 5. How it works -------------------------------------------------------- */
-
-function HowItWorks() {
-  return (
-    <Slide section="How it works">
-      <Body>
-        <Title className="max-w-[960px]">
-          Write once in the notebook. Every reader gets the same words.
-        </Title>
-      </Body>
-      <ol className="absolute top-[232px] inset-x-16 grid grid-cols-3 gap-10">
-        <Step n={1} head="Write">
-          Plain Markdown files you own, in folders. Edit them as rich text or as Markdown.
-        </Step>
-        <Step n={2} head="Publish and connect">
-          A docs site or help center for people. Plugins connect Claude, Codex, and more in one
-          click.
-        </Step>
-        <Step n={3} head="Fill the gaps">
-          Questions nobody could answer come back as AI drafts, written with the model you pick.
-        </Step>
-      </ol>
-      <div className="absolute inset-x-16 top-[378px] bottom-0 flex flex-col">
-        <div className="mb-3 grid grid-cols-[52.5%_1fr] px-1 text-[15px]">
-          <Dot tone="off">
-            <span className="font-medium">People</span>
-            <span className="text-muted">read the help page</span>
-          </Dot>
-          <Dot tone="good">
-            <span className="font-medium">Agents and the support bot</span>
-            <span className="text-muted">get the same words</span>
-          </Dot>
-        </div>
-        <SplitView
-          pageId="refunds"
-          site="acme-help.corpus.app"
-          start="How long refunds take"
-          className="min-h-0 flex-1 rounded-b-none"
-        />
-      </div>
-    </Slide>
-  );
-}
-
-function Step({ n, head, children }: { n: number; head: string; children: ReactNode }) {
-  return (
-    <li className="grid grid-cols-[24px_1fr] border-t pt-3.5">
-      <span className="text-[15px] font-medium text-faint tabular-nums">{n}</span>
-      <div>
-        <p className="text-[17px] font-medium">{head}</p>
-        <div className="mt-1 text-[14.5px] leading-[1.5] text-pretty text-muted">{children}</div>
-      </div>
-    </li>
-  );
-}
-
-/* 6. Plugins ------------------------------------------------------------ */
+/* 5. Plugins ------------------------------------------------------------ */
 
 function Tile({ tile, className }: { tile: ToolId; className?: string }) {
   return (
@@ -562,7 +506,63 @@ function Plugins() {
   );
 }
 
-/* 7. Competition --------------------------------------------------------- */
+/* 6. How it works ------------------------------------------------------- */
+
+function HowItWorks() {
+  return (
+    <Slide section="How it works">
+      <Body>
+        <Title className="max-w-[960px]">
+          Write once in the notebook. Every reader gets the same words.
+        </Title>
+      </Body>
+      <ol className="absolute top-[232px] inset-x-16 grid grid-cols-3 gap-10">
+        <Step n={1} head="Write">
+          Plain Markdown files you own, in folders. Edit them as rich text or as Markdown.
+        </Step>
+        <Step n={2} head="Publish and connect">
+          A docs site or help center for people. Plugins connect Claude, Codex, and more in one
+          click.
+        </Step>
+        <Step n={3} head="Fill the gaps">
+          Questions nobody could answer come back as AI drafts, written with the model you pick.
+        </Step>
+      </ol>
+      <div className="absolute inset-x-16 top-[378px] bottom-0 flex flex-col">
+        <div className="mb-3 grid grid-cols-[52.5%_1fr] px-1 text-[15px]">
+          <Dot tone="off">
+            <span className="font-medium">People</span>
+            <span className="text-muted">read the help page</span>
+          </Dot>
+          <Dot tone="good">
+            <span className="font-medium">Agents and the support bot</span>
+            <span className="text-muted">get the same words</span>
+          </Dot>
+        </div>
+        <SplitView
+          pageId="refunds"
+          site="acme-help.corpus.app"
+          start="How long refunds take"
+          className="min-h-0 flex-1 rounded-b-none"
+        />
+      </div>
+    </Slide>
+  );
+}
+
+function Step({ n, head, children }: { n: number; head: string; children: ReactNode }) {
+  return (
+    <li className="grid grid-cols-[24px_1fr] border-t pt-3.5">
+      <span className="text-[15px] font-medium text-faint tabular-nums">{n}</span>
+      <div>
+        <p className="text-[17px] font-medium">{head}</p>
+        <div className="mt-1 text-[14.5px] leading-[1.5] text-pretty text-muted">{children}</div>
+      </div>
+    </li>
+  );
+}
+
+/* 7. Competition -------------------------------------------------------- */
 
 type Has = "yes" | "part" | "no";
 
@@ -710,7 +710,7 @@ function Competition() {
   );
 }
 
-/* 7. Business model ------------------------------------------------------ */
+/* 8. Business model ----------------------------------------------------- */
 
 function BusinessModel() {
   const plans: [name: string, plan: string, total: number][] = [
@@ -806,7 +806,7 @@ function BusinessModel() {
   );
 }
 
-/* 8. Traction ------------------------------------------------------------ */
+/* 9. Traction ----------------------------------------------------------- */
 
 function Traction() {
   const groups: { tone: "good" | "warn" | "off"; label: string; items: ReactNode[] }[] = [
@@ -882,7 +882,7 @@ function Traction() {
   );
 }
 
-/* 9. Team ---------------------------------------------------------------- */
+/* 10. Team -------------------------------------------------------------- */
 
 function Team() {
   const record: [string, ReactNode][] = [
@@ -942,7 +942,7 @@ function Team() {
   );
 }
 
-/* 10. Use of proceeds ---------------------------------------------------- */
+/* 11. Use of proceeds --------------------------------------------------- */
 
 function Proceeds() {
   const spend: [string, string, string][] = [
@@ -1012,7 +1012,7 @@ function Proceeds() {
   );
 }
 
-/* 11. Milestones --------------------------------------------------------- */
+/* 12. Milestones -------------------------------------------------------- */
 
 function Milestones() {
   const steps: { when: string; head: string; body: string; done?: boolean }[] = [
@@ -1092,7 +1092,7 @@ function Milestones() {
   );
 }
 
-/* 12. Close -------------------------------------------------------------- */
+/* 13. Close ------------------------------------------------------------- */
 
 function Close() {
   return (
@@ -1151,8 +1151,8 @@ export const SLIDES = [
   Problem,
   WhyNow,
   Solution,
-  HowItWorks,
   Plugins,
+  HowItWorks,
   Competition,
   BusinessModel,
   Traction,
