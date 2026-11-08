@@ -43,8 +43,8 @@ function Cover() {
           Own what your company knows. Use it with any AI.
         </h1>
         <p className="mt-6 text-[20px] leading-[1.45] text-pretty text-muted">
-          Corpus is one notebook for your docs, help center, AI context, and design system. Pay once
-          to run it yourself, or let us host it for $7 a month.
+          Corpus is shared memory for any AI, owned by your team. Your docs, help center, and
+          support bot come from the same library. Pay once, or $7 a month hosted.
         </p>
       </div>
       <div className="absolute bottom-14 left-16 grid gap-1 text-[15px]">
@@ -67,23 +67,26 @@ function Cover() {
 function Problem() {
   const pains: [string, string][] = [
     [
-      "Scattered",
-      "Docs in Mintlify or GitBook, notes in Notion or Obsidian, help articles in Zendesk, and AI context in each vendor’s own project files.",
+      "Personal",
+      "Claude and ChatGPT remember one person. Your teammate’s AI doesn’t know what yours learned.",
     ],
-    ["Rented", "Every tool bills by the seat, the site, or the answer, every month."],
     [
-      "Stuck",
-      "Context saved inside one AI vendor stays there. Switch models, and you set it all up again.",
+      "Locked in",
+      "Switch to another AI, or to next year’s leader, and the memory stays with the old vendor.",
+    ],
+    [
+      "Missing",
+      "Open-weight models like DeepSeek and Qwen, and tools that store no user data, start every session blank.",
     ],
   ];
   return (
     <Slide section="Problem">
       <Body>
-        <Title className="max-w-[900px]">
-          Company knowledge is scattered, rented, and stuck with one AI vendor.
+        <Title className="max-w-[960px]">
+          The best AI tools remember you. That memory is locked inside one vendor.
         </Title>
-        <div className="mt-11 grid grid-cols-[1fr_560px] gap-14">
-          <ul className="divide-y border-y">
+        <div className="mt-11 grid grid-cols-[1fr_600px] gap-14">
+          <ul className="self-start divide-y border-y">
             {pains.map(([head, body]) => (
               <li key={head} className="py-4">
                 <p className="text-[18.5px] font-medium">{head}</p>
@@ -91,45 +94,59 @@ function Problem() {
               </li>
             ))}
           </ul>
-          <FiveAnswers />
+          <MemoryTable />
         </div>
       </Body>
     </Slide>
   );
 }
 
-function FiveAnswers() {
-  const answers: [where: string, said: string, note?: string][] = [
-    ["Help center", "“5 business days”"],
-    ["Docs site", "“Up to 7 days”"],
-    ["Support bot", "“Within 24 hours”", "a guess"],
-    ["ChatGPT project", "“5 to 7 days”", "last year’s PDF"],
+function MemoryTable() {
+  const cols = ["Remembers", "Shared with your team", "Any AI can use it"];
+  const rows: { name: string; has: Has[]; us?: boolean }[] = [
+    { name: "Claude", has: ["yes", "part", "no"] },
+    { name: "ChatGPT", has: ["yes", "part", "no"] },
+    { name: "Open-weight models", has: ["no", "no", "no"] },
+    { name: "Corpus", has: ["yes", "yes", "yes"], us: true },
   ];
   return (
-    <figure className="self-start overflow-hidden rounded-xl border bg-white">
-      <figcaption className="border-b bg-subtle px-5 py-3 text-[14px] text-muted">
-        Five places answer “How long do refunds take?”
-      </figcaption>
-      <ul className="divide-y text-[15.5px]">
-        {answers.map(([where, said, note]) => (
-          <li key={where} className="grid grid-cols-[150px_1fr] items-baseline px-5 py-3">
-            <span className="text-muted">{where}</span>
-            <Dot tone="bad">
-              {said}
-              {note && <span className="text-[13.5px] text-muted">{note}</span>}
-            </Dot>
-          </li>
-        ))}
-        <li className="grid grid-cols-[150px_1fr] items-baseline bg-good-soft px-5 py-3">
-          <span className="text-muted">Team notes</span>
-          <Dot tone="good">
-            <span className="font-medium">“3 business days, since March”</span>
-          </Dot>
-        </li>
-      </ul>
-      <p className="border-t px-5 py-3 text-[13px] text-muted">
-        An illustration. Every copy was right once.
-      </p>
+    <figure className="self-start">
+      <table className="w-full border-collapse text-[15px]">
+        <thead>
+          <tr className="border-b text-left text-[13.5px] text-muted">
+            <th className="py-2.5 pr-3 pl-3 font-normal">Where memory lives</th>
+            {cols.map((c) => (
+              <th key={c} className="w-[124px] px-2 py-2.5 font-normal leading-tight">
+                {c}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.name} className={cn("border-b", r.us && "border-b-0 bg-good-soft")}>
+              <td className={cn("py-3 pr-3 pl-3", r.us ? "font-semibold" : "font-medium")}>
+                {r.name}
+              </td>
+              {r.has.map((h, k) => (
+                <td key={k} className="px-2 py-3">
+                  <span className="inline-flex items-baseline gap-2">
+                    <span className="self-center">
+                      <Mark has={h} />
+                    </span>
+                    {HAS_LABEL[h]}
+                  </span>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <Source className="mt-3 text-pretty">
+        Partly: shared projects on team plans, not each person’s memory. Claude can import a
+        one-time copy of ChatGPT memory, but the two don’t stay in sync. Vendor help pages, November
+        2026. Corpus runs as a prototype.
+      </Source>
     </figure>
   );
 }
@@ -294,9 +311,9 @@ function Solution() {
   const jobs: [job: JobId, head: string, body: string, instead: string][] = [
     [
       "ai",
-      "AI context",
-      "Plugins for Claude, Codex, and more recall your plans and decisions, and save new ones back.",
-      "prompt files in every AI tool",
+      "Memory for any AI",
+      "Claude, ChatGPT, Codex, Cursor, and open-weight models recall what your team knows and save what they learn.",
+      "memory locked inside one vendor",
     ],
     [
       "support",
@@ -321,26 +338,33 @@ function Solution() {
     <Slide section="Solution">
       <Body>
         <Title className="max-w-[980px]">
-          Corpus: one notebook that every person, support bot, and AI tool reads.
+          Corpus: shared memory that every AI tool and every teammate can use.
         </Title>
         <Lead className="max-w-[900px]">
-          A context control plane for your company. Write it once, choose what’s public, and every
-          reader gets the same answer.
+          One library your company owns. Any AI recalls from it and saves to it, and the same pages
+          publish as docs, a help center, and a support bot.
         </Lead>
         <div className="absolute inset-x-0 bottom-0">
           <div className="flex h-[60px] items-center gap-3 rounded-xl bg-ink px-5 text-white">
             <CorpusMark className="size-5" />
-            <span className="text-[17px] font-semibold">Corpus notebook</span>
+            <span className="text-[17px] font-semibold">Corpus library</span>
             <span className="text-[14.5px] text-neutral-400">
-              Markdown files you own, hosted or on your server
+              Shared memory as Markdown files you own, hosted or on your server
             </span>
           </div>
           <ol className="grid grid-cols-4 gap-8">
             {jobs.map(([job, head, body, instead]) => (
               <li key={head}>
                 {/* The line from the notebook runs into each job's icon. */}
-                <span className="ml-5 block h-6 w-px bg-neutral-300" />
-                <span className="grid size-10 place-items-center rounded-xl border bg-white text-ink">
+                <span
+                  className={cn("ml-5 block h-6 w-px", job === "ai" ? "bg-ink" : "bg-neutral-300")}
+                />
+                <span
+                  className={cn(
+                    "grid size-10 place-items-center rounded-xl border",
+                    job === "ai" ? "border-ink bg-ink text-white" : "bg-white text-ink",
+                  )}
+                >
                   <JobIcon job={job} />
                 </span>
                 <div className="mt-4">
@@ -1080,8 +1104,8 @@ function Close() {
           Use it with any AI.
         </h2>
         <p className="mt-6 max-w-[660px] text-[20px] leading-[1.45] text-pretty text-muted">
-          One notebook for your docs, help center, AI context, and design system. Pay once to
-          self-host, or $7 a month hosted.
+          Shared memory for any AI, owned by your team, with docs, a help center, and a support bot
+          from the same library. Pay once to self-host, or $7 a month hosted.
         </p>
       </div>
       <div className="absolute inset-x-16 bottom-14 grid grid-cols-[1fr_440px] gap-16">
