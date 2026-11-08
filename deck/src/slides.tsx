@@ -902,12 +902,16 @@ function Team() {
       "15 years in the Drupal community",
       "People I already know how to reach when the Drupal and WordPress plugins ship.",
     ],
+    [
+      "Uses four AI tools every week",
+      "I switch between Claude Code, Z.ai, DeepSeek, and OpenCode. Corpus is the shared memory I need.",
+    ],
   ];
   return (
     <Slide section="Team">
       <Body>
         <Title>Solo founder. I’ve built docs, design systems, and products people pay for.</Title>
-        <div className="mt-12 grid grid-cols-[372px_1fr] gap-16">
+        <div className="mt-8 grid grid-cols-[372px_1fr] gap-16">
           <div>
             <img
               src={portrait}
@@ -930,7 +934,7 @@ function Team() {
           </div>
           <ul className="divide-y border-y">
             {record.map(([head, body]) => (
-              <li key={head} className="py-[15px]">
+              <li key={head} className="py-3">
                 <p className="text-[18px] font-medium">{head}</p>
                 <p className="mt-1 text-[15.5px] leading-[1.5] text-pretty text-muted">{body}</p>
               </li>
