@@ -116,7 +116,7 @@ function MemoryTable() {
           <tr className="border-b text-left text-[13.5px] text-muted">
             <th className="py-2.5 pr-3 pl-3 font-normal">Where memory lives</th>
             {cols.map((c) => (
-              <th key={c} className="w-[124px] px-2 py-2.5 font-normal leading-tight">
+              <th key={c} className="w-[124px] px-2 py-2.5 text-center font-normal leading-tight">
                 {c}
               </th>
             ))}
@@ -129,7 +129,7 @@ function MemoryTable() {
                 {r.name}
               </td>
               {r.has.map((h, k) => (
-                <td key={k} className="px-2 py-3">
+                <td key={k} className="px-2 py-3 text-center">
                   <span className="inline-flex items-baseline gap-2">
                     <span className="self-center">
                       <Mark has={h} />
