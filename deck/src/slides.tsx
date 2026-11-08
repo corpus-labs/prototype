@@ -715,7 +715,7 @@ function BusinessModel() {
     ],
     [
       "Reach",
-      "X first, then Notion imports and WordPress and Drupal plugins, where millions of sites already live.",
+      "X and Reddit first, then Notion imports and WordPress and Drupal plugins, where millions of sites already live.",
     ],
     ["Goal", "Bootstrapped and profitable. Not raising venture capital."],
   ];
@@ -922,13 +922,18 @@ function Team() {
 function Proceeds() {
   const spend: [string, string, string][] = [
     [
-      "$3,000",
-      "X ads as a demand test",
-      "Four ad sets, one per job: AI context, support answers, docs, and design systems. Each sends people to the corpus.app waitlist, where half see $79 and half see $99.",
+      "$1,500",
+      "Reddit ads",
+      "Four ad sets, one per job: AI context, support answers, docs, and design systems. Shown in communities like r/selfhosted and r/webdev.",
+    ],
+    [
+      "$1,500",
+      "X ads",
+      "The same four ad sets, shown to people building with AI tools. Both send people to the corpus.app waitlist, where half see $79 and half see $99.",
     ],
   ];
   const report = [
-    "Cost per signup, by job",
+    "Cost per signup, by job and platform",
     "Waitlist size",
     "Landing page conversion rate",
     "Share willing to pay $79, and $99",
@@ -958,9 +963,9 @@ function Proceeds() {
               ))}
             </ul>
             <p className="mt-5 text-[15.5px] leading-[1.5] text-pretty text-muted">
-              I’ll also interview ten signups for 30 minutes each, thanked with a free lifetime
-              license. No hires and no pay for me: I build Corpus with AI coding agents, so every
-              dollar buys demand data.
+              After two weeks, more of the budget goes to whichever platform brings signups more
+              cheaply. I’ll also interview ten signups, thanked with a free lifetime license. No
+              hires and no pay for me: I build Corpus with AI coding agents.
             </p>
           </div>
           <div>
