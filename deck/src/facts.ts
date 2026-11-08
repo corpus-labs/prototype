@@ -19,9 +19,9 @@ export const FACTS = {
   },
   /** Targets for the IYA Venture Showcase. */
   targets: {
-    waitlist: null as string | null,
-    betaTeams: null as string | null,
-    paidLicenses: null as string | null,
+    waitlist: "250 signups" as string | null,
+    betaTeams: "10 teams" as string | null,
+    paidLicenses: "25 sold" as string | null,
   },
   /** What the hosted plan costs. */
   hostedPrice: "$7 a month" as string | null,
