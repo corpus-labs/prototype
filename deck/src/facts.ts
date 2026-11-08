@@ -9,7 +9,7 @@ export const FACTS = {
   /** Demo video link, without https://. */
   demoVideo: null as string | null,
   /** Where judges can click through the prototype, without https://. */
-  prototypeUrl: null as string | null,
+  prototypeUrl: "demo.corpus.app" as string | null,
   waitlist: {
     url: "corpus.app",
     /** When the landing page went live, like "Nov 2026". */

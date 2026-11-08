@@ -1117,6 +1117,9 @@ function Close() {
               <Fill value={FACTS.email} todo="email" />
             </Fact>
             <Fact k="Waitlist">{FACTS.waitlist.url}</Fact>
+            <Fact k="Prototype">
+              <Fill value={FACTS.prototypeUrl} todo="link" />
+            </Fact>
             <Fact k="Demo">
               <Fill value={FACTS.demoVideo} todo="link" />
             </Fact>
