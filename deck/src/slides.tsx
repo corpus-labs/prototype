@@ -836,7 +836,7 @@ function Traction() {
               ))}
             </div>
             <dl className="mt-auto grid gap-2 border-t pt-4 text-[14px]">
-              <Fact k="Demo video">
+              <Fact k="Pitch video">
                 <Fill value={FACTS.demoVideo} todo="link" />
               </Fact>
               <Fact k="Prototype">
@@ -1111,7 +1111,7 @@ function Close() {
             <Fact k="Prototype">
               <Fill value={FACTS.prototypeUrl} todo="link" />
             </Fact>
-            <Fact k="Demo video">
+            <Fact k="Pitch video">
               <Fill value={FACTS.demoVideo} todo="link" />
             </Fact>
           </dl>

@@ -6,7 +6,7 @@
 export const FACTS = {
   /** Contact email for the judges. A usc.edu address reads best here. */
   email: "kostelec@usc.edu" as string | null,
-  /** Demo video link, without https://. */
+  /** Pitch video link (you presenting the deck), without https://. */
   demoVideo: null as string | null,
   /** Where judges can click through the prototype, without https://. */
   prototypeUrl: "demo.corpus.app" as string | null,
