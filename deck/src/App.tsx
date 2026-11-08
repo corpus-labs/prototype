@@ -112,7 +112,7 @@ export default function App() {
       </div>
 
       {view.mode === "present" && (
-        <nav className="no-print fixed inset-x-0 bottom-0 flex h-14 items-center justify-center gap-1 text-[13px] text-neutral-600">
+        <nav className="no-print fixed inset-x-0 bottom-0 flex h-11 items-center justify-center gap-1 text-[13px] text-neutral-600">
           <NavButton label="Previous slide" onClick={() => go(view.i - 1)} disabled={view.i === 0}>
             <path d="M10 3 5 8l5 5" />
           </NavButton>
