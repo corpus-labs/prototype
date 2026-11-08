@@ -922,14 +922,14 @@ function Team() {
 function Proceeds() {
   const spend: [string, string, string][] = [
     [
-      "$2,500",
+      "$3,000",
       "X ads as a demand test",
       "Four ad sets, one per job: AI context, support answers, docs, and design systems. Each sends people to the corpus.app waitlist, where half see $79 and half see $99.",
     ],
     [
-      "$500",
-      "Ten paid user interviews",
-      "30 minutes each, $50 per person, with signups from the job that draws the most interest.",
+      "$0",
+      "Ten user interviews",
+      "30 minutes each, with signups from the job that draws the most interest. Each person gets a free lifetime license as thanks.",
     ],
   ];
   const report = [
@@ -947,23 +947,14 @@ function Proceeds() {
         </Title>
         <div className="mt-11 grid grid-cols-[1fr_360px] gap-16">
           <div>
-            <div className="flex h-3 gap-[3px] overflow-hidden rounded-full">
-              <span className="w-5/6 rounded-l-full bg-ink" />
-              <span className="w-1/6 rounded-r-full bg-good" />
-            </div>
-            <ul className="mt-6 divide-y border-y">
-              {spend.map(([amount, head, body], i) => (
+            <ul className="divide-y border-y">
+              {spend.map(([amount, head, body]) => (
                 <li key={head} className="grid grid-cols-[120px_1fr] gap-5 py-5">
                   <p className="text-[28px] leading-[1.05] font-semibold tracking-[-0.025em] tabular-nums">
                     {amount}
                   </p>
                   <div>
-                    <p className="flex items-center gap-2.5 text-[18px] font-medium">
-                      <span
-                        className={cn("size-2.5 rounded-[3px]", i === 0 ? "bg-ink" : "bg-good")}
-                      />
-                      {head}
-                    </p>
+                    <p className="text-[18px] font-medium">{head}</p>
                     <p className="mt-1.5 text-[15.5px] leading-[1.5] text-pretty text-muted">
                       {body}
                     </p>
@@ -972,8 +963,8 @@ function Proceeds() {
               ))}
             </ul>
             <p className="mt-5 text-[15.5px] leading-[1.5] text-pretty text-muted">
-              No hires. I build Corpus with AI coding agents, so the money goes to learning from
-              users instead of buying engineering hours.
+              No hires and no pay for me. I build Corpus with AI coding agents, so every dollar buys
+              demand data instead of engineering hours.
             </p>
           </div>
           <div>
@@ -1099,7 +1090,10 @@ function Close() {
           <ul className="mt-3 divide-y border-y text-[17px] leading-[1.45]">
             <li className="py-3">
               <span className="font-medium">$3,000 Ignite Grant, GenAI track</span>
-              <span className="text-muted"> for the demand test and ten user interviews</span>
+              <span className="text-muted">
+                {" "}
+                for a demand test: ads, a waitlist, and a price test
+              </span>
             </li>
             <li className="py-3">
               <span className="font-medium">A mentor</span>
