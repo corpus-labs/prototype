@@ -155,11 +155,21 @@ function MemoryTable() {
 /* 3. Why now ------------------------------------------------------------ */
 
 function WhyNow() {
-  const shifts: [string, ReactNode, string][] = [
+  const shifts: [string, ReactNode, ReactNode][] = [
     [
       "Even big customers switch",
-      "Revolut moved its developers from Claude to self-hosted Z.ai models in 2026 and cut inference costs by up to 90%. Open-weight models already handle 19% of enterprise AI use.",
-      "Revolut, via TechRadar, November 2026. Menlo Ventures, November 2026",
+      "Revolut moved its developers from Claude to self-hosted Z.ai models and cut inference costs by up to 90%, it reported in November 2026. Open-weight models already handle 19% of enterprise AI use.",
+      <>
+        <a
+          href="https://www.techradar.com/pro/we-were-highly-skeptical-about-the-cost-of-ai-revolut-reveals-it-cut-ai-coding-costs-by-cutting-out-claude-entirely"
+          target="_blank"
+          rel="noreferrer"
+          className="underline decoration-neutral-400 underline-offset-2 hover:text-ink"
+        >
+          Revolut, via TechRadar, November 4, 2026
+        </a>
+        . Menlo Ventures, November 2026
+      </>,
     ],
     [
       "One plug fits all of them",

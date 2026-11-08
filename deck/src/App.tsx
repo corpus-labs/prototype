@@ -83,12 +83,13 @@ export default function App() {
   }, [view, go, toggleAll]);
 
   const onSlideClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Links on a slide (like a cited source) open on their own, in either view.
+    if ((e.target as HTMLElement).closest("a")) return;
     if (view.mode === "all") {
       const el = (e.target as HTMLElement).closest<HTMLElement>(".slide");
       if (el?.dataset.n) go(Number(el.dataset.n) - 1);
       return;
     }
-    if ((e.target as HTMLElement).closest("a")) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     go(view.i + (x < 0.3 ? -1 : 1));
