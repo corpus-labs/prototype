@@ -871,7 +871,7 @@ function Team() {
     ],
     [
       "Elite author on ThemeForest",
-      "More than $75,000 in lifetime sales of one-time-priced products, Envato’s bar for Elite. Corpus uses the same model.",
+      "More than $100,000 in lifetime sales of one-time-priced products, past Envato’s $75,000 bar for Elite. Corpus uses the same model.",
     ],
     [
       "15 years in the Drupal community",
