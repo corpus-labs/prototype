@@ -1,0 +1,10 @@
+# Cloudflare Pages: the built page plus the waitlist function in functions/.
+# See WAITLIST.md.
+name = "corpus-landing"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-10-20"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "corpus-waitlist"
+database_id = "05d333e8-2257-48e4-a0df-de879fc200a4"

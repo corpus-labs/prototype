@@ -17,7 +17,7 @@ permissions:
 
 env:
   CLOUDFLARE_ACCOUNT_ID: 4139fc6e3371df53333f15fb12b0344f
-  WRANGLER_VERSION: 4.158.0
+  WRANGLER_VERSION: 4.152.0
 
 jobs:
   deploy:
@@ -35,23 +35,23 @@ jobs:
           - domain: corpus.app
             dir: landing
             build: build
-            out: landing/dist
+            out: dist
             project: corpus-landing
           - domain: iya-ignite.corpus.app
             dir: deck
             build: build
-            out: deck/dist
+            out: dist
             project: corpus-deck
     # A newer push to main replaces a deploy of the same site still in progress.
     concurrency:
       group: deploy-${{ matrix.project }}
       cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v7.0.1
 
-      - uses: actions/setup-node@v4.4.0
+      - uses: actions/setup-node@v7.1.0
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
           cache-dependency-path: ${{ matrix.dir }}/package-lock.json
 
@@ -63,7 +63,10 @@ jobs:
         working-directory: ${{ matrix.dir }}
         run: npm run ${{ matrix.build }}
 
+      # Runs from the site's folder so the landing page's wrangler.toml and
+      # functions/ (the waitlist) deploy with it.
       - name: Deploy
+        working-directory: ${{ matrix.dir }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: >
