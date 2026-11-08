@@ -72,6 +72,11 @@
   pre {
     font-family: var(--font-mono);
   }
+  /* Tailwind 4 resets buttons to the default arrow; anything clickable shows the pointer. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 /* ---------- Slides ---------- */

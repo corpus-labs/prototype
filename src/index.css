@@ -331,6 +331,11 @@ body::before {
   samp {
     @apply font-mono;
   }
+  /* Tailwind 4 resets buttons to the default arrow; anything clickable shows the pointer. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
   ::selection {
     background: color-mix(in oklch, var(--foreground) 14%, transparent);
   }
