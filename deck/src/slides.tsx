@@ -44,8 +44,7 @@ function Cover() {
         </h1>
         <p className="mt-6 text-[20px] leading-[1.45] text-pretty text-muted">
           One shared memory for every AI tool and teammate, including open-weight models. Your docs,
-          help center, and support bot come from the same pages. Pay once to self-host, or add
-          hosting for $7 a month.
+          help center, and support bot come from the same pages.
         </p>
       </div>
       <div className="absolute bottom-14 left-16 grid gap-1 text-[15px]">
@@ -1107,7 +1106,7 @@ function Close() {
         </h2>
         <p className="mt-6 max-w-[660px] text-[20px] leading-[1.45] text-pretty text-muted">
           One shared memory for every AI tool and teammate, with docs, a help center, and a support
-          bot from the same pages. Pay once to self-host, or add hosting for $7 a month.
+          bot from the same pages.
         </p>
       </div>
       <div className="absolute inset-x-16 bottom-14 grid grid-cols-[1fr_440px] gap-16">
