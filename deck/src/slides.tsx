@@ -972,14 +972,24 @@ function Proceeds() {
         </Title>
         <div className="mt-11 grid grid-cols-[1fr_360px] gap-16">
           <div>
-            <ul className="divide-y border-y">
-              {spend.map(([amount, head, body]) => (
+            {/* The budget split, in the same order and colors as the rows below. */}
+            <div className="flex h-3 gap-[3px] overflow-hidden rounded-full">
+              <span className="w-1/2 rounded-l-full bg-ink" />
+              <span className="w-1/2 rounded-r-full bg-good" />
+            </div>
+            <ul className="mt-6 divide-y border-y">
+              {spend.map(([amount, head, body], i) => (
                 <li key={head} className="grid grid-cols-[120px_1fr] gap-5 py-5">
                   <p className="text-[28px] leading-[1.05] font-semibold tracking-[-0.025em] tabular-nums">
                     {amount}
                   </p>
                   <div>
-                    <p className="text-[18px] font-medium">{head}</p>
+                    <p className="flex items-center gap-2.5 text-[18px] font-medium">
+                      <span
+                        className={cn("size-2.5 rounded-[3px]", i === 0 ? "bg-ink" : "bg-good")}
+                      />
+                      {head}
+                    </p>
                     <p className="mt-1.5 text-[15.5px] leading-[1.5] text-pretty text-muted">
                       {body}
                     </p>
