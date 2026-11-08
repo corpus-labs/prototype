@@ -157,9 +157,9 @@ function MemoryTable() {
 function WhyNow() {
   const shifts: [string, ReactNode, string][] = [
     [
-      "Teams use several models at once",
-      "37% of enterprises use five or more models, up from 29% a year earlier.",
-      "Andreessen Horowitz, CIO survey, 2025",
+      "Even big customers switch",
+      "Revolut moved its developers from Claude to self-hosted Z.ai models in 2026 and cut inference costs by up to 90%. Open-weight models already handle 19% of enterprise AI use.",
+      "Revolut, via TechRadar, November 2026. Menlo Ventures, November 2026",
     ],
     [
       "One plug fits all of them",
@@ -176,15 +176,17 @@ function WhyNow() {
     <Slide section="Why now">
       <Body>
         <Title className="max-w-[960px]">
-          Teams now use several AI models, and the leader keeps changing.
+          The AI leader changed in two years, and companies keep switching.
         </Title>
         <div className="absolute inset-x-0 bottom-0 grid grid-cols-[452px_1fr] items-end gap-16">
           <figure>
             <figcaption className="text-[15px] font-medium">
-              Share of enterprise AI model use
+              Share of enterprise AI spend
             </figcaption>
             <ShareShift />
-            <Source className="mt-2">Menlo Ventures, LLM market update, July 2025</Source>
+            <Source className="mt-2">
+              Menlo Ventures, State of Enterprise AI, December 2025 and November 2026
+            </Source>
           </figure>
           <ul className="divide-y border-y">
             {shifts.map(([head, body, source]) => (
@@ -201,56 +203,95 @@ function WhyNow() {
   );
 }
 
-/** A two-point slope chart. Direct labels carry identity, so there's no legend. */
+/**
+ * A three-point slope chart, with years spaced to scale. Direct labels carry
+ * identity, so there's no legend.
+ */
 function ShareShift() {
-  const x0 = 140;
-  const x1 = 312;
+  const years = [2023, 2025, 2026];
+  const xs = [130, 263, 330];
   const y = (v: number) => 236 - (v / 60) * 216;
   const series = [
-    { name: "OpenAI", from: 50, to: 25, stroke: "stroke-neutral-400", fill: "fill-neutral-400" },
-    { name: "Anthropic", from: 12, to: 32, stroke: "stroke-ink", fill: "fill-ink" },
+    {
+      name: "OpenAI",
+      values: [50, 27, 31],
+      stroke: "stroke-neutral-400",
+      fill: "fill-neutral-400",
+    },
+    { name: "Anthropic", values: [12, 40, 55], stroke: "stroke-ink", fill: "fill-ink" },
   ];
+  const [openai, anthropic] = series;
   return (
     <svg viewBox="0 0 452 272" className="mt-3 w-full" role="img" aria-labelledby="share-desc">
       <desc id="share-desc">
-        OpenAI fell from 50% of enterprise model use in 2023 to 25% in 2025. Anthropic rose from 12%
-        to 32%.
+        OpenAI went from 50% of enterprise AI spend in 2023 to 27% in 2025 and 31% in 2026.
+        Anthropic went from 12% to 40% to 55%.
       </desc>
-      <line x1={x0} x2={x0} y1={12} y2={244} className="stroke-line" />
-      <line x1={x1} x2={x1} y1={12} y2={244} className="stroke-line" />
+      {xs.map((x) => (
+        <line key={x} x1={x} x2={x} y1={12} y2={244} className="stroke-line" />
+      ))}
       {series.map((s) => (
         <g key={s.name}>
-          <line
-            x1={x0}
-            y1={y(s.from)}
-            x2={x1}
-            y2={y(s.to)}
+          <polyline
+            points={s.values.map((v, i) => `${xs[i]},${y(v)}`).join(" ")}
             className={s.stroke}
+            fill="none"
             strokeWidth="2"
             strokeLinecap="round"
+            strokeLinejoin="round"
           />
-          <circle cx={x0} cy={y(s.from)} r="5" className={s.fill} stroke="#fff" strokeWidth="2" />
-          <circle cx={x1} cy={y(s.to)} r="5" className={s.fill} stroke="#fff" strokeWidth="2" />
+          {s.values.map((v, i) => (
+            <circle
+              key={i}
+              cx={xs[i]}
+              cy={y(v)}
+              r="5"
+              className={s.fill}
+              stroke="#fff"
+              strokeWidth="2"
+            />
+          ))}
           <text
-            x={x0 - 14}
-            y={y(s.from)}
+            x={xs[0] - 14}
+            y={y(s.values[0])}
             textAnchor="end"
             dominantBaseline="middle"
             className="fill-ink text-[15px]"
           >
-            {s.name} <tspan className="font-semibold">{s.from}%</tspan>
+            {s.name} <tspan className="font-semibold">{s.values[0]}%</tspan>
           </text>
-          <text x={x1 + 14} y={y(s.to)} dominantBaseline="middle" className="fill-ink text-[15px]">
-            <tspan className="font-semibold">{s.to}%</tspan> {s.name}
+          <text
+            x={xs[2] + 14}
+            y={y(s.values[2])}
+            dominantBaseline="middle"
+            className="fill-ink text-[15px]"
+          >
+            <tspan className="font-semibold">{s.values[2]}%</tspan> {s.name}
           </text>
         </g>
       ))}
-      <text x={x0} y={266} textAnchor="middle" className="fill-muted text-[13px]">
-        2023
+      {/* 2025 values sit where the lines leave room: Anthropic's above left, OpenAI's below. */}
+      <text
+        x={xs[1] - 10}
+        y={y(anthropic.values[1]) - 12}
+        textAnchor="end"
+        className="fill-ink text-[13.5px] font-semibold"
+      >
+        {anthropic.values[1]}%
       </text>
-      <text x={x1} y={266} textAnchor="middle" className="fill-muted text-[13px]">
-        2025
+      <text
+        x={xs[1]}
+        y={y(openai.values[1]) + 24}
+        textAnchor="middle"
+        className="fill-ink text-[13.5px] font-semibold"
+      >
+        {openai.values[1]}%
       </text>
+      {years.map((yr, i) => (
+        <text key={yr} x={xs[i]} y={266} textAnchor="middle" className="fill-muted text-[13px]">
+          {yr}
+        </text>
+      ))}
     </svg>
   );
 }
