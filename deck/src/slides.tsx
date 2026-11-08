@@ -926,11 +926,6 @@ function Proceeds() {
       "X ads as a demand test",
       "Four ad sets, one per job: AI context, support answers, docs, and design systems. Each sends people to the corpus.app waitlist, where half see $79 and half see $99.",
     ],
-    [
-      "$0",
-      "Ten user interviews",
-      "30 minutes each, with signups from the job that draws the most interest. Each person gets a free lifetime license as thanks.",
-    ],
   ];
   const report = [
     "Cost per signup, by job",
@@ -963,8 +958,9 @@ function Proceeds() {
               ))}
             </ul>
             <p className="mt-5 text-[15.5px] leading-[1.5] text-pretty text-muted">
-              No hires and no pay for me. I build Corpus with AI coding agents, so every dollar buys
-              demand data instead of engineering hours.
+              I’ll also interview ten signups for 30 minutes each, thanked with a free lifetime
+              license. No hires and no pay for me: I build Corpus with AI coding agents, so every
+              dollar buys demand data.
             </p>
           </div>
           <div>
