@@ -43,8 +43,9 @@ function Cover() {
           Own what your company knows. Use it with any AI.
         </h1>
         <p className="mt-6 text-[20px] leading-[1.45] text-pretty text-muted">
-          Corpus is shared memory for any AI, owned by your team. Your docs, help center, and
-          support bot come from the same library. Pay once, or $7 a month hosted.
+          One shared memory for every AI tool and teammate, including open-weight models. Your docs,
+          help center, and support bot come from the same pages. Pay once to self-host, or add
+          hosting for $7 a month.
         </p>
       </div>
       <div className="absolute bottom-14 left-16 grid gap-1 text-[15px]">
@@ -143,9 +144,10 @@ function MemoryTable() {
         </tbody>
       </table>
       <Source className="mt-3 text-pretty">
-        Partly: shared projects on team plans, not each person’s memory. Claude can import a
-        one-time copy of ChatGPT memory, but the two don’t stay in sync. Vendor help pages, November
-        2026. Corpus runs as a prototype.
+        Partly: shared projects on team plans, with memory kept to that project. Claude can import a
+        one-time copy of ChatGPT memory; the two don’t stay in sync. Open-weight models means the
+        model itself, through an API or on your own server. Vendor help pages, November 2026. Corpus
+        runs as a prototype.
       </Source>
     </figure>
   );
@@ -313,7 +315,7 @@ function Solution() {
       "ai",
       "Memory for any AI",
       "Claude, ChatGPT, Codex, Cursor, and open-weight models recall what your team knows and save what they learn.",
-      "memory locked inside one vendor",
+      "memory locked in one vendor",
     ],
     [
       "support",
@@ -324,7 +326,7 @@ function Solution() {
     [
       "docs",
       "Docs and help center",
-      "Publish public docs, a help center, or an internal handbook from the notebook.",
+      "Publish public docs, a help center, or an internal handbook from the same pages.",
       "Mintlify or GitBook",
     ],
     [
@@ -1104,8 +1106,8 @@ function Close() {
           Use it with any AI.
         </h2>
         <p className="mt-6 max-w-[660px] text-[20px] leading-[1.45] text-pretty text-muted">
-          Shared memory for any AI, owned by your team, with docs, a help center, and a support bot
-          from the same library. Pay once to self-host, or $7 a month hosted.
+          One shared memory for every AI tool and teammate, with docs, a help center, and a support
+          bot from the same pages. Pay once to self-host, or add hosting for $7 a month.
         </p>
       </div>
       <div className="absolute inset-x-16 bottom-14 grid grid-cols-[1fr_440px] gap-16">

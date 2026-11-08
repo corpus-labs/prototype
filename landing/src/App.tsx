@@ -69,7 +69,7 @@ function Header() {
 /* Hero --------------------------------------------------------------------- */
 
 const DEFAULT_LEAD =
-  "Corpus is shared memory for any AI, owned by your team. Claude, ChatGPT, Codex, and open-weight models recall what your team knows and save what they learn, and your docs, help center, and support bot come from the same library. Pay once, or $7 a month hosted.";
+  "Corpus is one memory that Claude, ChatGPT, Codex, and open-weight models all share, owned by your team. Your docs, help center, and support bot come from the same pages. Pay once to self-host, or add hosting for $7 a month.";
 
 function Hero() {
   return (
@@ -154,7 +154,7 @@ function Problem() {
       <div className={WRAP}>
         <Heading
           title="The best AI tools remember you. That memory is locked inside one vendor."
-          lead="What your team teaches one AI stays in that AI, for that one person. Everyone else, and every other tool, starts from nothing."
+          lead="What you teach one AI mostly stays with you, inside that one product. Your teammates and your other AI tools start over."
         />
         <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_600px] lg:gap-16">
           <ul className="divide-y border-y self-start">
@@ -219,8 +219,9 @@ function MemoryTable() {
         </tbody>
       </table>
       <figcaption className="mt-3 text-[13px] leading-[1.5] text-pretty text-faint">
-        Partly: shared projects on team plans, not each person’s memory. Claude can import a
-        one-time copy of ChatGPT memory, but the two don’t stay in sync.
+        Partly: shared projects on team plans, with memory kept to that project. Claude can import a
+        one-time copy of ChatGPT memory; the two don’t stay in sync. Open-weight models means the
+        model itself, through an API or on your own server.
       </figcaption>
     </figure>
   );
@@ -281,7 +282,7 @@ function Jobs() {
     {
       id: "ai",
       body: "Claude, ChatGPT, Codex, Cursor, and open-weight models recall what your team knows and save what they learn.",
-      instead: "memory locked inside one AI vendor",
+      instead: "memory locked in one AI vendor",
     },
     {
       id: "support",
@@ -290,7 +291,7 @@ function Jobs() {
     },
     {
       id: "docs",
-      body: "Publish public docs, a help center, or an internal handbook, straight from the notebook.",
+      body: "Publish public docs, a help center, or an internal handbook from the same pages.",
       instead: "a monthly bill for every docs site",
     },
     {
@@ -304,7 +305,7 @@ function Jobs() {
       <div className={WRAP}>
         <Heading
           title="One library. Every AI remembers."
-          lead="Shared memory comes first. The same pages publish as docs, a help center, a support bot, and a design system, so your team, your customers, and every AI tool read the same words. The files stay yours."
+          lead="Any AI recalls from it and saves to it. The same pages publish as docs, a help center, a support bot, and a design system, so your team, your customers, and every AI tool read the same words. The files stay yours."
         />
         <ul className="mt-14 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
           {jobs.map((j) => (
@@ -315,7 +316,12 @@ function Jobs() {
                 visit.job === j.id ? "border-ink" : "border-neutral-200",
               )}
             >
-              <span className="grid size-10 place-items-center rounded-xl border bg-white text-ink">
+              <span
+                className={cn(
+                  "grid size-10 place-items-center rounded-xl border",
+                  j.id === "ai" ? "border-ink bg-ink text-white" : "bg-white text-ink",
+                )}
+              >
                 <Icon job={j.id} />
               </span>
               <p className="mt-4 text-[18px] font-medium">{JOBS[j.id].label}</p>
@@ -699,12 +705,16 @@ function Faq() {
       `The private beta opens in ${CONFIG.betaOpens} for teams on the waitlist, and Corpus launches in ${CONFIG.launches}. The waitlist hears first, by email.`,
     ],
     [
+      "How is this different from ChatGPT or Claude memory?",
+      "Their memory belongs to one person, inside one product. Corpus memory belongs to your team, works in every AI tool you connect, and stays as Markdown files you can read and edit. Claude and ChatGPT keep their own memory alongside it.",
+    ],
+    [
       "Where does my content live?",
       "In Markdown files you own: in your own git repository on your server, or in Corpus cloud. Moving between the two means copying a folder.",
     ],
     [
       "Which AI tools does it work with?",
-      "Plugins for Claude, Codex, Cursor, Z.ai, DeepSeek, and Grok install in one click. Any other tool that speaks MCP or reads llms.txt works too. Drafting and the support bot run on your own key with Anthropic, OpenAI, Z.ai, DeepSeek, OpenRouter, or a local model.",
+      "Plugins for Claude, Codex, Cursor, Z.ai, DeepSeek, and Grok install in one click. ChatGPT and any other tool that speaks MCP or reads llms.txt work too. Drafting and the support bot run on your own key with Anthropic, OpenAI, Z.ai, DeepSeek, OpenRouter, or a local model.",
     ],
     [
       "Why a one-time price?",
