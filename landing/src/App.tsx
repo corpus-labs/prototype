@@ -190,7 +190,7 @@ function MemoryTable() {
           <tr className="border-b text-left align-bottom text-[13px] text-muted sm:text-[14px]">
             <th className="w-[30%] py-3 pr-2 pl-3 font-normal">Where memory lives</th>
             {cols.map((c) => (
-              <th key={c} className="px-2 py-3 text-center font-normal leading-tight">
+              <th key={c} className="px-2 py-3 font-normal leading-tight">
                 {c}
               </th>
             ))}
@@ -208,7 +208,7 @@ function MemoryTable() {
                 {r.name}
               </td>
               {r.has.map((h, n) => (
-                <td key={n} className="px-2 py-3.5 text-center">
+                <td key={n} className="px-2 py-3.5">
                   <Dot tone={h === "yes" ? "good" : h === "part" ? "warn" : "off"}>
                     {HAS_LABEL[h]}
                   </Dot>
