@@ -964,8 +964,7 @@ function Proceeds() {
             </ul>
             <p className="mt-5 text-[15.5px] leading-[1.5] text-pretty text-muted">
               After two weeks, more of the budget goes to whichever platform brings signups more
-              cheaply. I’ll also interview ten signups, thanked with a free lifetime license. No
-              hires and no pay for me: I build Corpus with AI coding agents.
+              cheaply. I’ll also interview ten signups, thanked with a free lifetime license.
             </p>
           </div>
           <div>
