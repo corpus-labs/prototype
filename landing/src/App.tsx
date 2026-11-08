@@ -69,7 +69,7 @@ function Header() {
 /* Hero --------------------------------------------------------------------- */
 
 const DEFAULT_LEAD =
-  "Corpus is one memory that Claude, ChatGPT, Codex, and open-weight models all share, owned by your team. Your docs, help center, and support bot come from the same pages. Pay once to self-host, or add hosting for $7 a month.";
+  "Corpus is one memory that Claude, ChatGPT, Codex, and open-weight models all share, owned by your team. Your docs, help center, and support bot come from the same pages.";
 
 function Hero() {
   return (
