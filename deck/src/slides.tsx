@@ -1111,7 +1111,7 @@ function Close() {
             <Fact k="Prototype">
               <Fill value={FACTS.prototypeUrl} todo="link" />
             </Fact>
-            <Fact k="Demo">
+            <Fact k="Demo video">
               <Fill value={FACTS.demoVideo} todo="link" />
             </Fact>
           </dl>
