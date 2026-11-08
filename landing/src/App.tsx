@@ -69,7 +69,7 @@ function Header() {
 /* Hero --------------------------------------------------------------------- */
 
 const DEFAULT_LEAD =
-  "Corpus is one notebook for your docs, help center, AI context, and design system. People, support bots, and every AI tool read the same pages. Pay once to run it yourself, or let us host it for $7 a month.";
+  "Corpus is shared memory for any AI, owned by your team. Claude, ChatGPT, Codex, and open-weight models recall what your team knows and save what they learn, and your docs, help center, and support bot come from the same library. Pay once, or $7 a month hosted.";
 
 function Hero() {
   return (
@@ -137,23 +137,26 @@ function Callout({ className, children }: { className?: string; children: ReactN
 function Problem() {
   const pains: [string, string][] = [
     [
-      "Scattered",
-      "Docs in Mintlify or GitBook, notes in Notion or Obsidian, help articles in Zendesk, and a different context file for every AI tool.",
+      "Personal",
+      "Claude and ChatGPT remember one person. Your teammate’s AI doesn’t know what yours learned.",
     ],
-    ["Rented", "Each one bills by the seat, the site, or the answer, every month."],
     [
-      "Stuck",
-      "Context saved inside one AI vendor stays there. Switch models, and you set it all up again.",
+      "Locked in",
+      "Switch to another AI, or to next year’s leader, and the memory stays with the old vendor.",
+    ],
+    [
+      "Missing",
+      "Open-weight models like DeepSeek and Qwen, and tools that store no user data, start every session blank.",
     ],
   ];
   return (
     <section className="py-24 sm:py-32">
       <div className={WRAP}>
         <Heading
-          title="Your answers live in five places. They don’t agree."
-          lead="Every copy was right once. Then the policy changed, one page got updated, and your support bot kept quoting the old one."
+          title="The best AI tools remember you. That memory is locked inside one vendor."
+          lead="What your team teaches one AI stays in that AI, for that one person. Everyone else, and every other tool, starts from nothing."
         />
-        <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_560px] lg:gap-16">
+        <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_600px] lg:gap-16">
           <ul className="divide-y border-y self-start">
             {pains.map(([head, body]) => (
               <li key={head} className="py-5">
@@ -162,45 +165,63 @@ function Problem() {
               </li>
             ))}
           </ul>
-          <FiveAnswers />
+          <MemoryTable />
         </div>
       </div>
     </section>
   );
 }
 
-function FiveAnswers() {
-  const answers: [where: string, said: string, note?: string][] = [
-    ["Help center", "“5 business days”"],
-    ["Docs site", "“Up to 7 days”"],
-    ["Support bot", "“Within 24 hours”", "a guess"],
-    ["ChatGPT project", "“5 to 7 days”", "last year’s PDF"],
+type Has = "yes" | "part" | "no";
+const HAS_LABEL: Record<Has, string> = { yes: "Yes", part: "Partly", no: "No" };
+
+function MemoryTable() {
+  const cols = ["Remembers", "Shared with your team", "Any AI can use it"];
+  const rows: { name: string; has: Has[]; us?: boolean }[] = [
+    { name: "Claude", has: ["yes", "part", "no"] },
+    { name: "ChatGPT", has: ["yes", "part", "no"] },
+    { name: "Open\u2011weight models", has: ["no", "no", "no"] },
+    { name: "Corpus", has: ["yes", "yes", "yes"], us: true },
   ];
   return (
-    <figure className="self-start overflow-hidden rounded-2xl border bg-white">
-      <figcaption className="border-b bg-subtle px-5 py-3.5 text-[14.5px] text-muted">
-        Five places answer “How long do refunds take?”
+    <figure className="self-start">
+      <table className="w-full table-fixed border-collapse text-[14.5px] sm:text-[15.5px]">
+        <thead>
+          <tr className="border-b text-left align-bottom text-[13px] text-muted sm:text-[14px]">
+            <th className="w-[30%] py-3 pr-2 pl-3 font-normal">Where memory lives</th>
+            {cols.map((c) => (
+              <th key={c} className="px-2 py-3 font-normal leading-tight">
+                {c}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.name} className={cn("border-b", r.us && "border-b-0 bg-good-soft")}>
+              <td
+                className={cn(
+                  "py-3.5 pr-2 pl-3 leading-tight",
+                  r.us ? "font-semibold" : "font-medium",
+                )}
+              >
+                {r.name}
+              </td>
+              {r.has.map((h, n) => (
+                <td key={n} className="px-2 py-3.5">
+                  <Dot tone={h === "yes" ? "good" : h === "part" ? "warn" : "off"}>
+                    {HAS_LABEL[h]}
+                  </Dot>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <figcaption className="mt-3 text-[13px] leading-[1.5] text-pretty text-faint">
+        Partly: shared projects on team plans, not each person’s memory. Claude can import a
+        one-time copy of ChatGPT memory, but the two don’t stay in sync.
       </figcaption>
-      <ul className="divide-y text-[15.5px]">
-        {answers.map(([where, said, note]) => (
-          <li
-            key={where}
-            className="grid grid-cols-[120px_1fr] items-baseline gap-2 px-5 py-3.5 sm:grid-cols-[150px_1fr]"
-          >
-            <span className="text-muted">{where}</span>
-            <Dot tone="bad" className="flex-wrap gap-y-0">
-              {said}
-              {note && <span className="text-[13.5px] text-muted">{note}</span>}
-            </Dot>
-          </li>
-        ))}
-        <li className="grid grid-cols-[120px_1fr] items-baseline gap-2 bg-good-soft px-5 py-3.5 sm:grid-cols-[150px_1fr]">
-          <span className="text-muted">Team notes</span>
-          <Dot tone="good">
-            <span className="font-medium">“3 business days, since March”</span>
-          </Dot>
-        </li>
-      </ul>
     </figure>
   );
 }
@@ -259,8 +280,8 @@ function Jobs() {
   const jobs: { id: JobId; body: string; instead: string }[] = [
     {
       id: "ai",
-      body: "Plugins for Claude, Codex, and more recall your plans and decisions, and save new ones back.",
-      instead: "a prompt file copied into every AI tool",
+      body: "Claude, ChatGPT, Codex, Cursor, and open-weight models recall what your team knows and save what they learn.",
+      instead: "memory locked inside one AI vendor",
     },
     {
       id: "support",
@@ -282,8 +303,8 @@ function Jobs() {
     <section className="border-t bg-subtle py-24 sm:py-32">
       <div className={WRAP}>
         <Heading
-          title="One notebook. Four jobs."
-          lead="Write it once in Corpus, and every reader that needs it gets it: your team, your customers, and every AI tool you use. The files stay yours."
+          title="One library. Every AI remembers."
+          lead="Shared memory comes first. The same pages publish as docs, a help center, a support bot, and a design system, so your team, your customers, and every AI tool read the same words. The files stay yours."
         />
         <ul className="mt-14 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
           {jobs.map((j) => (
@@ -595,7 +616,7 @@ function Pricing() {
     ["Obsidian", "Sync and Publish", "$12 a person a month"],
   ];
   const included = [
-    "Docs, help center, AI context, and design systems",
+    "Shared AI memory, docs, a help center, a support bot, and design systems",
     "Self-host on your server, or let us host it for $7 a month",
     "Any AI on your own key, with no usage fees",
     "Your content stays a folder of Markdown",
@@ -761,7 +782,7 @@ function Footer() {
             <CorpusLogo className="h-[22px]" />
           </a>
           <p className="mt-3 max-w-[320px] text-[14.5px] leading-[1.55] text-pretty text-muted">
-            One notebook for what your company knows. Use it with any AI.
+            Shared memory for any AI, owned by your team.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-x-16 gap-y-2 text-[14.5px]">

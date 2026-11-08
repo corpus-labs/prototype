@@ -948,7 +948,7 @@ function Proceeds() {
     [
       "$1,500",
       "Reddit ads",
-      "Four ad sets, one per job: AI context, support answers, docs, and design systems. Shown in communities like r/selfhosted and r/webdev.",
+      "Four ad sets, one per job: AI memory, support answers, docs, and design systems. Shown in communities like r/selfhosted and r/webdev.",
     ],
     [
       "$1,500",
