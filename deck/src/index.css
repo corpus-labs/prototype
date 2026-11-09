@@ -61,10 +61,12 @@
   body {
     margin: 0;
   }
-  /* The same light gray as the landing page's waitlist section. It's on html
-     only, so the lattice behind the deck can show through the body. */
+  /* A gradient from the deck's original darker gray at the top to the landing
+     page's light gray at the bottom, fixed to the window so it looks the same
+     while the all-slides view scrolls. It's on html only, so the lattice
+     behind the deck can show through the body. */
   html {
-    background: var(--color-subtle);
+    background: linear-gradient(to bottom, var(--color-neutral-200), var(--color-subtle)) fixed;
   }
   body {
     font-family: var(--font-sans);

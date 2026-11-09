@@ -106,6 +106,7 @@ export default function App() {
       <div className="no-print pointer-events-none fixed inset-0 -z-10">
         <Lattice
           className="opacity-60"
+          markClassName="fill-mist-300"
           fade="radial-gradient(ellipse 70% 120% at 100% 0%, black 0%, rgb(0 0 0 / 0.5) 40%, transparent 75%)"
         />
       </div>

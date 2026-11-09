@@ -201,8 +201,11 @@ export function Lattice({
   className,
   size = 72,
   fade,
+  markClassName = "fill-mist-200",
 }: {
   className?: string;
+  /** The marks' fill. One shade darker keeps them visible on a darker background. */
+  markClassName?: string;
   /** One mark's width in pixels. */
   size?: number;
   /** CSS mask images that fade the lattice out. Several are intersected, so each one fades an edge. */
@@ -230,7 +233,7 @@ export function Lattice({
     >
       <defs>
         <pattern id={id} width={size} height={size} patternUnits="userSpaceOnUse">
-          <g transform={`scale(${size / 48})`} className="fill-mist-200">
+          <g transform={`scale(${size / 48})`} className={markClassName}>
             {offsets.map(([x, y]) => (
               <path key={`${x} ${y}`} d={MARK} transform={`translate(${x} ${y})`} />
             ))}
