@@ -48,4 +48,4 @@ The three thousand dollars buys a demand test: fifteen hundred on Reddit ads and
 
 ## Summary
 
-So: write it once, own it for life, and use it with any AI. I'm asking for the three thousand dollar Ignite Grant to run the demand test, and for a mentor with marketing experience who has sold software to small teams. You can try the prototype at demo.corpus.app and join the waitlist at corpus.app. Thank you.
+Corpus is Latin for body. Today it means the whole body of writing on a subject, and in AI, it's the text a model learns from. That's exactly what this is: everything your team knows, in one body you own for life, that works with any AI. I'm asking for the three thousand dollar Ignite Grant to run the demand test, and for a mentor with marketing experience who has sold software to small teams. You can try the prototype at demo.corpus.app and join the waitlist at corpus.app. Thank you.
