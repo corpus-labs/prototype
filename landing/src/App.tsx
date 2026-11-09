@@ -99,7 +99,7 @@ function Hero() {
             src={heroShot}
             width={2560}
             height={1450}
-            address="corpus.app"
+            address="demo.corpus.app"
             alt="Corpus with three projects side by side: the Charged UI design system, a web team handbook, and a customer help center, each showing questions asked this week and the ones with no answer"
           />
           <Callout className="top-[60%] -left-6">
@@ -357,7 +357,7 @@ function Writing() {
           src={editorShot}
           width={2560}
           height={1600}
-          address="corpus.app"
+          address="demo.corpus.app/#handbook-deploying"
           alt="Editing a handbook page in Corpus: a formatting toolbar above the page, a selection menu over bold text, and a to-do list with one item checked"
           className="mt-12"
         />
@@ -390,7 +390,7 @@ function Publishing() {
           src={siteShot}
           width={2560}
           height={1600}
-          address="acme-help.corpus.app"
+          address="demo.corpus.app/#site-help"
           alt="A published help center for Acme, Inc: a search box, articles grouped by topic, and a support bot that answers from the same pages"
           className="mt-12"
         />
