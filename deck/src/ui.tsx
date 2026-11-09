@@ -138,6 +138,21 @@ export function Fill({ value, todo }: { value: string | null; todo: string }) {
   return value ? <>{value}</> : <Todo>{todo}</Todo>;
 }
 
+/** A web address shown without https://, as a link that opens in a new tab. */
+export function Url({ value, todo = "link" }: { value: string | null; todo?: string }) {
+  if (!value) return <Todo>{todo}</Todo>;
+  return (
+    <a
+      href={`https://${value}`}
+      target="_blank"
+      rel="noreferrer"
+      className="underline decoration-neutral-400 underline-offset-2 hover:decoration-ink"
+    >
+      {value}
+    </a>
+  );
+}
+
 /** A product screenshot: a plain bordered object, the way the product frames previews. */
 export function Shot({
   src,

@@ -3,7 +3,7 @@ import { FACTS } from "./facts";
 import { SplitView } from "./split-view";
 import { cn } from "./lib/utils";
 import { ToolLogo, type ToolId } from "./tool-logo";
-import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title } from "./ui";
+import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title, Url } from "./ui";
 import coverShot from "./assets/shots/cover-notebook.png";
 import siteShot from "./assets/shots/traction-site.png";
 import portrait from "./assets/portrait.jpg";
@@ -913,13 +913,13 @@ function Traction() {
             </div>
             <dl className="mt-auto grid gap-2 border-t pt-4 text-[14px]">
               <Fact k="Pitch video">
-                <Fill value={FACTS.demoVideo} todo="link" />
+                <Url value={FACTS.demoVideo} />
               </Fact>
               <Fact k="Prototype">
-                <Fill value={FACTS.prototypeUrl} todo="link" />
+                <Url value={FACTS.prototypeUrl} />
               </Fact>
               <Fact k="Waitlist">
-                {FACTS.waitlist.url}{" "}
+                <Url value={FACTS.waitlist.url} />{" "}
                 <span className="text-muted">
                   (live since {FACTS.waitlist.liveSince}
                   {FACTS.waitlist.signups && `, ${FACTS.waitlist.signups} signups`})
@@ -1197,12 +1197,14 @@ function Close() {
             <Fact k="Email">
               <Fill value={FACTS.email} todo="email" />
             </Fact>
-            <Fact k="Waitlist">{FACTS.waitlist.url}</Fact>
+            <Fact k="Waitlist">
+              <Url value={FACTS.waitlist.url} />
+            </Fact>
             <Fact k="Prototype">
-              <Fill value={FACTS.prototypeUrl} todo="link" />
+              <Url value={FACTS.prototypeUrl} />
             </Fact>
             <Fact k="Pitch video">
-              <Fill value={FACTS.demoVideo} todo="link" />
+              <Url value={FACTS.demoVideo} />
             </Fact>
           </dl>
         </div>
