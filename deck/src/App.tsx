@@ -104,7 +104,10 @@ export default function App() {
     <div className="stage" data-mode={view.mode}>
       {/* The landing page's lattice, fixed to the window and strongest at the top right. */}
       <div className="no-print pointer-events-none fixed inset-0 -z-10">
-        <Lattice fade="radial-gradient(ellipse 70% 120% at 100% 0%, black 0%, rgb(0 0 0 / 0.5) 40%, transparent 75%)" />
+        <Lattice
+          className="opacity-60"
+          fade="radial-gradient(ellipse 70% 120% at 100% 0%, black 0%, rgb(0 0 0 / 0.5) 40%, transparent 75%)"
+        />
       </div>
       <div
         className="deck cursor-pointer select-none"
