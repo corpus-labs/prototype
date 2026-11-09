@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { SLIDES } from "./slides";
-import { SlideIndex } from "./ui";
+import { Lattice, SlideIndex } from "./ui";
 
 const TOTAL = SLIDES.length;
 /** Content slides: everything but the cover and the close. */
 const PAGES = TOTAL - 2;
-/** A slide's number among the content slides, or null for the cover and the close. */
-const pageOf = (i: number) => (i > 0 && i < TOTAL - 1 ? i : null);
+/** What the page controls show: "Cover", "Summary", or a content slide's number. */
+const pageLabel = (i: number) =>
+  i === 0 ? "Cover" : i === TOTAL - 1 ? "Summary" : `${i} of ${PAGES}`;
 const W = 1280;
 const H = 720;
 
@@ -101,6 +102,14 @@ export default function App() {
 
   return (
     <div className="stage" data-mode={view.mode}>
+      {/* The landing page's lattice, fixed to the window and strongest at the top right. */}
+      <div className="no-print pointer-events-none fixed inset-0 -z-10">
+        <Lattice
+          className="opacity-60"
+          markClassName="fill-mist-300"
+          fade="radial-gradient(ellipse 70% 120% at 100% 0%, black 0%, rgb(0 0 0 / 0.5) 40%, transparent 75%)"
+        />
+      </div>
       <div
         className="deck cursor-pointer select-none"
         data-mode={view.mode}
@@ -121,9 +130,7 @@ export default function App() {
           <NavButton label="Previous slide" onClick={() => go(view.i - 1)} disabled={view.i === 0}>
             <path d="M10 3 5 8l5 5" />
           </NavButton>
-          <span className="w-16 text-center tabular-nums">
-            {pageOf(view.i) && `${pageOf(view.i)} of ${PAGES}`}
-          </span>
+          <span className="w-16 text-center tabular-nums">{pageLabel(view.i)}</span>
           <NavButton
             label="Next slide"
             onClick={() => go(view.i + 1)}

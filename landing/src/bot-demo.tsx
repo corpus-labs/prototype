@@ -48,7 +48,7 @@ export function BotDemo({ className }: { className?: string }) {
           <span className="grid size-7 place-items-center rounded-lg bg-ink text-white">
             <CorpusMark className="size-3.5" />
           </span>
-          Acme help
+          Acme, Inc help
         </span>
         <Dot tone="good" className="text-[13px] text-muted">
           Answers from {helpPages.length} pages

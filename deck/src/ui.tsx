@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useId, type ReactNode } from "react";
 import { cn } from "./lib/utils";
 
 // The Corpus mark and wordmark, copied from the product (src/components/corpus-logo.tsx).
@@ -191,4 +191,56 @@ export function Shot({
 
 export function Source({ children, className }: { children: ReactNode; className?: string }) {
   return <p className={cn("text-[12.5px] leading-snug text-faint", className)}>{children}</p>;
+}
+
+/**
+ * The mark, tiled into a lattice: each mark sits half a tile off its neighbors, so
+ * their petals interlock. Faded with a mask and kept pale, it's texture, not a picture.
+ */
+export function Lattice({
+  className,
+  size = 72,
+  fade,
+  markClassName = "fill-mist-200",
+}: {
+  className?: string;
+  /** The marks' fill. One shade darker keeps them visible on a darker background. */
+  markClassName?: string;
+  /** One mark's width in pixels. */
+  size?: number;
+  /** CSS mask images that fade the lattice out. Several are intersected, so each one fades an edge. */
+  fade: string;
+}) {
+  // useId can contain characters that break url(#id) references.
+  const id = `lattice-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  const offsets = [
+    [0, 0],
+    [24, 24],
+    [-24, 24],
+    [24, -24],
+    [-24, -24],
+  ];
+  return (
+    <svg
+      aria-hidden
+      className={cn("pointer-events-none absolute inset-0 -z-10 size-full", className)}
+      style={{
+        maskImage: fade,
+        WebkitMaskImage: fade,
+        maskComposite: "intersect",
+        WebkitMaskComposite: "source-in",
+      }}
+    >
+      <defs>
+        <pattern id={id} width={size} height={size} patternUnits="userSpaceOnUse">
+          <g transform={`scale(${size / 48})`} className={markClassName}>
+            {offsets.map(([x, y]) => (
+              <path key={`${x} ${y}`} d={MARK} transform={`translate(${x} ${y})`} />
+            ))}
+          </g>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill={`url(#${id})`} />
+    </svg>
+  );
 }

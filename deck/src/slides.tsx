@@ -905,8 +905,8 @@ function Traction() {
               imgClassName="h-full object-cover object-top"
             />
             <figcaption className="mt-3 text-[13.5px] leading-snug text-pretty text-muted">
-              The help center Corpus publishes from Acme’s pages, with search and a support bot.
-              Sample data; AI, git, and MCP calls are simulated until they’re built.
+              The help center Corpus publishes from the pages of Acme, Inc, with search and a
+              support bot. Sample data; AI, git, and MCP calls are simulated until they’re built.
             </figcaption>
           </figure>
           <div className="flex flex-col gap-6">
@@ -960,7 +960,7 @@ function Team() {
     ],
     [
       "Elite author on ThemeForest",
-      "More than $100,000 in lifetime sales of one-time-priced products, past Envato’s $75,000 bar for Elite. Corpus uses the same model.",
+      "More than $100,000 in lifetime sales of one-time-priced products. Corpus uses the same pricing model.",
     ],
     [
       "Uses four AI tools every week",
@@ -986,7 +986,7 @@ function Team() {
               <Fact k="USC">
                 IYA graduate student, MS in Integrated Design, Business and Technology
               </Fact>
-              <Fact k="Enrolled">Fall 2026 and Spring 2027</Fact>
+              <Fact k="Enrolled">Fall 2024 to Spring 2027</Fact>
               <Fact k="Email">
                 <Mailto value={FACTS.email} />
               </Fact>
@@ -1172,7 +1172,10 @@ function Close() {
             </li>
             <li className="py-3">
               <span className="font-medium">A mentor</span>
-              <span className="text-muted"> who has sold software to small teams</span>
+              <span className="text-muted">
+                {" "}
+                with marketing experience who has sold software to small teams
+              </span>
             </li>
           </ul>
         </div>
@@ -1182,11 +1185,11 @@ function Close() {
             <Fact k="Email">
               <Mailto value={FACTS.email} />
             </Fact>
-            <Fact k="Waitlist">
-              <Url value={FACTS.waitlist.url} />
-            </Fact>
             <Fact k="Prototype">
               <Url value={FACTS.prototypeUrl} />
+            </Fact>
+            <Fact k="Landing page">
+              <Url value={FACTS.waitlist.url} />
             </Fact>
           </dl>
         </div>

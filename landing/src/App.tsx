@@ -99,7 +99,7 @@ function Hero() {
             src={heroShot}
             width={2560}
             height={1450}
-            address="corpus.app"
+            address="demo.corpus.app"
             alt="Corpus with three projects side by side: the Charged UI design system, a web team handbook, and a customer help center, each showing questions asked this week and the ones with no answer"
           />
           <Callout className="top-[60%] -left-6">
@@ -281,7 +281,7 @@ function Jobs() {
   const jobs: { id: JobId; body: string; instead: string }[] = [
     {
       id: "ai",
-      body: "Claude, ChatGPT, Codex, Cursor, and open-weight models recall what your team knows and save what they learn.",
+      body: "Claude, ChatGPT, and open-weight models recall what your team knows and save what they learn.",
       instead: "memory locked in one AI vendor",
     },
     {
@@ -357,7 +357,7 @@ function Writing() {
           src={editorShot}
           width={2560}
           height={1600}
-          address="corpus.app"
+          address="demo.corpus.app/#handbook-deploying"
           alt="Editing a handbook page in Corpus: a formatting toolbar above the page, a selection menu over bold text, and a to-do list with one item checked"
           className="mt-12"
         />
@@ -390,7 +390,7 @@ function Publishing() {
           src={siteShot}
           width={2560}
           height={1600}
-          address="acme-help.corpus.app"
+          address="demo.corpus.app/#site-help"
           alt="A published help center for Acme, Inc: a search box, articles grouped by topic, and a support bot that answers from the same pages"
           className="mt-12"
         />
@@ -721,8 +721,8 @@ function Faq() {
       "When you self-host, you bring the server and the AI key, so there’s nothing for Corpus to bill you for each month. Pay once, and the version you bought keeps working. If we host it for you, that’s $7 a month, since we run the server.",
     ],
     [
-      "Do I need Drupal, WordPress, or Notion?",
-      "No. Corpus stands on its own. Plugins for WordPress and Drupal, and imports from Notion, are planned after launch.",
+      "Do I need Drupal, WordPress, Notion, or Figma?",
+      "No. Corpus stands on its own. Plugins for WordPress and Drupal, imports from Notion, and syncing design tokens from Figma are planned after launch.",
     ],
   ];
   return (

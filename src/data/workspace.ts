@@ -1294,7 +1294,8 @@ export const helpCenter: DocsProject = {
   id: "help",
   kind: "help-center",
   name: "Customer help",
-  description: "Answers for Acme customers. The help site and the support bot read the same pages.",
+  description:
+    "Answers for customers of Acme, Inc. The help site and the support bot read the same pages.",
   site: "acme-help.corpus.app",
   repo: "acme/help",
   requests: 386,
