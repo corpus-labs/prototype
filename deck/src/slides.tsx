@@ -3,7 +3,7 @@ import { FACTS } from "./facts";
 import { SplitView } from "./split-view";
 import { cn } from "./lib/utils";
 import { ToolLogo, type ToolId } from "./tool-logo";
-import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title, Todo } from "./ui";
+import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title } from "./ui";
 import coverShot from "./assets/shots/cover-notebook.png";
 import siteShot from "./assets/shots/traction-site.png";
 import portrait from "./assets/portrait.jpg";
@@ -715,7 +715,7 @@ function BusinessModel() {
     ],
     [
       "Reach",
-      "X first, then Notion imports and WordPress and Drupal plugins, where millions of sites already live.",
+      "X and Reddit first, then Notion imports and WordPress and Drupal plugins, where millions of sites already live.",
     ],
     ["Goal", "Bootstrapped and profitable. Not raising venture capital."],
   ];
@@ -767,7 +767,7 @@ function BusinessModel() {
               sites, or AI answers.
             </Source>
           </figure>
-          <dl className="divide-y border-y text-[15px] leading-[1.45]">
+          <dl className="self-start divide-y border-y text-[15px] leading-[1.45]">
             {terms.map(([k, v]) => (
               <div key={k} className="grid grid-cols-[96px_1fr] gap-4 py-[9px]">
                 <dt className="font-medium">{k}</dt>
@@ -836,7 +836,7 @@ function Traction() {
               ))}
             </div>
             <dl className="mt-auto grid gap-2 border-t pt-4 text-[14px]">
-              <Fact k="Demo video">
+              <Fact k="Pitch video">
                 <Fill value={FACTS.demoVideo} todo="link" />
               </Fact>
               <Fact k="Prototype">
@@ -844,13 +844,10 @@ function Traction() {
               </Fact>
               <Fact k="Waitlist">
                 {FACTS.waitlist.url}{" "}
-                {FACTS.waitlist.liveSince && FACTS.waitlist.signups ? (
-                  <span className="text-muted">
-                    live since {FACTS.waitlist.liveSince}, {FACTS.waitlist.signups} signups
-                  </span>
-                ) : (
-                  <Todo>live date, signups</Todo>
-                )}
+                <span className="text-muted">
+                  (live since {FACTS.waitlist.liveSince}
+                  {FACTS.waitlist.signups && `, ${FACTS.waitlist.signups} signups`})
+                </span>
               </Fact>
             </dl>
           </div>
@@ -874,7 +871,7 @@ function Team() {
     ],
     [
       "Elite author on ThemeForest",
-      "More than $75,000 in lifetime sales of one-time-priced products, Envato’s bar for Elite. Corpus uses the same model.",
+      "More than $100,000 in lifetime sales of one-time-priced products, past Envato’s $75,000 bar for Elite. Corpus uses the same model.",
     ],
     [
       "15 years in the Drupal community",
@@ -925,18 +922,18 @@ function Team() {
 function Proceeds() {
   const spend: [string, string, string][] = [
     [
-      "$2,500",
-      "X ads as a demand test",
-      "Four ad sets, one per job: AI context, support answers, docs, and design systems. Each sends people to the corpus.app waitlist, where half see $79 and half see $99.",
+      "$1,500",
+      "Reddit ads",
+      "Four ad sets, one per job: AI context, support answers, docs, and design systems. Shown in communities like r/selfhosted and r/webdev.",
     ],
     [
-      "$500",
-      "Ten paid user interviews",
-      "30 minutes each, $50 per person, with signups from the job that draws the most interest.",
+      "$1,500",
+      "X ads",
+      "The same four ad sets, shown to people building with AI tools. Both send people to the corpus.app waitlist, where half see $79 and half see $99.",
     ],
   ];
   const report = [
-    "Cost per signup, by job",
+    "Cost per signup, by job and platform",
     "Waitlist size",
     "Landing page conversion rate",
     "Share willing to pay $79, and $99",
@@ -950,23 +947,14 @@ function Proceeds() {
         </Title>
         <div className="mt-11 grid grid-cols-[1fr_360px] gap-16">
           <div>
-            <div className="flex h-3 gap-[3px] overflow-hidden rounded-full">
-              <span className="w-5/6 rounded-l-full bg-ink" />
-              <span className="w-1/6 rounded-r-full bg-good" />
-            </div>
-            <ul className="mt-6 divide-y border-y">
-              {spend.map(([amount, head, body], i) => (
+            <ul className="divide-y border-y">
+              {spend.map(([amount, head, body]) => (
                 <li key={head} className="grid grid-cols-[120px_1fr] gap-5 py-5">
                   <p className="text-[28px] leading-[1.05] font-semibold tracking-[-0.025em] tabular-nums">
                     {amount}
                   </p>
                   <div>
-                    <p className="flex items-center gap-2.5 text-[18px] font-medium">
-                      <span
-                        className={cn("size-2.5 rounded-[3px]", i === 0 ? "bg-ink" : "bg-good")}
-                      />
-                      {head}
-                    </p>
+                    <p className="text-[18px] font-medium">{head}</p>
                     <p className="mt-1.5 text-[15.5px] leading-[1.5] text-pretty text-muted">
                       {body}
                     </p>
@@ -975,8 +963,8 @@ function Proceeds() {
               ))}
             </ul>
             <p className="mt-5 text-[15.5px] leading-[1.5] text-pretty text-muted">
-              No hires. I build Corpus with AI coding agents, so the money goes to learning from
-              users instead of buying engineering hours.
+              After two weeks, more of the budget goes to whichever platform brings signups more
+              cheaply. I’ll also interview ten signups, thanked with a free lifetime license.
             </p>
           </div>
           <div>
@@ -1102,7 +1090,10 @@ function Close() {
           <ul className="mt-3 divide-y border-y text-[17px] leading-[1.45]">
             <li className="py-3">
               <span className="font-medium">$3,000 Ignite Grant, GenAI track</span>
-              <span className="text-muted"> for the demand test and ten user interviews</span>
+              <span className="text-muted">
+                {" "}
+                for a demand test: ads, a waitlist, and a price test
+              </span>
             </li>
             <li className="py-3">
               <span className="font-medium">A mentor</span>
@@ -1117,7 +1108,10 @@ function Close() {
               <Fill value={FACTS.email} todo="email" />
             </Fact>
             <Fact k="Waitlist">{FACTS.waitlist.url}</Fact>
-            <Fact k="Demo">
+            <Fact k="Prototype">
+              <Fill value={FACTS.prototypeUrl} todo="link" />
+            </Fact>
+            <Fact k="Pitch video">
               <Fill value={FACTS.demoVideo} todo="link" />
             </Fact>
           </dl>

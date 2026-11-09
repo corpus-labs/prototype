@@ -121,6 +121,15 @@
   min-height: 100svh;
 }
 
+/* Present mode: equal space above and below the slide, with the page controls
+   centered in the space below at any window size. */
+.stage[data-mode="present"] {
+  grid-template-rows: 1fr auto 1fr;
+}
+.stage[data-mode="present"] > .deck {
+  grid-row: 2;
+}
+
 .deck {
   zoom: var(--zoom, 1);
 }
