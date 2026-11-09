@@ -6,8 +6,6 @@
 export const FACTS = {
   /** Contact email for the judges. A usc.edu address reads best here. */
   email: "kostelec@usc.edu" as string | null,
-  /** Pitch video link (you presenting the deck), without https://. Redirects to the video once it’s recorded. */
-  demoVideo: "iya-pitch.corpus.app" as string | null,
   /** Where judges can click through the prototype, without https://. */
   prototypeUrl: "demo.corpus.app" as string | null,
   waitlist: {

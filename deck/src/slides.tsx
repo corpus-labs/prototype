@@ -912,9 +912,6 @@ function Traction() {
               ))}
             </div>
             <dl className="mt-auto grid gap-2 border-t pt-4 text-[14px]">
-              <Fact k="Pitch video">
-                <Url value={FACTS.demoVideo} />
-              </Fact>
               <Fact k="Prototype">
                 <Url value={FACTS.prototypeUrl} />
               </Fact>
@@ -1202,9 +1199,6 @@ function Close() {
             </Fact>
             <Fact k="Prototype">
               <Url value={FACTS.prototypeUrl} />
-            </Fact>
-            <Fact k="Pitch video">
-              <Url value={FACTS.demoVideo} />
             </Fact>
           </dl>
         </div>
