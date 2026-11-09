@@ -60,7 +60,11 @@
   html,
   body {
     margin: 0;
-    background: var(--color-neutral-200);
+  }
+  /* The same light gray as the landing page's waitlist section. It's on html
+     only, so the lattice behind the deck can show through the body. */
+  html {
+    background: var(--color-subtle);
   }
   body {
     font-family: var(--font-sans);

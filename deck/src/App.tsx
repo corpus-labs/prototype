@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { SLIDES } from "./slides";
-import { SlideIndex } from "./ui";
+import { Lattice, SlideIndex } from "./ui";
 
 const TOTAL = SLIDES.length;
 /** Content slides: everything but the cover and the close. */
@@ -102,6 +102,10 @@ export default function App() {
 
   return (
     <div className="stage" data-mode={view.mode}>
+      {/* The landing page's lattice, fixed to the window and strongest at the top right. */}
+      <div className="no-print pointer-events-none fixed inset-0 -z-10">
+        <Lattice fade="radial-gradient(ellipse 70% 120% at 100% 0%, black 0%, rgb(0 0 0 / 0.5) 40%, transparent 75%)" />
+      </div>
       <div
         className="deck cursor-pointer select-none"
         data-mode={view.mode}
