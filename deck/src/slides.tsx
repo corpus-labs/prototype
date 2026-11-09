@@ -986,7 +986,7 @@ function Team() {
               <Fact k="USC">
                 IYA graduate student, MS in Integrated Design, Business and Technology
               </Fact>
-              <Fact k="Enrolled">Fall 2026 and Spring 2027</Fact>
+              <Fact k="Enrolled">Fall 2024 to Spring 2027</Fact>
               <Fact k="Email">
                 <Mailto value={FACTS.email} />
               </Fact>
