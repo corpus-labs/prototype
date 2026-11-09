@@ -170,6 +170,42 @@ export function Url({ value, todo = "link" }: { value: string | null; todo?: str
   );
 }
 
+/**
+ * A button-shaped link to a video on YouTube, with YouTube's play mark.
+ * The mark keeps YouTube's own red: it's the one brand color on the slide.
+ */
+export function VideoButton({
+  value,
+  children,
+  className,
+}: {
+  value: string | null;
+  children: ReactNode;
+  className?: string;
+}) {
+  if (!value) return <Todo>video link</Todo>;
+  return (
+    <a
+      href={`https://${value}`}
+      target="_blank"
+      rel="noreferrer"
+      className={cn(
+        "inline-flex h-12 items-center gap-3 rounded-full bg-ink pr-6 pl-4 text-[16px] font-medium text-white shadow-[0_1px_2px_rgb(0_0_0/0.12),0_4px_12px_-2px_rgb(0_0_0/0.18)] transition-colors print:shadow-none hover:bg-neutral-800",
+        className,
+      )}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden className="h-[22px] w-auto shrink-0">
+        <path
+          fill="#ff0000"
+          d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"
+        />
+        <path fill="#fff" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+      </svg>
+      {children}
+    </a>
+  );
+}
+
 /** A product screenshot: a plain bordered object, the way the product frames previews. */
 export function Shot({
   src,

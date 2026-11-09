@@ -15,6 +15,7 @@ import {
   Source,
   Title,
   Url,
+  VideoButton,
 } from "./ui";
 import coverShot from "./assets/shots/cover-notebook.png";
 import siteShot from "./assets/shots/traction-site.png";
@@ -58,6 +59,9 @@ function Cover() {
           One shared memory for every AI tool and teammate, including open-weight models. Your docs,
           help center, and support bot come from the same pages.
         </p>
+        <VideoButton value={FACTS.pitchVideoUrl} className="mt-9">
+          Watch the pitch
+        </VideoButton>
       </div>
       <div className="absolute bottom-14 left-16 grid gap-1 text-[15px]">
         <p className="font-medium">Mitch Kostelecky</p>
