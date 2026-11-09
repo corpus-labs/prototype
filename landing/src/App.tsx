@@ -281,7 +281,7 @@ function Jobs() {
   const jobs: { id: JobId; body: string; instead: string }[] = [
     {
       id: "ai",
-      body: "Claude, ChatGPT, Codex, Cursor, and open-weight models recall what your team knows and save what they learn.",
+      body: "Claude, ChatGPT, and open-weight models recall what your team knows and save what they learn.",
       instead: "memory locked in one AI vendor",
     },
     {
