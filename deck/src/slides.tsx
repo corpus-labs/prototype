@@ -1172,7 +1172,10 @@ function Close() {
             </li>
             <li className="py-3">
               <span className="font-medium">A mentor</span>
-              <span className="text-muted"> who has sold software to small teams</span>
+              <span className="text-muted">
+                {" "}
+                with marketing experience who has sold software to small teams
+              </span>
             </li>
           </ul>
         </div>
