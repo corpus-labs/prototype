@@ -576,12 +576,13 @@ function HowItWorks() {
     <Slide section="How it works">
       <Body>
         <Title className="max-w-[960px]">
-          Write once in the notebook. Every reader gets the same words.
+          People and agents write to the same notebook, and read the same words.
         </Title>
       </Body>
       <ol className="absolute top-[232px] inset-x-16 grid grid-cols-3 gap-10">
-        <Step n={1} head="Write">
-          Plain Markdown files you own, in folders. Edit them as rich text or as Markdown.
+        <Step n={1} head="Write and save">
+          People write in the editor. Agents save notes from Claude Code, OpenCode, or any harness,
+          as Markdown drafts a person approves.
         </Step>
         <Step n={2} head="Publish and connect">
           A docs site or help center for people. Plugins connect Claude, Codex, and more in one
