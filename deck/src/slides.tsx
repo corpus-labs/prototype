@@ -3,7 +3,19 @@ import { FACTS } from "./facts";
 import { SplitView } from "./split-view";
 import { cn } from "./lib/utils";
 import { ToolLogo, type ToolId } from "./tool-logo";
-import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title, Url } from "./ui";
+import {
+  CorpusLogo,
+  CorpusMark,
+  Dot,
+  Fill,
+  Lead,
+  Mailto,
+  Shot,
+  Slide,
+  Source,
+  Title,
+  Url,
+} from "./ui";
 import coverShot from "./assets/shots/cover-notebook.png";
 import siteShot from "./assets/shots/traction-site.png";
 import portrait from "./assets/portrait.jpg";
@@ -915,6 +927,9 @@ function Traction() {
               <Fact k="Prototype">
                 <Url value={FACTS.prototypeUrl} />
               </Fact>
+              <Fact k="Help center">
+                <Url value={FACTS.helpCenterUrl} />
+              </Fact>
               <Fact k="Waitlist">
                 <Url value={FACTS.waitlist.url} />{" "}
                 <span className="text-muted">
@@ -976,7 +991,7 @@ function Team() {
               </Fact>
               <Fact k="Enrolled">Fall 2026 and Spring 2027</Fact>
               <Fact k="Email">
-                <Fill value={FACTS.email} todo="email" />
+                <Mailto value={FACTS.email} />
               </Fact>
             </dl>
           </div>
@@ -1192,7 +1207,7 @@ function Close() {
           <p className="text-[15px] font-medium">Mitch Kostelecky</p>
           <dl className="mt-3 grid gap-2 border-t pt-3 text-[15px]">
             <Fact k="Email">
-              <Fill value={FACTS.email} todo="email" />
+              <Mailto value={FACTS.email} />
             </Fact>
             <Fact k="Waitlist">
               <Url value={FACTS.waitlist.url} />
