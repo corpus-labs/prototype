@@ -950,7 +950,10 @@ function Traction() {
 
 function Team() {
   const record: [string, ReactNode][] = [
-    ["Founder, Charged Labs", "Agentic developer tooling for Drupal and WordPress."],
+    [
+      "Founder, Charged Labs",
+      "Agentic developer tooling and cloud infrastructure for Drupal and WordPress.",
+    ],
     [
       "Staff-level frontend engineer",
       "Flipgrid (acquired by Microsoft), OurFamilyWizard, and Parsley Health.",
