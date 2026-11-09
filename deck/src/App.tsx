@@ -5,8 +5,9 @@ import { SlideIndex } from "./ui";
 const TOTAL = SLIDES.length;
 /** Content slides: everything but the cover and the close. */
 const PAGES = TOTAL - 2;
-/** A slide's number among the content slides, or null for the cover and the close. */
-const pageOf = (i: number) => (i > 0 && i < TOTAL - 1 ? i : null);
+/** What the page controls show: "Cover", "Summary", or a content slide's number. */
+const pageLabel = (i: number) =>
+  i === 0 ? "Cover" : i === TOTAL - 1 ? "Summary" : `${i} of ${PAGES}`;
 const W = 1280;
 const H = 720;
 
@@ -121,9 +122,7 @@ export default function App() {
           <NavButton label="Previous slide" onClick={() => go(view.i - 1)} disabled={view.i === 0}>
             <path d="M10 3 5 8l5 5" />
           </NavButton>
-          <span className="w-16 text-center tabular-nums">
-            {pageOf(view.i) && `${pageOf(view.i)} of ${PAGES}`}
-          </span>
+          <span className="w-16 text-center tabular-nums">{pageLabel(view.i)}</span>
           <NavButton
             label="Next slide"
             onClick={() => go(view.i + 1)}
