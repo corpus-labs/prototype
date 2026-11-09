@@ -905,8 +905,8 @@ function Traction() {
               imgClassName="h-full object-cover object-top"
             />
             <figcaption className="mt-3 text-[13.5px] leading-snug text-pretty text-muted">
-              The help center Corpus publishes from Acme’s pages, with search and a support bot.
-              Sample data; AI, git, and MCP calls are simulated until they’re built.
+              The help center Corpus publishes from the pages of Acme, Inc, with search and a
+              support bot. Sample data; AI, git, and MCP calls are simulated until they’re built.
             </figcaption>
           </figure>
           <div className="flex flex-col gap-6">

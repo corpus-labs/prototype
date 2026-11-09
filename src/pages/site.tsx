@@ -72,7 +72,7 @@ function Brand({ project }: { project: DocsProject }) {
       <span className="grid size-7 place-items-center rounded-lg bg-(--cui-charge) text-white">
         <span className="text-[14px] font-bold">A</span>
       </span>
-      <span className="text-[15px] font-semibold tracking-[-0.01em]">Acme</span>
+      <span className="text-[15px] font-semibold tracking-[-0.01em]">Acme, Inc</span>
       <span className="text-[15px] text-(--cui-muted)">Help</span>
     </a>
   );
@@ -322,7 +322,7 @@ function SiteHome({
               How can we help?
             </h1>
             <p className="mt-3 text-[17px] text-(--cui-muted)">
-              Installing, updating, and paying for Acme themes.
+              Installing, updating, and paying for themes from Acme, Inc.
             </p>
             <div className="mt-7">
               <SearchBox project={project} inputRef={searchRef} large />
