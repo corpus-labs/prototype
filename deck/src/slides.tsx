@@ -3,7 +3,19 @@ import { FACTS } from "./facts";
 import { SplitView } from "./split-view";
 import { cn } from "./lib/utils";
 import { ToolLogo, type ToolId } from "./tool-logo";
-import { CorpusLogo, CorpusMark, Dot, Fill, Lead, Shot, Slide, Source, Title } from "./ui";
+import {
+  CorpusLogo,
+  CorpusMark,
+  Dot,
+  Fill,
+  Lead,
+  Mailto,
+  Shot,
+  Slide,
+  Source,
+  Title,
+  Url,
+} from "./ui";
 import coverShot from "./assets/shots/cover-notebook.png";
 import siteShot from "./assets/shots/traction-site.png";
 import portrait from "./assets/portrait.jpg";
@@ -32,7 +44,7 @@ function Fact({ k, children, wide = false }: { k: string; children: ReactNode; w
   );
 }
 
-/* 1. Cover --------------------------------------------------------------- */
+/* 1. Cover -------------------------------------------------------------- */
 
 function Cover() {
   return (
@@ -43,8 +55,8 @@ function Cover() {
           Own what your company knows. Use it with any AI.
         </h1>
         <p className="mt-6 text-[20px] leading-[1.45] text-pretty text-muted">
-          Corpus is one notebook for your docs, help center, AI context, and design system. Pay once
-          to run it yourself, or let us host it for $7 a month.
+          One shared memory for every AI tool and teammate, including open-weight models. Your docs,
+          help center, and support bot come from the same pages.
         </p>
       </div>
       <div className="absolute bottom-14 left-16 grid gap-1 text-[15px]">
@@ -62,28 +74,31 @@ function Cover() {
   );
 }
 
-/* 2. Problem ------------------------------------------------------------- */
+/* 2. Problem ------------------------------------------------------------ */
 
 function Problem() {
   const pains: [string, string][] = [
     [
-      "Scattered",
-      "Docs in Mintlify or GitBook, notes in Notion or Obsidian, help articles in Zendesk, and AI context in each vendor’s own project files.",
+      "Personal",
+      "Claude and ChatGPT remember one person. Your teammate’s AI doesn’t know what yours learned.",
     ],
-    ["Rented", "Every tool bills by the seat, the site, or the answer, every month."],
     [
-      "Stuck",
-      "Context saved inside one AI vendor stays there. Switch models, and you set it all up again.",
+      "Locked in",
+      "Switch to another AI, or to next year’s leader, and the memory stays with the old vendor.",
+    ],
+    [
+      "Missing",
+      "Open-weight models like DeepSeek and Qwen, and tools that store no user data, start every session blank.",
     ],
   ];
   return (
     <Slide section="Problem">
       <Body>
-        <Title className="max-w-[900px]">
-          Company knowledge is scattered, rented, and stuck with one AI vendor.
+        <Title className="max-w-[960px]">
+          The best AI tools remember you. That memory is locked inside one vendor.
         </Title>
-        <div className="mt-11 grid grid-cols-[1fr_560px] gap-14">
-          <ul className="divide-y border-y">
+        <div className="mt-11 grid grid-cols-[1fr_600px] gap-14">
+          <ul className="self-start divide-y border-y">
             {pains.map(([head, body]) => (
               <li key={head} className="py-4">
                 <p className="text-[18.5px] font-medium">{head}</p>
@@ -91,57 +106,79 @@ function Problem() {
               </li>
             ))}
           </ul>
-          <FiveAnswers />
+          <MemoryTable />
         </div>
       </Body>
     </Slide>
   );
 }
 
-function FiveAnswers() {
-  const answers: [where: string, said: string, note?: string][] = [
-    ["Help center", "“5 business days”"],
-    ["Docs site", "“Up to 7 days”"],
-    ["Support bot", "“Within 24 hours”", "a guess"],
-    ["ChatGPT project", "“5 to 7 days”", "last year’s PDF"],
+function MemoryTable() {
+  const cols = ["Remembers", "Shared with your team", "Any AI can use it"];
+  const rows: { name: string; has: Has[]; us?: boolean }[] = [
+    { name: "Claude", has: ["yes", "part", "no"] },
+    { name: "ChatGPT", has: ["yes", "part", "no"] },
+    { name: "Open-weight models", has: ["no", "no", "no"] },
+    { name: "Corpus", has: ["yes", "yes", "yes"], us: true },
   ];
   return (
-    <figure className="self-start overflow-hidden rounded-xl border bg-white">
-      <figcaption className="border-b bg-subtle px-5 py-3 text-[14px] text-muted">
-        Five places answer “How long do refunds take?”
-      </figcaption>
-      <ul className="divide-y text-[15.5px]">
-        {answers.map(([where, said, note]) => (
-          <li key={where} className="grid grid-cols-[150px_1fr] items-baseline px-5 py-3">
-            <span className="text-muted">{where}</span>
-            <Dot tone="bad">
-              {said}
-              {note && <span className="text-[13.5px] text-muted">{note}</span>}
-            </Dot>
-          </li>
-        ))}
-        <li className="grid grid-cols-[150px_1fr] items-baseline bg-good-soft px-5 py-3">
-          <span className="text-muted">Team notes</span>
-          <Dot tone="good">
-            <span className="font-medium">“3 business days, since March”</span>
-          </Dot>
-        </li>
-      </ul>
-      <p className="border-t px-5 py-3 text-[13px] text-muted">
-        An illustration. Every copy was right once.
-      </p>
+    <figure className="self-start">
+      <table className="w-full border-collapse text-[15px]">
+        <thead>
+          <tr className="border-b text-left text-[13.5px] text-muted">
+            <th className="py-2.5 pr-3 pl-3 font-normal">Where memory lives</th>
+            {cols.map((c) => (
+              <th key={c} className="w-[124px] px-2 py-2.5 text-center font-normal leading-tight">
+                {c}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.name} className={cn("border-b", r.us && "border-b-0 bg-good-soft")}>
+              <td className={cn("py-3 pr-3 pl-3", r.us ? "font-semibold" : "font-medium")}>
+                {r.name}
+              </td>
+              {r.has.map((h, k) => (
+                <td key={k} className="px-2 py-3 text-center">
+                  <span className="inline-flex items-baseline gap-2">
+                    <span className="self-center">
+                      <Mark has={h} />
+                    </span>
+                    {HAS_LABEL[h]}
+                  </span>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <Source className="mt-3 text-pretty">
+        Partly: shared projects on team plans, with memory kept to that project. Claude can import a
+        one-time copy of ChatGPT memory; the two don’t stay in sync. Open-weight models means the
+        model itself, through an API or on your own server. Vendor help pages, November 2026. Corpus
+        runs as a prototype.
+      </Source>
     </figure>
   );
 }
 
-/* 3. Why now ------------------------------------------------------------- */
+/* 3. Why now ------------------------------------------------------------ */
 
 function WhyNow() {
-  const shifts: [string, ReactNode, string][] = [
+  const shifts: [string, ReactNode, ReactNode][] = [
     [
-      "Teams use several models at once",
-      "37% of enterprises use five or more models, up from 29% a year earlier.",
-      "Andreessen Horowitz, CIO survey, 2025",
+      "Even big customers switch",
+      "Revolut moved its developers from Claude to self-hosted Z.ai models and cut inference costs by up to 90%, it reported in November 2026.",
+      <a
+        href="https://www.techradar.com/pro/we-were-highly-skeptical-about-the-cost-of-ai-revolut-reveals-it-cut-ai-coding-costs-by-cutting-out-claude-entirely"
+        target="_blank"
+        rel="noreferrer"
+        className="underline decoration-neutral-400 underline-offset-2 hover:text-ink"
+      >
+        Revolut, via TechRadar, November 4, 2026
+      </a>,
     ],
     [
       "One plug fits all of them",
@@ -158,15 +195,20 @@ function WhyNow() {
     <Slide section="Why now">
       <Body>
         <Title className="max-w-[960px]">
-          Teams now use several AI models, and the leader keeps changing.
+          The AI leader changed in two years, and companies keep switching.
         </Title>
         <div className="absolute inset-x-0 bottom-0 grid grid-cols-[452px_1fr] items-end gap-16">
           <figure>
             <figcaption className="text-[15px] font-medium">
-              Share of enterprise AI model use
+              Share of enterprise AI spend
             </figcaption>
             <ShareShift />
-            <Source className="mt-2">Menlo Ventures, LLM market update, July 2025</Source>
+            <p className="mt-2 text-[14px] text-muted">
+              Open-weight models: 19% of enterprise AI use, 4% of spend
+            </p>
+            <Source className="mt-1">
+              Menlo Ventures, State of Enterprise AI, December 2025 and November 2026
+            </Source>
           </figure>
           <ul className="divide-y border-y">
             {shifts.map(([head, body, source]) => (
@@ -183,61 +225,100 @@ function WhyNow() {
   );
 }
 
-/** A two-point slope chart. Direct labels carry identity, so there's no legend. */
+/**
+ * A three-point slope chart, with years spaced to scale. Direct labels carry
+ * identity, so there's no legend.
+ */
 function ShareShift() {
-  const x0 = 140;
-  const x1 = 312;
+  const years = [2023, 2025, 2026];
+  const xs = [130, 263, 330];
   const y = (v: number) => 236 - (v / 60) * 216;
   const series = [
-    { name: "OpenAI", from: 50, to: 25, stroke: "stroke-neutral-400", fill: "fill-neutral-400" },
-    { name: "Anthropic", from: 12, to: 32, stroke: "stroke-ink", fill: "fill-ink" },
+    {
+      name: "OpenAI",
+      values: [50, 27, 31],
+      stroke: "stroke-neutral-400",
+      fill: "fill-neutral-400",
+    },
+    { name: "Anthropic", values: [12, 40, 55], stroke: "stroke-ink", fill: "fill-ink" },
   ];
+  const [openai, anthropic] = series;
   return (
     <svg viewBox="0 0 452 272" className="mt-3 w-full" role="img" aria-labelledby="share-desc">
       <desc id="share-desc">
-        OpenAI fell from 50% of enterprise model use in 2023 to 25% in 2025. Anthropic rose from 12%
-        to 32%.
+        OpenAI went from 50% of enterprise AI spend in 2023 to 27% in 2025 and 31% in 2026.
+        Anthropic went from 12% to 40% to 55%.
       </desc>
-      <line x1={x0} x2={x0} y1={12} y2={244} className="stroke-line" />
-      <line x1={x1} x2={x1} y1={12} y2={244} className="stroke-line" />
+      {xs.map((x) => (
+        <line key={x} x1={x} x2={x} y1={12} y2={244} className="stroke-line" />
+      ))}
       {series.map((s) => (
         <g key={s.name}>
-          <line
-            x1={x0}
-            y1={y(s.from)}
-            x2={x1}
-            y2={y(s.to)}
+          <polyline
+            points={s.values.map((v, i) => `${xs[i]},${y(v)}`).join(" ")}
             className={s.stroke}
+            fill="none"
             strokeWidth="2"
             strokeLinecap="round"
+            strokeLinejoin="round"
           />
-          <circle cx={x0} cy={y(s.from)} r="5" className={s.fill} stroke="#fff" strokeWidth="2" />
-          <circle cx={x1} cy={y(s.to)} r="5" className={s.fill} stroke="#fff" strokeWidth="2" />
+          {s.values.map((v, i) => (
+            <circle
+              key={i}
+              cx={xs[i]}
+              cy={y(v)}
+              r="5"
+              className={s.fill}
+              stroke="#fff"
+              strokeWidth="2"
+            />
+          ))}
           <text
-            x={x0 - 14}
-            y={y(s.from)}
+            x={xs[0] - 14}
+            y={y(s.values[0])}
             textAnchor="end"
             dominantBaseline="middle"
             className="fill-ink text-[15px]"
           >
-            {s.name} <tspan className="font-semibold">{s.from}%</tspan>
+            {s.name} <tspan className="font-semibold">{s.values[0]}%</tspan>
           </text>
-          <text x={x1 + 14} y={y(s.to)} dominantBaseline="middle" className="fill-ink text-[15px]">
-            <tspan className="font-semibold">{s.to}%</tspan> {s.name}
+          <text
+            x={xs[2] + 14}
+            y={y(s.values[2])}
+            dominantBaseline="middle"
+            className="fill-ink text-[15px]"
+          >
+            <tspan className="font-semibold">{s.values[2]}%</tspan> {s.name}
           </text>
         </g>
       ))}
-      <text x={x0} y={266} textAnchor="middle" className="fill-muted text-[13px]">
-        2023
+      {/* 2025 values sit where the lines leave room: Anthropic's above left, OpenAI's below. */}
+      <text
+        x={xs[1] - 10}
+        y={y(anthropic.values[1]) - 12}
+        textAnchor="end"
+        className="fill-ink text-[13.5px] font-semibold"
+      >
+        {anthropic.values[1]}%
       </text>
-      <text x={x1} y={266} textAnchor="middle" className="fill-muted text-[13px]">
-        2025
+      <text
+        x={xs[1]}
+        y={y(openai.values[1]) + 24}
+        textAnchor="middle"
+        className="fill-ink text-[13.5px] font-semibold"
+      >
+        {openai.values[1]}%
       </text>
+      {years.map((yr, i) => (
+        <text key={yr} x={xs[i]} y={266} textAnchor="middle" className="fill-muted text-[13px]">
+          {yr}
+        </text>
+      ))}
     </svg>
   );
 }
 
-/* 4. Solution ------------------------------------------------------------ */
+/* 4. Solution ----------------------------------------------------------- */
 
 type JobId = "ai" | "support" | "docs" | "design";
 
@@ -294,9 +375,9 @@ function Solution() {
   const jobs: [job: JobId, head: string, body: string, instead: string][] = [
     [
       "ai",
-      "AI context",
-      "Plugins for Claude, Codex, and more recall your plans and decisions, and save new ones back.",
-      "prompt files in every AI tool",
+      "Memory for any AI",
+      "Claude, ChatGPT, Codex, Cursor, and open-weight models recall what your team knows and save what they learn.",
+      "memory locked in one vendor",
     ],
     [
       "support",
@@ -307,7 +388,7 @@ function Solution() {
     [
       "docs",
       "Docs and help center",
-      "Publish public docs, a help center, or an internal handbook from the notebook.",
+      "Publish public docs, a help center, or an internal handbook from the same pages.",
       "Mintlify or GitBook",
     ],
     [
@@ -321,26 +402,33 @@ function Solution() {
     <Slide section="Solution">
       <Body>
         <Title className="max-w-[980px]">
-          Corpus: one notebook that every person, support bot, and AI tool reads.
+          Corpus: shared memory that every AI tool and every teammate can use.
         </Title>
         <Lead className="max-w-[900px]">
-          A context control plane for your company. Write it once, choose what’s public, and every
-          reader gets the same answer.
+          One library your company owns. Any AI recalls from it and saves to it, and the same pages
+          publish as docs, a help center, and a support bot.
         </Lead>
         <div className="absolute inset-x-0 bottom-0">
           <div className="flex h-[60px] items-center gap-3 rounded-xl bg-ink px-5 text-white">
             <CorpusMark className="size-5" />
-            <span className="text-[17px] font-semibold">Corpus notebook</span>
+            <span className="text-[17px] font-semibold">Corpus library</span>
             <span className="text-[14.5px] text-neutral-400">
-              Markdown files you own, hosted or on your server
+              Shared memory as Markdown files you own, hosted or on your server
             </span>
           </div>
           <ol className="grid grid-cols-4 gap-8">
             {jobs.map(([job, head, body, instead]) => (
               <li key={head}>
                 {/* The line from the notebook runs into each job's icon. */}
-                <span className="ml-5 block h-6 w-px bg-neutral-300" />
-                <span className="grid size-10 place-items-center rounded-xl border bg-white text-ink">
+                <span
+                  className={cn("ml-5 block h-6 w-px", job === "ai" ? "bg-ink" : "bg-neutral-300")}
+                />
+                <span
+                  className={cn(
+                    "grid size-10 place-items-center rounded-xl border",
+                    job === "ai" ? "border-ink bg-ink text-white" : "bg-white text-ink",
+                  )}
+                >
                   <JobIcon job={job} />
                 </span>
                 <div className="mt-4">
@@ -360,63 +448,7 @@ function Solution() {
   );
 }
 
-/* 5. How it works -------------------------------------------------------- */
-
-function HowItWorks() {
-  return (
-    <Slide section="How it works">
-      <Body>
-        <Title className="max-w-[960px]">
-          Write once in the notebook. Every reader gets the same words.
-        </Title>
-      </Body>
-      <ol className="absolute top-[232px] inset-x-16 grid grid-cols-3 gap-10">
-        <Step n={1} head="Write">
-          Plain Markdown files you own, in folders. Edit them as rich text or as Markdown.
-        </Step>
-        <Step n={2} head="Publish and connect">
-          A docs site or help center for people. Plugins connect Claude, Codex, and more in one
-          click.
-        </Step>
-        <Step n={3} head="Fill the gaps">
-          Questions nobody could answer come back as AI drafts, written with the model you pick.
-        </Step>
-      </ol>
-      <div className="absolute inset-x-16 top-[378px] bottom-0 flex flex-col">
-        <div className="mb-3 grid grid-cols-[52.5%_1fr] px-1 text-[15px]">
-          <Dot tone="off">
-            <span className="font-medium">People</span>
-            <span className="text-muted">read the help page</span>
-          </Dot>
-          <Dot tone="good">
-            <span className="font-medium">Agents and the support bot</span>
-            <span className="text-muted">get the same words</span>
-          </Dot>
-        </div>
-        <SplitView
-          pageId="refunds"
-          site="acme-help.corpus.app"
-          start="How long refunds take"
-          className="min-h-0 flex-1 rounded-b-none"
-        />
-      </div>
-    </Slide>
-  );
-}
-
-function Step({ n, head, children }: { n: number; head: string; children: ReactNode }) {
-  return (
-    <li className="grid grid-cols-[24px_1fr] border-t pt-3.5">
-      <span className="text-[15px] font-medium text-faint tabular-nums">{n}</span>
-      <div>
-        <p className="text-[17px] font-medium">{head}</p>
-        <div className="mt-1 text-[14.5px] leading-[1.5] text-pretty text-muted">{children}</div>
-      </div>
-    </li>
-  );
-}
-
-/* 6. Plugins ------------------------------------------------------------ */
+/* 5. Plugins ------------------------------------------------------------ */
 
 function Tile({ tile, className }: { tile: ToolId; className?: string }) {
   return (
@@ -537,7 +569,64 @@ function Plugins() {
   );
 }
 
-/* 7. Competition --------------------------------------------------------- */
+/* 6. How it works ------------------------------------------------------- */
+
+function HowItWorks() {
+  return (
+    <Slide section="How it works">
+      <Body>
+        <Title className="max-w-[960px]">
+          People and agents write to the same notebook, and read the same words.
+        </Title>
+      </Body>
+      <ol className="absolute top-[232px] inset-x-16 grid grid-cols-3 gap-10">
+        <Step n={1} head="Write and save">
+          People write in the editor. Agents save notes from Claude Code, OpenCode, or any harness,
+          as Markdown drafts a person approves.
+        </Step>
+        <Step n={2} head="Publish and connect">
+          A docs site or help center for people. Plugins connect Claude, Codex, and more in one
+          click.
+        </Step>
+        <Step n={3} head="Fill the gaps">
+          Questions nobody could answer come back as AI drafts, written with the model you pick.
+        </Step>
+      </ol>
+      <div className="absolute inset-x-16 top-[378px] bottom-0 flex flex-col">
+        <div className="mb-3 grid grid-cols-[52.5%_1fr] px-1 text-[15px]">
+          <Dot tone="off">
+            <span className="font-medium">People</span>
+            <span className="text-muted">read the help page</span>
+          </Dot>
+          <Dot tone="good">
+            <span className="font-medium">Agents and the support bot</span>
+            <span className="text-muted">get the same words</span>
+          </Dot>
+        </div>
+        <SplitView
+          pageId="refunds"
+          site="acme-help.corpus.app"
+          start="How long refunds take"
+          className="min-h-0 flex-1 rounded-b-none"
+        />
+      </div>
+    </Slide>
+  );
+}
+
+function Step({ n, head, children }: { n: number; head: string; children: ReactNode }) {
+  return (
+    <li className="grid grid-cols-[24px_1fr] border-t pt-3.5">
+      <span className="text-[15px] font-medium text-faint tabular-nums">{n}</span>
+      <div>
+        <p className="text-[17px] font-medium">{head}</p>
+        <div className="mt-1 text-[14.5px] leading-[1.5] text-pretty text-muted">{children}</div>
+      </div>
+    </li>
+  );
+}
+
+/* 7. Competition -------------------------------------------------------- */
 
 type Has = "yes" | "part" | "no";
 
@@ -685,7 +774,7 @@ function Competition() {
   );
 }
 
-/* 7. Business model ------------------------------------------------------ */
+/* 8. Business model ----------------------------------------------------- */
 
 function BusinessModel() {
   const plans: [name: string, plan: string, total: number][] = [
@@ -781,7 +870,7 @@ function BusinessModel() {
   );
 }
 
-/* 8. Traction ------------------------------------------------------------ */
+/* 9. Traction ----------------------------------------------------------- */
 
 function Traction() {
   const groups: { tone: "good" | "warn" | "off"; label: string; items: ReactNode[] }[] = [
@@ -836,14 +925,14 @@ function Traction() {
               ))}
             </div>
             <dl className="mt-auto grid gap-2 border-t pt-4 text-[14px]">
-              <Fact k="Pitch video">
-                <Fill value={FACTS.demoVideo} todo="link" />
-              </Fact>
               <Fact k="Prototype">
-                <Fill value={FACTS.prototypeUrl} todo="link" />
+                <Url value={FACTS.prototypeUrl} />
+              </Fact>
+              <Fact k="Help center">
+                <Url value={FACTS.helpCenterUrl} />
               </Fact>
               <Fact k="Waitlist">
-                {FACTS.waitlist.url}{" "}
+                <Url value={FACTS.waitlist.url} />{" "}
                 <span className="text-muted">
                   (live since {FACTS.waitlist.liveSince}
                   {FACTS.waitlist.signups && `, ${FACTS.waitlist.signups} signups`})
@@ -857,7 +946,7 @@ function Traction() {
   );
 }
 
-/* 9. Team ---------------------------------------------------------------- */
+/* 10. Team -------------------------------------------------------------- */
 
 function Team() {
   const record: [string, ReactNode][] = [
@@ -877,12 +966,16 @@ function Team() {
       "15 years in the Drupal community",
       "People I already know how to reach when the Drupal and WordPress plugins ship.",
     ],
+    [
+      "Uses four AI tools every week",
+      "I switch between Claude Code, Z.ai, DeepSeek, and OpenCode. Corpus is the shared memory I need.",
+    ],
   ];
   return (
     <Slide section="Team">
       <Body>
         <Title>Solo founder. I’ve built docs, design systems, and products people pay for.</Title>
-        <div className="mt-12 grid grid-cols-[372px_1fr] gap-16">
+        <div className="mt-8 grid grid-cols-[372px_1fr] gap-16">
           <div>
             <img
               src={portrait}
@@ -899,13 +992,13 @@ function Team() {
               </Fact>
               <Fact k="Enrolled">Fall 2026 and Spring 2027</Fact>
               <Fact k="Email">
-                <Fill value={FACTS.email} todo="email" />
+                <Mailto value={FACTS.email} />
               </Fact>
             </dl>
           </div>
           <ul className="divide-y border-y">
             {record.map(([head, body]) => (
-              <li key={head} className="py-[15px]">
+              <li key={head} className="py-3">
                 <p className="text-[18px] font-medium">{head}</p>
                 <p className="mt-1 text-[15.5px] leading-[1.5] text-pretty text-muted">{body}</p>
               </li>
@@ -917,14 +1010,14 @@ function Team() {
   );
 }
 
-/* 10. Use of proceeds ---------------------------------------------------- */
+/* 11. Use of proceeds --------------------------------------------------- */
 
 function Proceeds() {
   const spend: [string, string, string][] = [
     [
       "$1,500",
       "Reddit ads",
-      "Four ad sets, one per job: AI context, support answers, docs, and design systems. Shown in communities like r/selfhosted and r/webdev.",
+      "Four ad sets, one per job: AI memory, support answers, docs, and design systems. Shown in communities like r/selfhosted and r/webdev.",
     ],
     [
       "$1,500",
@@ -947,14 +1040,24 @@ function Proceeds() {
         </Title>
         <div className="mt-11 grid grid-cols-[1fr_360px] gap-16">
           <div>
-            <ul className="divide-y border-y">
-              {spend.map(([amount, head, body]) => (
+            {/* The budget split, in the same order and colors as the rows below. */}
+            <div className="flex h-3 gap-[3px] overflow-hidden rounded-full">
+              <span className="w-1/2 rounded-l-full bg-ink" />
+              <span className="w-1/2 rounded-r-full bg-good" />
+            </div>
+            <ul className="mt-6 divide-y border-y">
+              {spend.map(([amount, head, body], i) => (
                 <li key={head} className="grid grid-cols-[120px_1fr] gap-5 py-5">
                   <p className="text-[28px] leading-[1.05] font-semibold tracking-[-0.025em] tabular-nums">
                     {amount}
                   </p>
                   <div>
-                    <p className="text-[18px] font-medium">{head}</p>
+                    <p className="flex items-center gap-2.5 text-[18px] font-medium">
+                      <span
+                        className={cn("size-2.5 rounded-[3px]", i === 0 ? "bg-ink" : "bg-good")}
+                      />
+                      {head}
+                    </p>
                     <p className="mt-1.5 text-[15.5px] leading-[1.5] text-pretty text-muted">
                       {body}
                     </p>
@@ -987,7 +1090,7 @@ function Proceeds() {
   );
 }
 
-/* 11. Milestones --------------------------------------------------------- */
+/* 12. Milestones -------------------------------------------------------- */
 
 function Milestones() {
   const steps: { when: string; head: string; body: string; done?: boolean }[] = [
@@ -1067,7 +1170,7 @@ function Milestones() {
   );
 }
 
-/* 12. Close -------------------------------------------------------------- */
+/* 13. Close ------------------------------------------------------------- */
 
 function Close() {
   return (
@@ -1080,8 +1183,8 @@ function Close() {
           Use it with any AI.
         </h2>
         <p className="mt-6 max-w-[660px] text-[20px] leading-[1.45] text-pretty text-muted">
-          One notebook for your docs, help center, AI context, and design system. Pay once to
-          self-host, or $7 a month hosted.
+          One shared memory for every AI tool and teammate, with docs, a help center, and a support
+          bot from the same pages.
         </p>
       </div>
       <div className="absolute inset-x-16 bottom-14 grid grid-cols-[1fr_440px] gap-16">
@@ -1105,14 +1208,13 @@ function Close() {
           <p className="text-[15px] font-medium">Mitch Kostelecky</p>
           <dl className="mt-3 grid gap-2 border-t pt-3 text-[15px]">
             <Fact k="Email">
-              <Fill value={FACTS.email} todo="email" />
+              <Mailto value={FACTS.email} />
             </Fact>
-            <Fact k="Waitlist">{FACTS.waitlist.url}</Fact>
+            <Fact k="Waitlist">
+              <Url value={FACTS.waitlist.url} />
+            </Fact>
             <Fact k="Prototype">
-              <Fill value={FACTS.prototypeUrl} todo="link" />
-            </Fact>
-            <Fact k="Pitch video">
-              <Fill value={FACTS.demoVideo} todo="link" />
+              <Url value={FACTS.prototypeUrl} />
             </Fact>
           </dl>
         </div>
@@ -1126,8 +1228,8 @@ export const SLIDES = [
   Problem,
   WhyNow,
   Solution,
-  HowItWorks,
   Plugins,
+  HowItWorks,
   Competition,
   BusinessModel,
   Traction,

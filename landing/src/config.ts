@@ -27,8 +27,8 @@ export const CONFIG = {
  */
 export const JOBS = {
   ai: {
-    label: "AI context",
-    lead: "Give Claude, Codex, and Cursor your team’s real plans, decisions, and rules, from files you own. Switch models any time; the context stays.",
+    label: "Memory for any AI",
+    lead: "Give Claude, ChatGPT, Codex, and open-weight models one shared memory your team owns. What one AI learns, every AI and every teammate can recall.",
   },
   support: {
     label: "Support answers",

@@ -2,11 +2,13 @@
 
 ## What Corpus is
 
-Corpus is one notebook for what a company knows, readable by any AI. The idea in one line: write it once, and people, support bots, and coding agents all read the same source, whichever AI vendor the team uses this year.
+Corpus is shared memory for any AI: one library of what a company (or one person) knows, owned by them, not by a model vendor. Any AI tool recalls from it and saves to it, including open-weight models and harnesses that keep no memory of their own. Docs, a help center, a support bot, and design systems are published from the same library. See `docs/decisions/0002-shared-memory.md`.
 
-It does four jobs. Design systems are one of them, not the whole product:
+The idea in one line: write it once, and people, support bots, and every AI tool read the same source, whichever AI vendor the team uses this year.
 
-- **AI context.** Claude, Codex, Cursor, or any MCP client reads the team's plans, decisions, and rules over MCP, llms.txt, and Markdown URLs (any page plus `.md`). Planned: one-click plugins for each harness that also save notes back as drafts a person approves (decision 6 in `0001-knowledge-notebook.md`).
+Memory is the center. The other jobs branch from it. Design systems are one of them, not the whole product:
+
+- **AI context (memory).** Claude, Codex, Cursor, or any MCP client reads the team's plans, decisions, and rules over MCP, llms.txt, and Markdown URLs (any page plus `.md`). Planned: one-click plugins for each harness that also save notes back as drafts a person approves (decision 6 in `0001-knowledge-notebook.md`).
 - **Support answers.** A support bot answers customers from the help center's pages, links the page it used, and says it doesn't know instead of guessing.
 - **Docs and help center.** Public docs, a help center, or an internal handbook, published as a site.
 - **Design systems.** Component pages with live previews, usage rules, do and don't examples, props, and tokens.

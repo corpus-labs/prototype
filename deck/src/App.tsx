@@ -3,6 +3,10 @@ import { SLIDES } from "./slides";
 import { SlideIndex } from "./ui";
 
 const TOTAL = SLIDES.length;
+/** Content slides: everything but the cover and the close. */
+const PAGES = TOTAL - 2;
+/** A slide's number among the content slides, or null for the cover and the close. */
+const pageOf = (i: number) => (i > 0 && i < TOTAL - 1 ? i : null);
 const W = 1280;
 const H = 720;
 
@@ -83,12 +87,13 @@ export default function App() {
   }, [view, go, toggleAll]);
 
   const onSlideClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Links on a slide (like a cited source) open on their own, in either view.
+    if ((e.target as HTMLElement).closest("a")) return;
     if (view.mode === "all") {
       const el = (e.target as HTMLElement).closest<HTMLElement>(".slide");
       if (el?.dataset.n) go(Number(el.dataset.n) - 1);
       return;
     }
-    if ((e.target as HTMLElement).closest("a")) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     go(view.i + (x < 0.3 ? -1 : 1));
@@ -103,7 +108,7 @@ export default function App() {
         onClick={onSlideClick}
       >
         {SLIDES.map((S, i) => (
-          <SlideIndex.Provider key={i} value={{ n: i + 1, total: TOTAL }}>
+          <SlideIndex.Provider key={i} value={{ n: i + 1, page: i, pages: PAGES }}>
             <SlideHost active={view.mode === "all" || i === view.i}>
               <S />
             </SlideHost>
@@ -117,7 +122,7 @@ export default function App() {
             <path d="M10 3 5 8l5 5" />
           </NavButton>
           <span className="w-16 text-center tabular-nums">
-            {view.i + 1} of {TOTAL}
+            {pageOf(view.i) && `${pageOf(view.i)} of ${PAGES}`}
           </span>
           <NavButton
             label="Next slide"

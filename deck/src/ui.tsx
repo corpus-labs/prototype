@@ -39,8 +39,12 @@ export function CorpusLogo({ className }: { className?: string }) {
   );
 }
 
-/** Which slide this is, so the running header can number itself. */
-export const SlideIndex = createContext({ n: 0, total: 0 });
+/**
+ * Which slide this is. `n` is the slide's place in the deck (and its #n link).
+ * `page` and `pages` number only the content slides, so the cover and the close
+ * don't count: slide 2 reads "1 of 11".
+ */
+export const SlideIndex = createContext({ n: 0, page: 0, pages: 0 });
 
 /**
  * One 1280 x 720 slide. `section` turns on the running header, which echoes
@@ -55,7 +59,7 @@ export function Slide({
   className?: string;
   children: ReactNode;
 }) {
-  const { n, total } = useContext(SlideIndex);
+  const { n, page, pages } = useContext(SlideIndex);
   return (
     <section className={cn("slide", className)} data-n={n}>
       {section && (
@@ -67,7 +71,7 @@ export function Slide({
             <span className="text-muted">{section}</span>
           </div>
           <span className="text-faint tabular-nums">
-            {n} of {total}
+            {page} of {pages}
           </span>
         </header>
       )}
@@ -136,6 +140,34 @@ export function Todo({ children }: { children: ReactNode }) {
 /** Shows the value when it's known, otherwise a TODO naming what's missing. */
 export function Fill({ value, todo }: { value: string | null; todo: string }) {
   return value ? <>{value}</> : <Todo>{todo}</Todo>;
+}
+
+/** An email address as a link that starts a message. */
+export function Mailto({ value, todo = "email" }: { value: string | null; todo?: string }) {
+  if (!value) return <Todo>{todo}</Todo>;
+  return (
+    <a
+      href={`mailto:${value}`}
+      className="underline decoration-neutral-400 underline-offset-2 hover:decoration-ink"
+    >
+      {value}
+    </a>
+  );
+}
+
+/** A web address shown without https://, as a link that opens in a new tab. */
+export function Url({ value, todo = "link" }: { value: string | null; todo?: string }) {
+  if (!value) return <Todo>{todo}</Todo>;
+  return (
+    <a
+      href={`https://${value}`}
+      target="_blank"
+      rel="noreferrer"
+      className="underline decoration-neutral-400 underline-offset-2 hover:decoration-ink"
+    >
+      {value}
+    </a>
+  );
 }
 
 /** A product screenshot: a plain bordered object, the way the product frames previews. */

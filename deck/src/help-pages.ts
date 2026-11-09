@@ -1,5 +1,5 @@
 // The sample help center's pages, read from the prototype's fixtures, so the
-// split view on slide 5 shows the real Refunds page. Same loader as the landing page's.
+// split view on slide 6 shows the real Refunds page. Same loader as the landing page's.
 
 export type HelpPage = {
   id: string;
