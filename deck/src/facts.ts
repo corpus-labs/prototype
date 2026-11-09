@@ -8,6 +8,8 @@ export const FACTS = {
   email: "kostelec@usc.edu" as string | null,
   /** Where judges can click through the prototype, without https://. */
   prototypeUrl: "demo.corpus.app" as string | null,
+  /** The recorded pitch on YouTube, without https://. Linked from the cover. */
+  pitchVideoUrl: "youtu.be/_S2NUaDDGO4" as string | null,
   /** The published help center inside the prototype, without https://. */
   helpCenterUrl: "demo.corpus.app/#site-help" as string | null,
   waitlist: {
