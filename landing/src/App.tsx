@@ -721,8 +721,8 @@ function Faq() {
       "When you self-host, you bring the server and the AI key, so there’s nothing for Corpus to bill you for each month. Pay once, and the version you bought keeps working. If we host it for you, that’s $7 a month, since we run the server.",
     ],
     [
-      "Do I need Drupal, WordPress, or Notion?",
-      "No. Corpus stands on its own. Plugins for WordPress and Drupal, and imports from Notion, are planned after launch.",
+      "Do I need Drupal, WordPress, Notion, or Figma?",
+      "No. Corpus stands on its own. Plugins for WordPress and Drupal, imports from Notion, and syncing design tokens from Figma are planned after launch.",
     ],
   ];
   return (
