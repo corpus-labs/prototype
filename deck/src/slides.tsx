@@ -1182,11 +1182,11 @@ function Close() {
             <Fact k="Email">
               <Mailto value={FACTS.email} />
             </Fact>
-            <Fact k="Waitlist">
-              <Url value={FACTS.waitlist.url} />
-            </Fact>
             <Fact k="Prototype">
               <Url value={FACTS.prototypeUrl} />
+            </Fact>
+            <Fact k="Landing page">
+              <Url value={FACTS.waitlist.url} />
             </Fact>
           </dl>
         </div>
