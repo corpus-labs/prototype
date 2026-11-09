@@ -931,7 +931,7 @@ function Traction() {
               <Fact k="Help center">
                 <Url value={FACTS.helpCenterUrl} />
               </Fact>
-              <Fact k="Waitlist">
+              <Fact k="Landing page">
                 <Url value={FACTS.waitlist.url} />{" "}
                 <span className="text-muted">
                   (live since {FACTS.waitlist.liveSince}
