@@ -931,7 +931,7 @@ function Traction() {
               <Fact k="Help center">
                 <Url value={FACTS.helpCenterUrl} />
               </Fact>
-              <Fact k="Waitlist">
+              <Fact k="Landing page">
                 <Url value={FACTS.waitlist.url} />{" "}
                 <span className="text-muted">
                   (live since {FACTS.waitlist.liveSince}
@@ -952,7 +952,7 @@ function Team() {
   const record: [string, ReactNode][] = [
     [
       "Founder, Charged Labs",
-      "Developer tools for Drupal and WordPress, including Charged UI, the design system in the prototype.",
+      "Agentic developer tooling and cloud infrastructure for Drupal and WordPress.",
     ],
     [
       "Staff-level frontend engineer",
@@ -963,10 +963,6 @@ function Team() {
       "More than $100,000 in lifetime sales of one-time-priced products, past Envato’s $75,000 bar for Elite. Corpus uses the same model.",
     ],
     [
-      "15 years in the Drupal community",
-      "People I already know how to reach when the Drupal and WordPress plugins ship.",
-    ],
-    [
       "Uses four AI tools every week",
       "I switch between Claude Code, Z.ai, DeepSeek, and OpenCode. Corpus is the shared memory I need.",
     ],
@@ -975,7 +971,7 @@ function Team() {
     <Slide section="Team">
       <Body>
         <Title>Solo founder. I’ve built docs, design systems, and products people pay for.</Title>
-        <div className="mt-8 grid grid-cols-[372px_1fr] gap-16">
+        <div className="mt-12 grid grid-cols-[372px_1fr] gap-16">
           <div>
             <img
               src={portrait}
@@ -998,7 +994,7 @@ function Team() {
           </div>
           <ul className="divide-y border-y">
             {record.map(([head, body]) => (
-              <li key={head} className="py-3">
+              <li key={head} className="py-[15px]">
                 <p className="text-[18px] font-medium">{head}</p>
                 <p className="mt-1 text-[15.5px] leading-[1.5] text-pretty text-muted">{body}</p>
               </li>
@@ -1010,7 +1006,7 @@ function Team() {
   );
 }
 
-/* 11. Use of proceeds --------------------------------------------------- */
+/* 11. Use of proceeds and milestones ------------------------------------- */
 
 function Proceeds() {
   const spend: [string, string, string][] = [
@@ -1022,15 +1018,28 @@ function Proceeds() {
     [
       "$1,500",
       "X ads",
-      "The same four ad sets, shown to people building with AI tools. Both send people to the corpus.app waitlist, where half see $79 and half see $99.",
+      "The same four ad sets, shown to people building with AI tools. Both send people to corpus.app, where half see $79 and half see $99.",
     ],
   ];
-  const report = [
-    "Cost per signup, by job and platform",
-    "Waitlist size",
-    "Landing page conversion rate",
-    "Share willing to pay $79, and $99",
-    "What teams use now, and what it costs them",
+  const steps: { when: string; head: string; body: string; done?: boolean }[] = [
+    {
+      when: "Nov 2026",
+      head: "Clickable prototype",
+      body: "Help center, handbook, and design system on sample data",
+      done: true,
+    },
+    { when: "Dec 2026", head: "Demand test", body: "Ads, the waitlist, and ten interviews" },
+    {
+      when: "Jan 2027",
+      head: "Plugins ship",
+      body: "Claude and Codex plugins recall and save notes",
+    },
+    {
+      when: "Feb 2027",
+      head: "Private beta",
+      body: "Waitlist teams, hosted or on their own servers",
+    },
+    { when: "Spring 2027", head: "Launch", body: "Licenses on sale, and the IYA Venture Showcase" },
   ];
   return (
     <Slide section="Use of proceeds">
@@ -1038,51 +1047,94 @@ function Proceeds() {
         <Title className="max-w-[960px]">
           $3,000 to learn who will pay, and for which job, before I build the rest.
         </Title>
-        <div className="mt-11 grid grid-cols-[1fr_360px] gap-16">
+        <div className="mt-10 grid grid-cols-2 gap-16">
           <div>
             {/* The budget split, in the same order and colors as the rows below. */}
             <div className="flex h-3 gap-[3px] overflow-hidden rounded-full">
               <span className="w-1/2 rounded-l-full bg-ink" />
               <span className="w-1/2 rounded-r-full bg-good" />
             </div>
-            <ul className="mt-6 divide-y border-y">
+            <ul className="mt-5 divide-y border-y">
               {spend.map(([amount, head, body], i) => (
-                <li key={head} className="grid grid-cols-[120px_1fr] gap-5 py-5">
-                  <p className="text-[28px] leading-[1.05] font-semibold tracking-[-0.025em] tabular-nums">
+                <li key={head} className="grid grid-cols-[92px_1fr] gap-4 py-4">
+                  <p className="text-[24px] leading-[1.1] font-semibold tracking-[-0.025em] tabular-nums">
                     {amount}
                   </p>
                   <div>
-                    <p className="flex items-center gap-2.5 text-[18px] font-medium">
+                    <p className="flex items-center gap-2.5 text-[17px] font-medium">
                       <span
                         className={cn("size-2.5 rounded-[3px]", i === 0 ? "bg-ink" : "bg-good")}
                       />
                       {head}
                     </p>
-                    <p className="mt-1.5 text-[15.5px] leading-[1.5] text-pretty text-muted">
+                    <p className="mt-1 text-[14.5px] leading-[1.45] text-pretty text-muted">
                       {body}
                     </p>
                   </div>
                 </li>
               ))}
             </ul>
-            <p className="mt-5 text-[15.5px] leading-[1.5] text-pretty text-muted">
-              After two weeks, more of the budget goes to whichever platform brings signups more
-              cheaply. I’ll also interview ten signups, thanked with a free lifetime license.
+            <p className="mt-4 text-[14.5px] leading-[1.5] text-pretty text-muted">
+              After two weeks, more goes to whichever platform brings signups more cheaply. I’ll
+              also interview ten signups, thanked with a free lifetime license. I’ll report cost per
+              signup by job and platform, and the share willing to pay $79 or $99.
             </p>
           </div>
           <div>
-            <p className="text-[16px] font-medium">What I’ll report back</p>
-            <ul className="mt-3 divide-y border-y text-[16px]">
-              {report.map((r) => (
-                <li key={r} className="py-3">
-                  {r}
+            <ol className="relative">
+              {steps.map((s, i) => (
+                <li
+                  key={s.when}
+                  className="relative grid grid-cols-[92px_24px_1fr] items-start pb-3.5 last:pb-0"
+                >
+                  {/* The spine runs from this dot to the next one. */}
+                  {i < steps.length - 1 && (
+                    <span className="absolute top-[10px] -bottom-[10px] left-[103.5px] w-px bg-neutral-300" />
+                  )}
+                  <p
+                    className={cn(
+                      "text-[14px] leading-[20px]",
+                      s.done ? "text-good" : "text-muted",
+                    )}
+                  >
+                    {s.when}
+                  </p>
+                  <span
+                    className={cn(
+                      "relative mt-[4.5px] size-[11px] justify-self-center rounded-full",
+                      s.done ? "bg-good" : "border-[1.5px] border-neutral-300 bg-white",
+                    )}
+                  />
+                  <p className="pl-2 text-[15px] leading-[20px]">
+                    <span className="font-medium">{s.head}</span>
+                    <span className="block text-[14px] text-muted">{s.body}</span>
+                  </p>
                 </li>
               ))}
-            </ul>
-            <p className="mt-4 text-[14px] leading-[1.5] text-pretty text-muted">
-              If teams won’t sign up at these prices, I find out for $3,000 instead of a year of
-              building.
-            </p>
+            </ol>
+            <div className="mt-6 border-t pt-4">
+              <p className="text-[15px] font-medium">Targets for the Showcase</p>
+              <dl className="mt-2 grid grid-cols-3 gap-4 text-[15px]">
+                <div>
+                  <dt className="text-muted">Waitlist</dt>
+                  <dd className="font-medium">
+                    <Fill value={FACTS.targets.waitlist} todo="signups" />
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted">Beta teams</dt>
+                  <dd className="font-medium">
+                    <Fill value={FACTS.targets.betaTeams} todo="teams" />
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted">Paid licenses</dt>
+                  <dd className="font-medium">
+                    <Fill value={FACTS.targets.paidLicenses} todo="licenses" />
+                  </dd>
+                </div>
+              </dl>
+            </div>
           </div>
         </div>
       </Body>
@@ -1090,87 +1142,7 @@ function Proceeds() {
   );
 }
 
-/* 12. Milestones -------------------------------------------------------- */
-
-function Milestones() {
-  const steps: { when: string; head: string; body: string; done?: boolean }[] = [
-    {
-      when: "Nov 2026",
-      head: "Clickable prototype",
-      body: "Handbook, help center, and design system projects on sample data, plus a build plan.",
-      done: true,
-    },
-    {
-      when: "Dec 2026",
-      head: "Demand test",
-      body: "Ads, waitlist, and interviews. Corpus reads a real folder of Markdown.",
-    },
-    {
-      when: "Jan 2027",
-      head: "Plugins ship",
-      body: "Claude and Codex plugins recall and save notes. Any MCP client reads real notebooks.",
-    },
-    {
-      when: "Feb 2027",
-      head: "Private beta",
-      body: "Waitlist teams, hosted or on their own servers. AI drafts with the model each team picks.",
-    },
-    {
-      when: "Spring 2027",
-      head: "Launch",
-      body: "Lifetime licenses on sale, a hosted plan, and the IYA Venture Showcase.",
-    },
-  ];
-  return (
-    <Slide section="Milestones">
-      <Body>
-        <Title>By the Venture Showcase: a working notebook in real teams’ hands.</Title>
-        <div className="relative mt-16">
-          <span className="absolute top-[5px] right-0 left-0 h-px bg-line" />
-          <ol className="relative grid grid-cols-5 gap-7">
-            {steps.map((s) => (
-              <li key={s.when}>
-                <span
-                  className={cn(
-                    "block size-[11px] rounded-full",
-                    s.done ? "bg-good" : "border-[1.5px] border-neutral-300 bg-white",
-                  )}
-                />
-                <p className={cn("mt-5 text-[14px]", s.done ? "text-good" : "text-muted")}>
-                  {s.when}
-                </p>
-                <p className="mt-1 text-[18px] font-medium">{s.head}</p>
-                <p className="mt-1.5 text-[14.5px] leading-[1.5] text-pretty text-muted">
-                  {s.body}
-                </p>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-6 text-[14.5px] text-muted">
-            After the Showcase: plugins for Z.ai, DeepSeek, and more, imports from Notion, and
-            plugins for WordPress and Drupal.
-          </p>
-        </div>
-        <div className="absolute inset-x-0 bottom-0 border-t pt-5">
-          <p className="text-[15px] font-medium">Targets for the Showcase</p>
-          <dl className="mt-2.5 grid grid-cols-3 gap-8 text-[15px]">
-            <Fact k="Waitlist" wide>
-              <Fill value={FACTS.targets.waitlist} todo="signups" />
-            </Fact>
-            <Fact k="Beta teams" wide>
-              <Fill value={FACTS.targets.betaTeams} todo="teams" />
-            </Fact>
-            <Fact k="Paid licenses" wide>
-              <Fill value={FACTS.targets.paidLicenses} todo="licenses" />
-            </Fact>
-          </dl>
-        </div>
-      </Body>
-    </Slide>
-  );
-}
-
-/* 13. Close ------------------------------------------------------------- */
+/* 12. Close ------------------------------------------------------------- */
 
 function Close() {
   return (
@@ -1235,6 +1207,5 @@ export const SLIDES = [
   Traction,
   Team,
   Proceeds,
-  Milestones,
   Close,
 ];
