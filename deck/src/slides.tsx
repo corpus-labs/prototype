@@ -963,10 +963,6 @@ function Team() {
       "More than $100,000 in lifetime sales of one-time-priced products, past Envato’s $75,000 bar for Elite. Corpus uses the same model.",
     ],
     [
-      "15 years in the Drupal community",
-      "People I already know how to reach when the Drupal and WordPress plugins ship.",
-    ],
-    [
       "Uses four AI tools every week",
       "I switch between Claude Code, Z.ai, DeepSeek, and OpenCode. Corpus is the shared memory I need.",
     ],
@@ -975,7 +971,7 @@ function Team() {
     <Slide section="Team">
       <Body>
         <Title>Solo founder. I’ve built docs, design systems, and products people pay for.</Title>
-        <div className="mt-8 grid grid-cols-[372px_1fr] gap-16">
+        <div className="mt-12 grid grid-cols-[372px_1fr] gap-16">
           <div>
             <img
               src={portrait}
@@ -998,7 +994,7 @@ function Team() {
           </div>
           <ul className="divide-y border-y">
             {record.map(([head, body]) => (
-              <li key={head} className="py-3">
+              <li key={head} className="py-[15px]">
                 <p className="text-[18px] font-medium">{head}</p>
                 <p className="mt-1 text-[15.5px] leading-[1.5] text-pretty text-muted">{body}</p>
               </li>
