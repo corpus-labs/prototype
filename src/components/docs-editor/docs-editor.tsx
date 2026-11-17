@@ -65,11 +65,10 @@ import {
   TableIcon,
   TextIcon,
 } from "./icons";
+import { BlockMenu, LinkForm, MenuList, type Block, type LinkTarget } from "./menus";
 import { createDocsEditor } from "./milkdown";
 import { TableMenu, runTableAction, tableAid, type TableInfo } from "./table-menu";
 import { EMPTY_TOOLBAR, EditorToolbar, type ToolbarAction, type ToolbarState } from "./toolbar";
-
-export type LinkTarget = { title: string; path: string; folder: string };
 
 type Menu = { kind: "slash" | "page"; query: string; from: number; to: number } | null;
 type Marks = {
@@ -80,91 +79,98 @@ type Marks = {
   link: string | null;
 };
 
-type Block = {
-  id: string;
-  label: string;
-  hint: string;
-  icon: React.ComponentType<{ className?: string }>;
-  run?: (ctx: Ctx) => boolean;
-};
-
 // Milkdown gives commands their keys when the editor starts, so each block looks its command up when it runs.
 const BLOCKS: Block[] = [
   {
     id: "text",
     label: "Text",
-    hint: "",
+    detail: "Plain paragraph text",
     icon: TextIcon,
-    run: (ctx) => callCommand(turnIntoTextCommand.key)(ctx),
+    run: callCommand(turnIntoTextCommand.key),
   },
   {
     id: "h1",
     label: "Heading 1",
-    hint: "#",
+    detail: "Section title",
     icon: Heading1Icon,
-    run: (ctx) => callCommand(wrapInHeadingCommand.key, 1)(ctx),
+    run: callCommand(wrapInHeadingCommand.key, 1),
   },
   {
     id: "h2",
     label: "Heading 2",
-    hint: "##",
+    detail: "Subsection title",
     icon: Heading2Icon,
-    run: (ctx) => callCommand(wrapInHeadingCommand.key, 2)(ctx),
+    run: callCommand(wrapInHeadingCommand.key, 2),
   },
   {
     id: "h3",
     label: "Heading 3",
-    hint: "###",
+    detail: "Minor heading",
     icon: Heading3Icon,
-    run: (ctx) => callCommand(wrapInHeadingCommand.key, 3)(ctx),
+    run: callCommand(wrapInHeadingCommand.key, 3),
   },
   {
     id: "ul",
     label: "Bulleted list",
-    hint: "-",
+    detail: "Simple bulleted list",
     icon: BulletListIcon,
-    run: (ctx) => callCommand(wrapInBulletListCommand.key)(ctx),
+    run: callCommand(wrapInBulletListCommand.key),
   },
   {
     id: "ol",
     label: "Numbered list",
-    hint: "1.",
+    detail: "Steps in order",
     icon: OrderedListIcon,
-    run: (ctx) => callCommand(wrapInOrderedListCommand.key)(ctx),
+    run: callCommand(wrapInOrderedListCommand.key),
   },
-  { id: "todo", label: "To-do list", hint: "[ ]", icon: TaskListIcon, run: toggleTaskList },
+  {
+    id: "todo",
+    label: "To-do list",
+    detail: "Track work with checkboxes",
+    icon: TaskListIcon,
+    run: toggleTaskList,
+  },
   {
     id: "quote",
     label: "Quote",
-    hint: ">",
+    detail: "Call out a quotation",
     icon: QuoteIcon,
-    run: (ctx) => callCommand(wrapInBlockquoteCommand.key)(ctx),
+    run: callCommand(wrapInBlockquoteCommand.key),
   },
   {
     id: "code",
     label: "Code block",
-    hint: "```",
+    detail: "Fenced code with a language",
     icon: CodeBlockIcon,
-    run: (ctx) => callCommand(createCodeBlockCommand.key)(ctx),
+    run: callCommand(createCodeBlockCommand.key),
   },
   {
     id: "hr",
     label: "Divider",
-    hint: "---",
+    detail: "Horizontal rule",
     icon: DividerIcon,
-    run: (ctx) => callCommand(insertHrCommand.key)(ctx),
+    run: callCommand(insertHrCommand.key),
   },
   {
     id: "table",
     label: "Table",
-    hint: "",
+    detail: "Rows and columns",
     icon: TableIcon,
-    run: (ctx) => callCommand(insertTableCommand.key, { row: 3, col: 3 })(ctx),
+    run: callCommand(insertTableCommand.key, { row: 3, col: 3 }),
   },
-  // Doesn't run a command. It opens the image dialog.
-  { id: "image", label: "Image", hint: "", icon: ImageIcon },
-  // Doesn't run a command. It types [[, which opens the page picker.
-  { id: "page", label: "Link to a page", hint: "[[", icon: FileTextIcon },
+  {
+    id: "image",
+    label: "Image",
+    detail: "Link one or embed a file",
+    icon: ImageIcon,
+  },
+  {
+    id: "page",
+    label: "Link to a page",
+    detail: "Search every page in this project",
+    icon: FileTextIcon,
+  },
+  // The image and page items open dialogs instead of running a command.
 ];
 
 const NO_MARKS: Marks = { strong: false, emphasis: false, strike: false, code: false, link: null };
@@ -309,10 +315,6 @@ function floating() {
   const el = document.createElement("div");
   el.className = "docs-editor-float";
   return el;
-}
-
-function matches(text: string, query: string) {
-  return text.toLowerCase().includes(query.trim().toLowerCase());
 }
 
 /** Best matches first: the text starts with the query, then a word does, then it appears anywhere. */
@@ -915,22 +917,7 @@ export function DocsEditor({
 
       {createPortal(
         menu?.kind === "slash" ? (
-          <MenuList
-            label="Insert a block"
-            items={items as Block[]}
-            active={active}
-            onChoose={choose}
-            empty="No block matches."
-            render={(b) => (
-              <>
-                <b.icon className="size-4 text-muted-foreground" />
-                <span className="flex-1">{b.label}</span>
-                {b.hint && (
-                  <span className="font-mono text-xs text-muted-foreground">{b.hint}</span>
-                )}
-              </>
-            )}
-          />
+          <BlockMenu items={items as Block[]} active={active} onChoose={choose} />
         ) : null,
         els.slash,
       )}
@@ -955,162 +942,5 @@ export function DocsEditor({
         els.page,
       )}
     </>
-  );
-}
-
-function MenuList<T>({
-  label,
-  items,
-  active,
-  onChoose,
-  render,
-  empty,
-}: {
-  label: string;
-  items: T[];
-  active: number;
-  onChoose: (item: T) => void;
-  render: (item: T) => React.ReactNode;
-  empty: string;
-}) {
-  const list = React.useRef<HTMLDivElement>(null);
-  // Arrow keys move the highlight past the menu's edge, so keep it in view.
-  React.useEffect(() => {
-    list.current
-      ?.querySelector<HTMLElement>('[aria-selected="true"]')
-      ?.scrollIntoView({ block: "nearest" });
-  }, [active]);
-  return (
-    <div
-      ref={list}
-      role="listbox"
-      aria-label={label}
-      className="max-h-72 w-64 overflow-y-auto rounded-lg bg-popover p-1 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10"
-    >
-      {items.length === 0 ? (
-        <p className="px-2 py-1.5 text-muted-foreground">{empty}</p>
-      ) : (
-        items.map((item, i) => (
-          <button
-            key={i}
-            type="button"
-            role="option"
-            aria-selected={i === active}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => onChoose(item)}
-            className={cn(
-              "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left outline-none",
-              i === active && "bg-accent text-accent-foreground",
-            )}
-          >
-            {render(item)}
-          </button>
-        ))
-      )}
-    </div>
-  );
-}
-
-/** Inside the selection toolbar: link to a page by name, or paste any URL. */
-function LinkForm({
-  current,
-  targets,
-  pagePath,
-  onApply,
-  onRemove,
-  onCancel,
-}: {
-  current: string | null;
-  targets: LinkTarget[];
-  pagePath: string;
-  onApply: (href: string) => void;
-  onRemove: () => void;
-  onCancel: () => void;
-}) {
-  const [text, setText] = React.useState(current ?? "");
-  const [active, setActive] = React.useState(0);
-  const pages = targets.filter((p) => matches(`${p.title} ${p.folder}`, text)).slice(0, 5);
-  // Something that looks like an address links as typed. Otherwise the top page wins.
-  const literal = /^(https?:\/\/|mailto:|\.{0,2}\/|#)/.test(text.trim());
-  const options = [
-    ...(literal ? [{ kind: "url" as const }] : []),
-    ...pages.map((p) => ({ kind: "page" as const, page: p })),
-  ];
-
-  const pick = (i: number) => {
-    const option = options[i];
-    if (!option) return;
-    onApply(option.kind === "url" ? text : relativeLink(pagePath, option.page.path));
-  };
-
-  return (
-    <div className="w-72 rounded-lg bg-popover p-1.5 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10">
-      <input
-        autoFocus
-        value={text}
-        onChange={(e) => {
-          setText(e.target.value);
-          setActive(0);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-            e.preventDefault();
-            setActive((i) =>
-              options.length
-                ? (i + (e.key === "ArrowDown" ? 1 : -1) + options.length) % options.length
-                : 0,
-            );
-          } else if (e.key === "Enter") {
-            e.preventDefault();
-            pick(active);
-          } else if (e.key === "Escape") {
-            e.preventDefault();
-            onCancel();
-          }
-        }}
-        placeholder="Search pages or paste a link"
-        aria-label="Link to"
-        className="h-8 w-full rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-      />
-      <div role="listbox" aria-label="Link options" className="mt-1">
-        {options.map((option, i) => (
-          <button
-            key={option.kind === "url" ? "url" : option.page.path}
-            type="button"
-            role="option"
-            aria-selected={i === active}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => pick(i)}
-            className={cn(
-              "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left outline-none",
-              i === active && "bg-accent text-accent-foreground",
-            )}
-          >
-            {option.kind === "url" ? (
-              <>
-                <LinkIcon className="size-4 shrink-0 text-muted-foreground" />
-                <span className="truncate">Link to {text.trim()}</span>
-              </>
-            ) : (
-              <>
-                <FileTextIcon className="size-4 shrink-0 text-muted-foreground" />
-                <span className="min-w-0 flex-1 truncate">{option.page.title}</span>
-                <span className="text-xs text-muted-foreground">{option.page.folder}</span>
-              </>
-            )}
-          </button>
-        ))}
-        {current && (
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={onRemove}
-            className="mt-1 flex w-full items-center rounded-md px-2 py-1.5 text-left text-muted-foreground outline-none hover:bg-accent hover:text-accent-foreground"
-          >
-            Remove link
-          </button>
-        )}
-      </div>
-    </div>
   );
 }
