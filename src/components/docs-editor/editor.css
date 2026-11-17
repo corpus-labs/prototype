@@ -52,6 +52,14 @@
   .docs-prose img.ProseMirror-selectednode {
     @apply ring-3 ring-ring/50;
   }
+
+  /* The editor's own text selections and caret, in theme tokens. */
+  .docs-prose {
+    caret-color: var(--foreground);
+  }
+  .docs-prose ::selection {
+    background: color-mix(in oklch, var(--foreground) 14%, transparent);
+  }
 }
 
 /*

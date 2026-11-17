@@ -25,6 +25,7 @@ import { insertTableCommand, toggleStrikethroughCommand } from "@milkdown/preset
 import { redoCommand, undoCommand } from "@milkdown/plugin-history";
 import { uploadConfig } from "@milkdown/plugin-upload";
 import { lift } from "@milkdown/prose/commands";
+import { getMarkRange } from "@milkdown/prose";
 import { redoDepth, undoDepth } from "@milkdown/prose/history";
 import { Plugin, TextSelection, type EditorState } from "@milkdown/prose/state";
 import { Decoration, DecorationSet, type EditorView } from "@milkdown/prose/view";
@@ -38,6 +39,7 @@ import { relativeLink } from "@core/markdown/links";
 import { cn } from "@/lib/utils";
 import { CodeLanguageChip, codeAid, runCodeLanguage, type CodeInfo } from "./code-block";
 import { embedImages, ImageForm } from "./image-form";
+import { LinkCard, type LinkCardInfo } from "./link-card";
 import {
   BlockGutter,
   blockFilter,
@@ -414,7 +416,15 @@ export function DocsEditor({
     table.classList.add("docs-editor-tablebar");
     const code = floating();
     code.classList.add("docs-editor-codechip");
-    return { toolbar: floating(), slash: floating(), page: floating(), handle, table, code };
+    return {
+      toolbar: floating(),
+      slash: floating(),
+      page: floating(),
+      handle,
+      table,
+      code,
+      card: floating(),
+    };
   });
   // The open menu and its highlighted item live in refs that change the moment the
   // text does. React state mirrors them for rendering only. Key handling reads the
@@ -437,6 +447,7 @@ export function DocsEditor({
   }, []);
   const [linking, setLinking] = React.useState(false);
   const [inserting, setInserting] = React.useState(false);
+  const [card, setCard] = React.useState<LinkCardInfo | null>(null);
   const [table, setTableState] = React.useState<TableInfo | null>(null);
   // Like the formatting bar, the table bar reports on every keystroke.
   const tableKey = React.useRef("");
@@ -587,9 +598,11 @@ export function DocsEditor({
     const slash = slashFactory("CORPUS_SLASH");
     const pageLink = slashFactory("CORPUS_PAGE_LINK");
 
-    // The table bar and the code chip position themselves against the host, so they live there.
+    // The table bar, the code chip, and the link card position themselves
+    // against the host, so they live there.
     host.current.appendChild(els.table);
     host.current.appendChild(els.code);
+    host.current.appendChild(els.card);
 
     createDocsEditor({
       root: host.current,
@@ -718,6 +731,50 @@ export function DocsEditor({
     run((ctx) => ctx.get(editorViewCtx).focus());
   };
 
+  // The link card: after the pointer rests on a link for a moment, show where
+  // it points. Editing selects the link first, so the link form opens on it.
+  const cardAnchor = React.useRef<HTMLAnchorElement | null>(null);
+  const hoverTimer = React.useRef<number | null>(null);
+  const cardHide = React.useRef<number | null>(null);
+  const stopHover = () => {
+    if (hoverTimer.current !== null) window.clearTimeout(hoverTimer.current);
+    hoverTimer.current = null;
+  };
+  const showCard = (anchor: HTMLAnchorElement) => {
+    const base = host.current?.getBoundingClientRect();
+    if (!base) return;
+    const rect = anchor.getBoundingClientRect();
+    cardAnchor.current = anchor;
+    setCard({
+      href: anchor.getAttribute("href") ?? "",
+      top: rect.bottom - base.top + 6,
+      left: rect.left - base.left,
+    });
+  };
+  React.useEffect(() => {
+    els.card.dataset.show = card ? "true" : "false";
+    if (card) {
+      els.card.style.top = `${card.top}px`;
+      els.card.style.left = `${card.left}px`;
+    }
+  }, [card, els.card]);
+
+  const editHoveredLink = () => {
+    const anchor = cardAnchor.current;
+    setCard(null);
+    if (!anchor) return;
+    run((ctx) => {
+      const view = ctx.get(editorViewCtx);
+      const $pos = view.state.doc.resolve(view.posAtDOM(anchor, 0));
+      const range = getMarkRange($pos, view.state.schema.marks.link);
+      if (!range) return;
+      view.dispatch(
+        view.state.tr.setSelection(TextSelection.create(view.state.doc, range.from, range.to)),
+      );
+    });
+    setLinking(true);
+  };
+
   // The formatting bar's buttons, mapped to Milkdown commands.
   const act = (action: ToolbarAction) => {
     const toggleList = (kind: "bullet" | "ordered", wrap: typeof wrapInBulletListCommand.key) =>
@@ -814,7 +871,25 @@ export function DocsEditor({
   return (
     <>
       <EditorToolbar state={toolbar} onAction={act} className="sticky top-14 z-10 mb-6 md:top-14" />
-      <div className="relative md:-ml-12 md:pl-12">
+      <div
+        className="relative md:-ml-12 md:pl-12"
+        onMouseOver={(e) => {
+          const target = e.target instanceof Element ? e.target : null;
+          const anchor = target?.closest?.("a");
+          if (!(anchor instanceof HTMLAnchorElement) || !host.current?.contains(anchor)) return;
+          if (cardHide.current !== null) window.clearTimeout(cardHide.current);
+          if (cardAnchor.current === anchor) return;
+          stopHover();
+          hoverTimer.current = window.setTimeout(() => showCard(anchor), 250);
+        }}
+        onMouseOut={(e) => {
+          const to = e.relatedTarget;
+          if (to instanceof Node && (els.card.contains(to) || to.nodeName === "A")) return;
+          stopHover();
+          if (cardHide.current !== null) window.clearTimeout(cardHide.current);
+          cardHide.current = window.setTimeout(() => setCard(null), 120);
+        }}
+      >
         <div ref={host} data-docs-editor className="relative" />
       </div>
 
@@ -842,6 +917,8 @@ export function DocsEditor({
           run((ctx) => ctx.get(editorViewCtx).focus());
         }}
       />
+
+      <LinkCard into={els.card} info={card} onEdit={editHoveredLink} />
 
       <ImageForm
         open={inserting}
