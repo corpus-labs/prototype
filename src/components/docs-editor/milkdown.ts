@@ -15,6 +15,7 @@ import { cursor, dropIndicatorConfig } from "@milkdown/plugin-cursor";
 import { history } from "@milkdown/plugin-history";
 import { listener, listenerCtx } from "@milkdown/plugin-listener";
 import { prism } from "@milkdown/plugin-prism";
+import { upload } from "@milkdown/plugin-upload";
 import { commonmark, updateCodeBlockLanguageCommand } from "@milkdown/preset-commonmark";
 import { columnResizingPlugin, gfm } from "@milkdown/preset-gfm";
 import { getMarkdown } from "@milkdown/utils";
@@ -82,6 +83,7 @@ export function createDocsEditor({
       .use(cursor)
       .use(block)
       .use(prism)
+      .use(upload)
       .use(plugins)
       .create()
   );

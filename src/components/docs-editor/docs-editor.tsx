@@ -8,6 +8,7 @@ import { TooltipProvider, tooltipFactory } from "@milkdown/plugin-tooltip";
 import {
   createCodeBlockCommand,
   insertHrCommand,
+  insertImageCommand,
   liftListItemCommand,
   toggleEmphasisCommand,
   toggleInlineCodeCommand,
@@ -22,6 +23,7 @@ import {
 } from "@milkdown/preset-commonmark";
 import { insertTableCommand, toggleStrikethroughCommand } from "@milkdown/preset-gfm";
 import { redoCommand, undoCommand } from "@milkdown/plugin-history";
+import { uploadConfig } from "@milkdown/plugin-upload";
 import { lift } from "@milkdown/prose/commands";
 import { redoDepth, undoDepth } from "@milkdown/prose/history";
 import { Plugin, TextSelection, type EditorState } from "@milkdown/prose/state";
@@ -35,6 +37,7 @@ import "./editor.css";
 import { relativeLink } from "@core/markdown/links";
 import { cn } from "@/lib/utils";
 import { CodeLanguageChip, codeAid, runCodeLanguage, type CodeInfo } from "./code-block";
+import { embedImages, ImageForm } from "./image-form";
 import {
   BlockGutter,
   blockFilter,
@@ -51,6 +54,7 @@ import {
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
+  ImageIcon,
   ItalicIcon,
   LinkIcon,
   BulletListIcon,
@@ -157,6 +161,8 @@ const BLOCKS: Block[] = [
     icon: TableIcon,
     run: (ctx) => callCommand(insertTableCommand.key, { row: 3, col: 3 })(ctx),
   },
+  // Doesn't run a command. It opens the image dialog.
+  { id: "image", label: "Image", hint: "", icon: ImageIcon },
   // Doesn't run a command. It types [[, which opens the page picker.
   { id: "page", label: "Link to a page", hint: "[[", icon: FileTextIcon },
 ];
@@ -428,6 +434,7 @@ export function DocsEditor({
     setToolbarState(next);
   }, []);
   const [linking, setLinking] = React.useState(false);
+  const [inserting, setInserting] = React.useState(false);
   const [table, setTableState] = React.useState<TableInfo | null>(null);
   // Like the formatting bar, the table bar reports on every keystroke.
   const tableKey = React.useRef("");
@@ -492,6 +499,7 @@ export function DocsEditor({
         } else if (kind === "slash" && "id" in item) {
           view.dispatch(view.state.tr.delete(at.from, at.to));
           if (item.id === "page") view.dispatch(view.state.tr.insertText("[["));
+          else if (item.id === "image") setInserting(true);
           else item.run?.(ctx);
         }
         view.focus();
@@ -596,6 +604,17 @@ export function DocsEditor({
       configure: (ctx) => {
         ctx.update(editorViewOptionsCtx, (prev) => ({ ...prev, handleKeyDown }));
         ctx.update(blockConfig.key, (prev) => ({ ...prev, filterNodes: blockFilter }));
+        // Pasted and dropped images embed as downscaled data URLs until Phase 5
+        // writes them to the repository.
+        ctx.update(uploadConfig.key, (prev) => ({
+          ...prev,
+          uploader: async (files, schema) => {
+            const embedded = await embedImages([...files]);
+            return embedded
+              .map((image) => schema.nodes.image.createAndFill(image))
+              .filter((node): node is NonNullable<typeof node> => node !== null);
+          },
+        }));
         ctx.set(blockSpec.key, {
           view: (view: EditorView) => {
             const provider = new BlockProvider({
@@ -769,6 +788,9 @@ export function DocsEditor({
       case "table":
         run(callCommand(insertTableCommand.key, { row: 3, col: 3 }));
         break;
+      case "image":
+        setInserting(true);
+        break;
       case "undo":
         run(callCommand(undoCommand.key));
         break;
@@ -815,6 +837,15 @@ export function DocsEditor({
         info={code}
         onPick={(pos, language) => {
           run((ctx) => runCodeLanguage(pos, language, ctx));
+          run((ctx) => ctx.get(editorViewCtx).focus());
+        }}
+      />
+
+      <ImageForm
+        open={inserting}
+        onOpenChange={setInserting}
+        onApply={(image) => {
+          run(callCommand(insertImageCommand.key, image));
           run((ctx) => ctx.get(editorViewCtx).focus());
         }}
       />

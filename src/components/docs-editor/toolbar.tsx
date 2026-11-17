@@ -21,6 +21,7 @@ import {
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
+  ImagePlusIcon,
   ItalicIcon,
   LinkIcon,
   OrderedListIcon,
@@ -77,6 +78,7 @@ export type ToolbarAction =
   | "codeBlock"
   | "divider"
   | "table"
+  | "image"
   | "undo"
   | "redo";
 
@@ -270,6 +272,7 @@ export function EditorToolbar({
       />
       <Tool label="Divider" icon={DividerIcon} onAction={() => onAction("divider")} />
       <Tool label="Table" icon={TableIcon} onAction={() => onAction("table")} />
+      <Tool label="Image" icon={ImagePlusIcon} onAction={() => onAction("image")} />
 
       <Divider />
       <Tool
