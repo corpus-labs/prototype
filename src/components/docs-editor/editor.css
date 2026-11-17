@@ -17,15 +17,24 @@
   }
 
   /*
-    The block gutter hides by visibility, not display. Milkdown's block provider
-    measures the handle while it is still marked hidden, and a display:none box
-    has no offset parent, so the provider would place it at viewport
-    coordinates. A hidden-but-laid-out box measures fine.
+    The block gutter and the table bar hide by visibility, not display. They are
+    measured or anchored while still marked hidden, and a display:none box has
+    no offset parent to measure against. A hidden-but-laid-out box works.
   */
-  .docs-editor-handle {
+  .docs-editor-handle,
+  .docs-editor-tablebar {
     @apply absolute z-40;
   }
-  .docs-editor-handle[data-show="false"] {
+  .docs-editor-handle[data-show="false"],
+  .docs-editor-tablebar[data-show="false"] {
     @apply invisible block;
+  }
+
+  /* Tables: the stock colors are hard-coded blue, so tokens take over. */
+  .docs-prose .selectedCell:after {
+    background: color-mix(in oklch, var(--foreground) 8%, transparent);
+  }
+  .docs-prose .column-resize-handle {
+    background-color: color-mix(in oklch, var(--foreground) 30%, transparent);
   }
 }

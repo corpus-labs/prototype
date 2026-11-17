@@ -61,6 +61,7 @@ import {
   TextIcon,
 } from "./icons";
 import { createDocsEditor } from "./milkdown";
+import { TableMenu, runTableAction, tableAid, type TableInfo } from "./table-menu";
 import { EMPTY_TOOLBAR, EditorToolbar, type ToolbarAction, type ToolbarState } from "./toolbar";
 
 export type LinkTarget = { title: string; path: string; folder: string };
@@ -400,7 +401,9 @@ export function DocsEditor({
   const [els] = React.useState(() => {
     const handle = floating();
     handle.classList.add("docs-editor-handle");
-    return { toolbar: floating(), slash: floating(), page: floating(), handle };
+    const table = floating();
+    table.classList.add("docs-editor-tablebar");
+    return { toolbar: floating(), slash: floating(), page: floating(), handle, table };
   });
   // The open menu and its highlighted item live in refs that change the moment the
   // text does. React state mirrors them for rendering only. Key handling reads the
@@ -422,6 +425,15 @@ export function DocsEditor({
     setToolbarState(next);
   }, []);
   const [linking, setLinking] = React.useState(false);
+  const [table, setTableState] = React.useState<TableInfo | null>(null);
+  // Like the formatting bar, the table bar reports on every keystroke.
+  const tableKey = React.useRef("");
+  const setTable = React.useCallback((next: TableInfo | null) => {
+    const key = JSON.stringify(next);
+    if (key === tableKey.current) return;
+    tableKey.current = key;
+    setTableState(next);
+  }, []);
   // Where the reader pressed Escape, so the same menu doesn't reopen until they start over.
   const dismissed = React.useRef<number | null>(null);
 
@@ -554,11 +566,20 @@ export function DocsEditor({
     const slash = slashFactory("CORPUS_SLASH");
     const pageLink = slashFactory("CORPUS_PAGE_LINK");
 
+    // The table bar positions itself against the host, so it lives there.
+    host.current.appendChild(els.table);
+
     createDocsEditor({
       root: host.current,
       value,
       onChange: (markdown) => latest.current.onChange(markdown),
-      plugins: [...selection, ...slash, ...pageLink, editingAids(setToolbar)],
+      plugins: [
+        ...selection,
+        ...slash,
+        ...pageLink,
+        editingAids(setToolbar),
+        tableAid(els.table, setTable),
+      ],
       configure: (ctx) => {
         ctx.update(editorViewOptionsCtx, (prev) => ({ ...prev, handleKeyDown }));
         ctx.update(blockConfig.key, (prev) => ({ ...prev, filterNodes: blockFilter }));
@@ -765,6 +786,15 @@ export function DocsEditor({
         getActive={() => blockProvider.current?.active ?? null}
         onAddBelow={addBelow}
         onAction={actOnBlock}
+      />
+
+      <TableMenu
+        into={els.table}
+        info={table}
+        onAction={(action) => {
+          run((ctx) => runTableAction(action, ctx));
+          run((ctx) => ctx.get(editorViewCtx).focus());
+        }}
       />
 
       {createPortal(

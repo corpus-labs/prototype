@@ -15,7 +15,7 @@ import { cursor, dropIndicatorConfig } from "@milkdown/plugin-cursor";
 import { history } from "@milkdown/plugin-history";
 import { listener, listenerCtx } from "@milkdown/plugin-listener";
 import { commonmark } from "@milkdown/preset-commonmark";
-import { gfm } from "@milkdown/preset-gfm";
+import { columnResizingPlugin, gfm } from "@milkdown/preset-gfm";
 import { getMarkdown } from "@milkdown/utils";
 
 import { markdownStyle } from "@core/markdown/style";
@@ -39,44 +39,48 @@ export function createDocsEditor({
   configure,
   label = "Page content",
 }: DocsEditorOptions) {
-  return Editor.make()
-    .config((ctx) => {
-      ctx.set(rootCtx, root);
-      ctx.set(defaultValueCtx, value);
-      // Write in the house style. New bold and italic marks take their markers from it too.
-      ctx.update(remarkStringifyOptionsCtx, (prev) => ({ ...prev, ...markdownStyle }));
-      ctx.update(editorViewOptionsCtx, (prev) => ({
-        ...prev,
-        attributes: {
-          class: "docs-prose",
-          role: "textbox",
-          "aria-multiline": "true",
-          "aria-label": label,
-          spellcheck: "true",
-        },
-      }));
-      // The line shown where a dragged block would land.
-      ctx.set(dropIndicatorConfig.key, {
-        width: 2,
-        color: "color-mix(in oklch, var(--foreground) 55%, transparent)",
-        class: "docs-editor-drop-line",
-      });
-      if (onChange) {
-        ctx.get(listenerCtx).markdownUpdated((_ctx, markdown, prev) => {
-          if (markdown !== prev) onChange(markdown);
+  return (
+    Editor.make()
+      .config((ctx) => {
+        ctx.set(rootCtx, root);
+        ctx.set(defaultValueCtx, value);
+        // Write in the house style. New bold and italic marks take their markers from it too.
+        ctx.update(remarkStringifyOptionsCtx, (prev) => ({ ...prev, ...markdownStyle }));
+        ctx.update(editorViewOptionsCtx, (prev) => ({
+          ...prev,
+          attributes: {
+            class: "docs-prose",
+            role: "textbox",
+            "aria-multiline": "true",
+            "aria-label": label,
+            spellcheck: "true",
+          },
+        }));
+        // The line shown where a dragged block would land.
+        ctx.set(dropIndicatorConfig.key, {
+          width: 2,
+          color: "color-mix(in oklch, var(--foreground) 55%, transparent)",
+          class: "docs-editor-drop-line",
         });
-      }
-      configure?.(ctx);
-    })
-    .use(commonmark)
-    .use(gfm)
-    .use(history)
-    .use(listener)
-    .use(clipboard)
-    .use(cursor)
-    .use(block)
-    .use(plugins)
-    .create();
+        if (onChange) {
+          ctx.get(listenerCtx).markdownUpdated((_ctx, markdown, prev) => {
+            if (markdown !== prev) onChange(markdown);
+          });
+        }
+        configure?.(ctx);
+      })
+      .use(commonmark)
+      .use(gfm)
+      // The gfm preset ships column resizing but does not enable it.
+      .use(columnResizingPlugin)
+      .use(history)
+      .use(listener)
+      .use(clipboard)
+      .use(cursor)
+      .use(block)
+      .use(plugins)
+      .create()
+  );
 }
 
 export function readMarkdown(editor: Editor): string {
