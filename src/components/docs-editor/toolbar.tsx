@@ -1,26 +1,4 @@
 import * as React from "react";
-import {
-  BoldIcon,
-  CheckIcon,
-  ChevronDownIcon,
-  CodeIcon,
-  Heading1Icon,
-  Heading2Icon,
-  Heading3Icon,
-  ItalicIcon,
-  LinkIcon,
-  ListIcon,
-  ListOrderedIcon,
-  ListTodoIcon,
-  MinusIcon,
-  PilcrowIcon,
-  QuoteIcon,
-  Redo2Icon,
-  SquareCodeIcon,
-  StrikethroughIcon,
-  TableIcon,
-  Undo2Icon,
-} from "lucide-react";
 
 import {
   DropdownMenu,
@@ -31,6 +9,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+
+import {
+  BoldIcon,
+  BulletListIcon,
+  CheckIcon,
+  ChevronDownIcon,
+  CodeBlockIcon,
+  CodeIcon,
+  DividerIcon,
+  Heading1Icon,
+  Heading2Icon,
+  Heading3Icon,
+  ItalicIcon,
+  LinkIcon,
+  OrderedListIcon,
+  QuoteIcon,
+  RedoIcon,
+  StrikeIcon,
+  TableIcon,
+  TaskListIcon,
+  TextIcon,
+  UndoIcon,
+} from "./icons";
 
 /** What the cursor is in right now, so every control can show its state. */
 export type ToolbarState = {
@@ -89,7 +90,7 @@ const BLOCK_TYPES: {
   icon: React.ComponentType<{ className?: string }>;
   keys: string;
 }[] = [
-  { id: "paragraph", label: "Text", icon: PilcrowIcon, keys: `${MOD}${ALT}0` },
+  { id: "paragraph", label: "Text", icon: TextIcon, keys: `${MOD}${ALT}0` },
   { id: "h1", label: "Heading 1", icon: Heading1Icon, keys: `${MOD}${ALT}1` },
   { id: "h2", label: "Heading 2", icon: Heading2Icon, keys: `${MOD}${ALT}2` },
   { id: "h3", label: "Heading 3", icon: Heading3Icon, keys: `${MOD}${ALT}3` },
@@ -210,7 +211,7 @@ export function EditorToolbar({
       <Tool
         label="Strikethrough"
         keys={`${MOD}${ALT}X`}
-        icon={StrikethroughIcon}
+        icon={StrikeIcon}
         on={state.strike}
         disabled={inCode}
         onAction={() => onAction("strike")}
@@ -236,20 +237,20 @@ export function EditorToolbar({
       <Tool
         label="Bulleted list"
         keys={`${MOD}${ALT}8`}
-        icon={ListIcon}
+        icon={BulletListIcon}
         on={state.list === "bullet"}
         onAction={() => onAction("bullet")}
       />
       <Tool
         label="Numbered list"
         keys={`${MOD}${ALT}7`}
-        icon={ListOrderedIcon}
+        icon={OrderedListIcon}
         on={state.list === "ordered"}
         onAction={() => onAction("ordered")}
       />
       <Tool
         label="To-do list"
-        icon={ListTodoIcon}
+        icon={TaskListIcon}
         on={state.list === "task"}
         onAction={() => onAction("task")}
       />
@@ -263,25 +264,25 @@ export function EditorToolbar({
       <Tool
         label="Code block"
         keys={`${MOD}${ALT}C`}
-        icon={SquareCodeIcon}
+        icon={CodeBlockIcon}
         on={inCode}
         onAction={() => onAction("codeBlock")}
       />
-      <Tool label="Divider" icon={MinusIcon} onAction={() => onAction("divider")} />
+      <Tool label="Divider" icon={DividerIcon} onAction={() => onAction("divider")} />
       <Tool label="Table" icon={TableIcon} onAction={() => onAction("table")} />
 
       <Divider />
       <Tool
         label="Undo"
         keys={`${MOD}Z`}
-        icon={Undo2Icon}
+        icon={UndoIcon}
         disabled={!state.canUndo}
         onAction={() => onAction("undo")}
       />
       <Tool
         label="Redo"
         keys={`${MOD}Y`}
-        icon={Redo2Icon}
+        icon={RedoIcon}
         disabled={!state.canRedo}
         onAction={() => onAction("redo")}
       />

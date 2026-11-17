@@ -9,7 +9,9 @@ import {
   rootCtx,
 } from "@milkdown/core";
 import type { Ctx, MilkdownPlugin } from "@milkdown/ctx";
+import { block } from "@milkdown/plugin-block";
 import { clipboard } from "@milkdown/plugin-clipboard";
+import { cursor, dropIndicatorConfig } from "@milkdown/plugin-cursor";
 import { history } from "@milkdown/plugin-history";
 import { listener, listenerCtx } from "@milkdown/plugin-listener";
 import { commonmark } from "@milkdown/preset-commonmark";
@@ -53,6 +55,12 @@ export function createDocsEditor({
           spellcheck: "true",
         },
       }));
+      // The line shown where a dragged block would land.
+      ctx.set(dropIndicatorConfig.key, {
+        width: 2,
+        color: "color-mix(in oklch, var(--foreground) 55%, transparent)",
+        class: "docs-editor-drop-line",
+      });
       if (onChange) {
         ctx.get(listenerCtx).markdownUpdated((_ctx, markdown, prev) => {
           if (markdown !== prev) onChange(markdown);
@@ -65,6 +73,8 @@ export function createDocsEditor({
     .use(history)
     .use(listener)
     .use(clipboard)
+    .use(cursor)
+    .use(block)
     .use(plugins)
     .create();
 }

@@ -2,6 +2,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { editorViewCtx, editorViewOptionsCtx, type Editor } from "@milkdown/core";
 import type { Ctx } from "@milkdown/ctx";
+import { BlockProvider, blockConfig, blockSpec, type ActiveNode } from "@milkdown/plugin-block";
 import { SlashProvider, slashFactory } from "@milkdown/plugin-slash";
 import { TooltipProvider, tooltipFactory } from "@milkdown/plugin-tooltip";
 import {
@@ -26,31 +27,39 @@ import { redoDepth, undoDepth } from "@milkdown/prose/history";
 import { Plugin, TextSelection, type EditorState } from "@milkdown/prose/state";
 import { Decoration, DecorationSet, type EditorView } from "@milkdown/prose/view";
 import { $prose, callCommand } from "@milkdown/utils";
+import "@milkdown/prose/view/style/prosemirror.css";
+import "@milkdown/prose/tables/style/tables.css";
+import "@milkdown/prose/gapcursor/style/gapcursor.css";
+import "./editor.css";
+
+import { relativeLink } from "@core/markdown/links";
+import { cn } from "@/lib/utils";
+import {
+  BlockGutter,
+  blockFilter,
+  firstLineRect,
+  runBlockAction,
+  type BlockAction,
+} from "./block-handle";
 import {
   BoldIcon,
+  CodeBlockIcon,
   CodeIcon,
+  DividerIcon,
   FileTextIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
   ItalicIcon,
   LinkIcon,
-  ListIcon,
-  ListOrderedIcon,
-  ListTodoIcon,
-  MinusIcon,
-  PilcrowIcon,
-  PlusIcon,
+  BulletListIcon,
+  OrderedListIcon,
+  TaskListIcon,
   QuoteIcon,
-  SquareCodeIcon,
-  StrikethroughIcon,
+  StrikeIcon,
   TableIcon,
-} from "lucide-react";
-import "@milkdown/prose/view/style/prosemirror.css";
-import "@milkdown/prose/tables/style/tables.css";
-
-import { relativeLink } from "@core/markdown/links";
-import { cn } from "@/lib/utils";
+  TextIcon,
+} from "./icons";
 import { createDocsEditor } from "./milkdown";
 import { EMPTY_TOOLBAR, EditorToolbar, type ToolbarAction, type ToolbarState } from "./toolbar";
 
@@ -79,7 +88,7 @@ const BLOCKS: Block[] = [
     id: "text",
     label: "Text",
     hint: "",
-    icon: PilcrowIcon,
+    icon: TextIcon,
     run: (ctx) => callCommand(turnIntoTextCommand.key)(ctx),
   },
   {
@@ -107,17 +116,17 @@ const BLOCKS: Block[] = [
     id: "ul",
     label: "Bulleted list",
     hint: "-",
-    icon: ListIcon,
+    icon: BulletListIcon,
     run: (ctx) => callCommand(wrapInBulletListCommand.key)(ctx),
   },
   {
     id: "ol",
     label: "Numbered list",
     hint: "1.",
-    icon: ListOrderedIcon,
+    icon: OrderedListIcon,
     run: (ctx) => callCommand(wrapInOrderedListCommand.key)(ctx),
   },
-  { id: "todo", label: "To-do list", hint: "[ ]", icon: ListTodoIcon, run: toggleTaskList },
+  { id: "todo", label: "To-do list", hint: "[ ]", icon: TaskListIcon, run: toggleTaskList },
   {
     id: "quote",
     label: "Quote",
@@ -129,14 +138,14 @@ const BLOCKS: Block[] = [
     id: "code",
     label: "Code block",
     hint: "```",
-    icon: SquareCodeIcon,
+    icon: CodeBlockIcon,
     run: (ctx) => callCommand(createCodeBlockCommand.key)(ctx),
   },
   {
     id: "hr",
     label: "Divider",
     hint: "---",
-    icon: MinusIcon,
+    icon: DividerIcon,
     run: (ctx) => callCommand(insertHrCommand.key)(ctx),
   },
   {
@@ -388,15 +397,17 @@ export function DocsEditor({
 }) {
   const host = React.useRef<HTMLDivElement>(null);
   const editor = React.useRef<Editor | null>(null);
-  const [els] = React.useState(() => ({
-    toolbar: floating(),
-    slash: floating(),
-    page: floating(),
-  }));
+  const [els] = React.useState(() => {
+    const handle = floating();
+    handle.classList.add("docs-editor-handle");
+    return { toolbar: floating(), slash: floating(), page: floating(), handle };
+  });
   // The open menu and its highlighted item live in refs that change the moment the
   // text does. React state mirrors them for rendering only. Key handling reads the
   // refs, so fast typing never acts on a menu from a keystroke ago.
   const menuRef = React.useRef<Menu>(null);
+  // The block gutter's provider, once the editor has mounted it.
+  const blockProvider = React.useRef<BlockProvider | null>(null);
   const activeRef = React.useRef(0);
   const [menu, setMenuState] = React.useState<Menu>(null);
   const [active, setActiveState] = React.useState(0);
@@ -550,6 +561,20 @@ export function DocsEditor({
       plugins: [...selection, ...slash, ...pageLink, editingAids(setToolbar)],
       configure: (ctx) => {
         ctx.update(editorViewOptionsCtx, (prev) => ({ ...prev, handleKeyDown }));
+        ctx.update(blockConfig.key, (prev) => ({ ...prev, filterNodes: blockFilter }));
+        ctx.set(blockSpec.key, {
+          view: (view: EditorView) => {
+            const provider = new BlockProvider({
+              ctx,
+              content: els.handle,
+              getPlacement: () => "left",
+              getOffset: () => 14,
+              getPosition: ({ active }) => firstLineRect(active.el),
+            });
+            blockProvider.current = provider;
+            return providerView(provider, view);
+          },
+        });
         ctx.set(selection.key, {
           view: (view: EditorView) =>
             providerView(
@@ -611,6 +636,7 @@ export function DocsEditor({
     return () => {
       cancelled = true;
       editor.current = null;
+      blockProvider.current = null;
       void instance?.destroy();
       // destroy() leaves Milkdown's DOM behind, and Strict Mode mounts twice.
       node.replaceChildren();
@@ -618,24 +644,23 @@ export function DocsEditor({
     // The editor loads `value` once. The parent remounts it to load new content.
   }, []);
 
-  // The block the pointer is over, for the "+" beside it.
-  const hoverBlock = React.useRef<{ el: HTMLElement } | null>(null);
-  const [handleTop, setHandleTop] = React.useState<number | null>(null);
-
-  /** Opens an empty line below the hovered block and starts a slash command there. */
-  const addBelow = () => {
-    const el = hoverBlock.current?.el;
-    if (!el) return;
+  /** Opens an empty line below the gutter's block and starts a slash command there. */
+  const addBelow = (active: ActiveNode) => {
     run((ctx) => {
       const view = ctx.get(editorViewCtx);
-      const inside = view.state.doc.resolve(view.posAtDOM(el, 0));
-      const after = inside.depth > 0 ? inside.after(1) : inside.pos;
+      const after = active.$pos.pos + active.node.nodeSize;
       const { paragraph } = view.state.schema.nodes;
       let tr = view.state.tr.insert(after, paragraph.create());
       tr = tr.setSelection(TextSelection.create(tr.doc, after + 1)).insertText("/");
       view.dispatch(tr.scrollIntoView());
       view.focus();
     });
+  };
+
+  /** Runs one action from the block menu on its block, then hands focus back. */
+  const actOnBlock = (action: BlockAction, active: ActiveNode) => {
+    run((ctx) => runBlockAction(action, ctx.get(editorViewCtx), active));
+    run((ctx) => ctx.get(editorViewCtx).focus());
   };
 
   // The formatting bar's buttons, mapped to Milkdown commands.
@@ -731,42 +756,16 @@ export function DocsEditor({
   return (
     <>
       <EditorToolbar state={toolbar} onAction={act} className="sticky top-14 z-10 mb-6 md:top-14" />
-      <div
-        className="group/editor relative md:-ml-12 md:pl-12"
-        onMouseMove={(e) => {
-          const root = host.current?.querySelector(".docs-prose");
-          if (!root) return;
-          // The top-level block under the pointer, like a paragraph, heading, or list.
-          let el = e.target instanceof Element ? e.target : null;
-          while (el && el.parentElement !== root) el = el.parentElement;
-          if (el instanceof HTMLElement && el !== hoverBlock.current?.el) {
-            const hostTop = host.current!.getBoundingClientRect().top;
-            const box = el.getBoundingClientRect();
-            const line = parseFloat(getComputedStyle(el).lineHeight) || 24;
-            hoverBlock.current = { el };
-            setHandleTop(box.top - hostTop + Math.min(line, box.height) / 2 - 12);
-          }
-        }}
-        onMouseLeave={() => {
-          hoverBlock.current = null;
-          setHandleTop(null);
-        }}
-      >
-        {handleTop !== null && (
-          <button
-            type="button"
-            aria-label="Add a block below"
-            title="Add a block below"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={addBelow}
-            style={{ top: handleTop }}
-            className="absolute left-3 hidden size-6 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity outline-none group-hover/editor:opacity-100 hover:bg-accent hover:text-foreground focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50 md:flex [&_svg]:size-4"
-          >
-            <PlusIcon />
-          </button>
-        )}
+      <div className="relative md:-ml-12 md:pl-12">
         <div ref={host} data-docs-editor className="relative" />
       </div>
+
+      <BlockGutter
+        into={els.handle}
+        getActive={() => blockProvider.current?.active ?? null}
+        onAddBelow={addBelow}
+        onAction={actOnBlock}
+      />
 
       {createPortal(
         linking ? (
@@ -801,7 +800,7 @@ export function DocsEditor({
                 ],
                 [
                   "Strikethrough",
-                  StrikethroughIcon,
+                  StrikeIcon,
                   marks.strike,
                   () => run(callCommand(toggleStrikethroughCommand.key)),
                 ],
