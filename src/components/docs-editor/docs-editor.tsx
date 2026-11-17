@@ -34,6 +34,7 @@ import "./editor.css";
 
 import { relativeLink } from "@core/markdown/links";
 import { cn } from "@/lib/utils";
+import { CodeLanguageChip, codeAid, runCodeLanguage, type CodeInfo } from "./code-block";
 import {
   BlockGutter,
   blockFilter,
@@ -403,7 +404,9 @@ export function DocsEditor({
     handle.classList.add("docs-editor-handle");
     const table = floating();
     table.classList.add("docs-editor-tablebar");
-    return { toolbar: floating(), slash: floating(), page: floating(), handle, table };
+    const code = floating();
+    code.classList.add("docs-editor-codechip");
+    return { toolbar: floating(), slash: floating(), page: floating(), handle, table, code };
   });
   // The open menu and its highlighted item live in refs that change the moment the
   // text does. React state mirrors them for rendering only. Key handling reads the
@@ -433,6 +436,14 @@ export function DocsEditor({
     if (key === tableKey.current) return;
     tableKey.current = key;
     setTableState(next);
+  }, []);
+  const [code, setCodeState] = React.useState<CodeInfo | null>(null);
+  const codeKey = React.useRef("");
+  const setCode = React.useCallback((next: CodeInfo | null) => {
+    const key = JSON.stringify(next);
+    if (key === codeKey.current) return;
+    codeKey.current = key;
+    setCodeState(next);
   }, []);
   // Where the reader pressed Escape, so the same menu doesn't reopen until they start over.
   const dismissed = React.useRef<number | null>(null);
@@ -566,8 +577,9 @@ export function DocsEditor({
     const slash = slashFactory("CORPUS_SLASH");
     const pageLink = slashFactory("CORPUS_PAGE_LINK");
 
-    // The table bar positions itself against the host, so it lives there.
+    // The table bar and the code chip position themselves against the host, so they live there.
     host.current.appendChild(els.table);
+    host.current.appendChild(els.code);
 
     createDocsEditor({
       root: host.current,
@@ -579,6 +591,7 @@ export function DocsEditor({
         ...pageLink,
         editingAids(setToolbar),
         tableAid(els.table, setTable),
+        codeAid(els.code, setCode),
       ],
       configure: (ctx) => {
         ctx.update(editorViewOptionsCtx, (prev) => ({ ...prev, handleKeyDown }));
@@ -793,6 +806,15 @@ export function DocsEditor({
         info={table}
         onAction={(action) => {
           run((ctx) => runTableAction(action, ctx));
+          run((ctx) => ctx.get(editorViewCtx).focus());
+        }}
+      />
+
+      <CodeLanguageChip
+        into={els.code}
+        info={code}
+        onPick={(pos, language) => {
+          run((ctx) => runCodeLanguage(pos, language, ctx));
           run((ctx) => ctx.get(editorViewCtx).focus());
         }}
       />

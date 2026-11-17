@@ -14,7 +14,8 @@ import { clipboard } from "@milkdown/plugin-clipboard";
 import { cursor, dropIndicatorConfig } from "@milkdown/plugin-cursor";
 import { history } from "@milkdown/plugin-history";
 import { listener, listenerCtx } from "@milkdown/plugin-listener";
-import { commonmark } from "@milkdown/preset-commonmark";
+import { prism } from "@milkdown/plugin-prism";
+import { commonmark, updateCodeBlockLanguageCommand } from "@milkdown/preset-commonmark";
 import { columnResizingPlugin, gfm } from "@milkdown/preset-gfm";
 import { getMarkdown } from "@milkdown/utils";
 
@@ -71,13 +72,16 @@ export function createDocsEditor({
       })
       .use(commonmark)
       .use(gfm)
-      // The gfm preset ships column resizing but does not enable it.
+      // The gfm preset ships column resizing but does not enable it, and
+      // commonmark exports this command without registering it.
       .use(columnResizingPlugin)
+      .use(updateCodeBlockLanguageCommand)
       .use(history)
       .use(listener)
       .use(clipboard)
       .use(cursor)
       .use(block)
+      .use(prism)
       .use(plugins)
       .create()
   );
