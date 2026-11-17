@@ -1,6 +1,10 @@
 // @vitest-environment jsdom
 import { editorViewCtx } from "@milkdown/core";
-import { toggleEmphasisCommand } from "@milkdown/preset-commonmark";
+import {
+  insertImageCommand,
+  toggleEmphasisCommand,
+  updateCodeBlockLanguageCommand,
+} from "@milkdown/preset-commonmark";
 import { TextSelection } from "@milkdown/prose/state";
 import { callCommand } from "@milkdown/utils";
 import { afterEach, describe, expect, it } from "vite-plus/test";
@@ -88,5 +92,46 @@ describe("docs editor round-trip", () => {
     const editor = await open('<script>alert("hi")</script>\n');
     const root = editor.action((ctx) => ctx.get(editorViewCtx).dom);
     expect(root.querySelector("script")).toBeNull();
+  });
+
+  it("pads aligned tables into one house shape", async () => {
+    const editor = await open("| A | B |\n| :- | -: |\n| 1 | 2 |\n");
+    expect(readMarkdown(editor)).toBe("| A  |  B |\n| :- | -: |\n| 1  |  2 |\n");
+  });
+
+  it("reads back an image, and its link and alt text, exactly as written", async () => {
+    const body = "![A ship in a bottle](https://example.com/ship.png)\n";
+    expect(readMarkdown(await open(body))).toBe(body);
+  });
+
+  it("sets a code block's language, which survives the round trip", async () => {
+    const editor = await open("```\nconst x = 1;\n```\n");
+    const applied = editor.action((ctx) => {
+      const view = ctx.get(editorViewCtx);
+      const $from = view.state.selection.$from;
+      let depth = 0;
+      for (let d = $from.depth; d > 0; d--) {
+        if ($from.node(d).type.name === "code_block") depth = d;
+      }
+      if (!depth) throw new Error("The cursor is not in the code block.");
+      return callCommand(updateCodeBlockLanguageCommand.key, {
+        pos: $from.before(depth),
+        language: "typescript",
+      })(ctx);
+    });
+    expect(applied).toBe(true);
+    expect(readMarkdown(editor)).toBe("```typescript\nconst x = 1;\n```\n");
+  });
+
+  it("inserts an image carrying its source and alt text", async () => {
+    const editor = await open("One.\n");
+    editor.action((ctx) => {
+      const view = ctx.get(editorViewCtx);
+      view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, 5)));
+    });
+    editor.action(
+      callCommand(insertImageCommand.key, { src: "https://x.test/a.png", alt: "A ship" }),
+    );
+    expect(readMarkdown(editor)).toBe("One.![A ship](https://x.test/a.png)\n");
   });
 });

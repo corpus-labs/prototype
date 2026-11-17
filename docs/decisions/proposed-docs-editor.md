@@ -37,3 +37,13 @@ This builds on [proposed-projects-and-docs.md](proposed-projects-and-docs.md). D
 **Decision.** The editor is used for docs pages only. Component and guideline pages keep the textarea editor until their custom blocks (Do, Dont, Preview, Callout) have editor nodes of their own. Until Phase 5 can write files, edits stay in the browser tab.
 
 **Why.** Plain Markdown proves the editor and the round-trip before the harder blocks. A save button that saves nothing would mislead people.
+
+## 6. The polish pass: vanilla plugins, reicon, and embedded images
+
+Date: November 17, 2026.
+
+**Decision.** Four more official plugins join, all vanilla and pinned at 7.22.3: `plugin-block` (the drag gutter), `plugin-cursor` (drop and gap cursors), `plugin-upload` (paste and drop of images), and `plugin-prism` (code highlighting through refractor). None brings Vue, CodeMirror, or KaTeX, so decision 1 stands. Editor icons come from reicon (`reicon-react`, outline weight) through one `icons.tsx` module; headings and strikethrough are drawn as type, because reicon has no glyphs for them. Images pasted or dropped are shrunk to a 1600px edge, re-encoded, and embedded as data URLs, refused over 1.5 MB. Tables get a floating bar (rows, columns, header row, alignment, delete) and column resizing, which the gfm preset ships but does not enable. Code blocks get a language chip; commonmark exports `updateCodeBlockLanguageCommand` without registering it, so the editor registers it.
+
+**Why.** Each plugin is the plain prose plugin Crepe wraps with its own UI. Wrapping them ourselves keeps the toolbar, menus, and bars in shadcn and the theme tokens. Data URLs keep the editor fully working in the tab until Phase 5, where the uploader is the single swap point for writing files to the repository.
+
+**Consequence.** The editor chunk grows by refractor, which registers 62 languages; it stays lazy-loaded. Reicon's ellipsis turned upright serves as the grip. Two floats (the block gutter and the table bar) hide by visibility rather than display, because their plugins measure them while still hidden, and a `display:none` box has no offset parent.
