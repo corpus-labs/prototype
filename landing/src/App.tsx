@@ -100,7 +100,7 @@ function Hero() {
             width={2560}
             height={1450}
             address="demo.corpus.app"
-            alt="Corpus listing three projects: the Charged UI design system, a web team handbook, and a customer help center, each with a preview, its requests this week, and the questions that had no answer"
+            alt="Corpus with three projects side by side: the Charged UI design system, a web team handbook, and a customer help center, each showing questions asked this week and the ones with no answer"
           />
           <Callout className="top-[60%] -left-6">
             <p className="text-[13px] text-muted">“How long do refunds take?”</p>
@@ -391,7 +391,7 @@ function Publishing() {
           width={2560}
           height={1600}
           address="demo.corpus.app/#site-help"
-          alt="A published help center for Acme, Inc: one field to search or ask, with an answer to “How long do refunds take?” that links the Refunds page it came from, above articles grouped by topic and common questions"
+          alt="A published help center for Acme, Inc: a search box, articles grouped by topic, and a support bot that answers from the same pages"
           className="mt-12"
         />
       </div>
