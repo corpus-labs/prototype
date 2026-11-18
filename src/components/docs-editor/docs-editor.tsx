@@ -36,7 +36,6 @@ import "@milkdown/prose/gapcursor/style/gapcursor.css";
 import "./editor.css";
 
 import { relativeLink } from "@core/markdown/links";
-import { cn } from "@/lib/utils";
 import { CodeLanguageChip, codeAid, runCodeLanguage, type CodeInfo } from "./code-block";
 import { embedImages, ImageForm } from "./image-form";
 import { LinkCard, type LinkCardInfo } from "./link-card";
@@ -49,29 +48,24 @@ import {
   type BlockAction,
 } from "./block-handle";
 import {
-  BoldIcon,
   CodeBlockIcon,
-  CodeIcon,
   DividerIcon,
   FileTextIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
   ImageIcon,
-  ItalicIcon,
-  LinkIcon,
   BulletListIcon,
   OrderedListIcon,
   TaskListIcon,
   QuoteIcon,
-  StrikeIcon,
   TableIcon,
   TextIcon,
 } from "./icons";
 import { BlockMenu, LinkForm, MenuList, type Block, type LinkTarget } from "./menus";
 import { createDocsEditor } from "./milkdown";
 import { TableMenu, runTableAction, tableAid, type TableInfo } from "./table-menu";
-import { EMPTY_TOOLBAR, EditorToolbar, type ToolbarAction, type ToolbarState } from "./toolbar";
+import { EMPTY_TOOLBAR, SelectionBar, type ToolbarAction, type ToolbarState } from "./toolbar";
 
 type Menu = { kind: "slash" | "page"; query: string; from: number; to: number } | null;
 type Marks = {
@@ -805,7 +799,7 @@ export function DocsEditor({
     setLinking(true);
   };
 
-  // The formatting bar's buttons, mapped to Milkdown commands.
+  // The selection menu's and the block menus' actions, mapped to Milkdown commands.
   const act = (action: ToolbarAction) => {
     const toggleList = (kind: "bullet" | "ordered", wrap: typeof wrapInBulletListCommand.key) =>
       run((ctx) => {
@@ -900,7 +894,6 @@ export function DocsEditor({
 
   return (
     <>
-      <EditorToolbar state={toolbar} onAction={act} className="sticky top-14 z-10 mb-6 md:top-14" />
       <div
         className="relative"
         onMouseOver={(e) => {
@@ -984,48 +977,11 @@ export function DocsEditor({
             }}
           />
         ) : (
-          <div
-            role="toolbar"
-            aria-label="Format"
-            className="flex items-center gap-0.5 rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10"
-          >
-            {(
-              [
-                ["Bold", BoldIcon, marks.strong, () => run(callCommand(toggleStrongCommand.key))],
-                [
-                  "Italic",
-                  ItalicIcon,
-                  marks.emphasis,
-                  () => run(callCommand(toggleEmphasisCommand.key)),
-                ],
-                [
-                  "Strikethrough",
-                  StrikeIcon,
-                  marks.strike,
-                  () => run(callCommand(toggleStrikethroughCommand.key)),
-                ],
-                ["Code", CodeIcon, marks.code, () => run(callCommand(toggleInlineCodeCommand.key))],
-                ["Link", LinkIcon, !!marks.link, () => setLinking(true)],
-              ] as const
-            ).map(([label, Icon, on, action]) => (
-              <button
-                key={label}
-                type="button"
-                aria-label={label}
-                aria-pressed={on}
-                title={label}
-                // Keep the editor's selection while clicking.
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={action}
-                className={cn(
-                  "flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors outline-none hover:bg-sidebar-accent hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-4",
-                  on && "bg-sidebar-accent text-foreground",
-                )}
-              >
-                <Icon />
-              </button>
-            ))}
-          </div>
+          <SelectionBar
+            state={toolbar}
+            onAction={act}
+            editorElement={() => host.current?.querySelector<HTMLElement>(".ProseMirror") ?? null}
+          />
         ),
         els.toolbar,
       )}

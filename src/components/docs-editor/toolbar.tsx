@@ -5,6 +5,8 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -17,21 +19,16 @@ import {
   ChevronDownIcon,
   CodeBlockIcon,
   CodeIcon,
-  DividerIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
-  ImagePlusIcon,
   ItalicIcon,
   LinkIcon,
   OrderedListIcon,
   QuoteIcon,
-  RedoIcon,
   StrikeIcon,
-  TableIcon,
   TaskListIcon,
   TextIcon,
-  UndoIcon,
 } from "./icons";
 
 /** What the cursor is in right now, so every control can show its state. */
@@ -104,6 +101,7 @@ function Tool({
   icon: Icon,
   on = false,
   disabled = false,
+  small = false,
   onAction,
 }: {
   label: string;
@@ -111,6 +109,8 @@ function Tool({
   icon: React.ComponentType<{ className?: string }>;
   on?: boolean;
   disabled?: boolean;
+  /** The selection menu's tighter size. */
+  small?: boolean;
   onAction: () => void;
 }) {
   return (
@@ -124,7 +124,8 @@ function Tool({
       onMouseDown={(e) => e.preventDefault()}
       onClick={onAction}
       className={cn(
-        "flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-35 [&_svg]:size-4",
+        "flex shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-35 [&_svg]:size-4",
+        small ? "size-7" : "size-8",
         on && "bg-accent text-foreground",
       )}
     >
@@ -137,57 +138,97 @@ function Divider() {
   return <span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-border" />;
 }
 
+/** What a block can be turned into from the selection menu, in the order Notion lists them. */
+const TURN_INTO: {
+  id: ToolbarAction;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  keys?: string;
+  on: (s: ToolbarState) => boolean;
+}[] = [
+  ...BLOCK_TYPES.map((b) => ({
+    id: b.id,
+    label: b.label,
+    icon: b.icon,
+    keys: b.keys,
+    on: (s: ToolbarState) => s.block === b.id && !s.list && !s.quote,
+  })),
+  {
+    id: "bullet",
+    label: "Bulleted list",
+    icon: BulletListIcon,
+    keys: `${MOD}${ALT}8`,
+    on: (s) => s.list === "bullet",
+  },
+  {
+    id: "ordered",
+    label: "Numbered list",
+    icon: OrderedListIcon,
+    keys: `${MOD}${ALT}7`,
+    on: (s) => s.list === "ordered",
+  },
+  { id: "task", label: "To-do list", icon: TaskListIcon, on: (s) => s.list === "task" },
+  { id: "quote", label: "Quote", icon: QuoteIcon, keys: `${MOD}⇧B`, on: (s) => s.quote },
+  {
+    id: "codeBlock",
+    label: "Code block",
+    icon: CodeBlockIcon,
+    keys: `${MOD}${ALT}C`,
+    on: (s) => s.block === "code",
+  },
+];
+
 /**
- * The editor's formatting bar, pinned under the app's top bar while the page scrolls:
- * block type, text marks, lists and blocks, then undo and redo.
+ * The menu over selected text, the way Notion's works: what the block is, which can be
+ * turned into another kind, then the text marks. Blocks are added with the slash menu
+ * and the gutter beside each block, so the page needs no fixed toolbar.
  */
-export function EditorToolbar({
+export function SelectionBar({
   state,
   onAction,
-  className,
+  editorElement,
 }: {
   state: ToolbarState;
   onAction: (action: ToolbarAction) => void;
-  className?: string;
+  /** The editable text, which gets focus back when the menu closes. */
+  editorElement: () => HTMLElement | null;
 }) {
-  const current = BLOCK_TYPES.find((b) => b.id === state.block);
-  const blockLabel = current?.label ?? (state.block === "code" ? "Code" : "Text");
+  const current = TURN_INTO.find((t) => t.on(state));
+  const blockLabel = current?.label ?? "Text";
   const inCode = state.block === "code";
   return (
     <div
       role="toolbar"
-      aria-label="Formatting"
-      className={cn(
-        "flex items-center gap-0.5 overflow-x-auto rounded-xl border bg-background/95 p-1 shadow-xs backdrop-blur-md [scrollbar-width:none]",
-        className,
-      )}
+      aria-label="Format"
+      className="flex items-center gap-0.5 rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10"
     >
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
             <button
               type="button"
+              // Keep the editor's selection while the menu opens.
               onMouseDown={(e) => e.preventDefault()}
-              className="flex h-8 w-[124px] shrink-0 items-center gap-2 rounded-md px-2.5 text-sm outline-none hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-accent"
-              aria-label={`Block type: ${blockLabel}`}
+              className="flex h-7 shrink-0 items-center gap-1.5 rounded-md px-2 text-sm whitespace-nowrap outline-none hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-accent"
+              aria-label={`Turn into, now ${blockLabel}`}
             />
           }
         >
-          <span className="flex-1 truncate text-left">{blockLabel}</span>
+          {blockLabel}
           <ChevronDownIcon className="size-3.5 text-muted-foreground" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-52">
+        {/* Closing hands focus back to the text, so typing carries on in the new block. */}
+        <DropdownMenuContent align="start" className="w-56" finalFocus={editorElement}>
           <DropdownMenuGroup>
-            {BLOCK_TYPES.map((b) => (
-              <DropdownMenuItem key={b.id} onClick={() => onAction(b.id)}>
-                <b.icon />
-                {b.label}
-                {state.block === b.id ? (
-                  <CheckIcon className="ml-auto" />
-                ) : (
-                  <DropdownMenuShortcut>{b.keys}</DropdownMenuShortcut>
-                )}
-              </DropdownMenuItem>
+            <DropdownMenuLabel>Turn into</DropdownMenuLabel>
+            {TURN_INTO.slice(0, 4).map((t) => (
+              <TurnIntoItem key={t.id} item={t} on={t.on(state)} onAction={onAction} />
+            ))}
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            {TURN_INTO.slice(4).map((t) => (
+              <TurnIntoItem key={t.id} item={t} on={t.on(state)} onAction={onAction} />
             ))}
           </DropdownMenuGroup>
         </DropdownMenuContent>
@@ -195,6 +236,7 @@ export function EditorToolbar({
 
       <Divider />
       <Tool
+        small
         label="Bold"
         keys={`${MOD}B`}
         icon={BoldIcon}
@@ -203,6 +245,7 @@ export function EditorToolbar({
         onAction={() => onAction("strong")}
       />
       <Tool
+        small
         label="Italic"
         keys={`${MOD}I`}
         icon={ItalicIcon}
@@ -211,6 +254,7 @@ export function EditorToolbar({
         onAction={() => onAction("emphasis")}
       />
       <Tool
+        small
         label="Strikethrough"
         keys={`${MOD}${ALT}X`}
         icon={StrikeIcon}
@@ -219,6 +263,7 @@ export function EditorToolbar({
         onAction={() => onAction("strike")}
       />
       <Tool
+        small
         label="Inline code"
         keys={`${MOD}E`}
         icon={CodeIcon}
@@ -227,6 +272,7 @@ export function EditorToolbar({
         onAction={() => onAction("code")}
       />
       <Tool
+        small
         label="Link"
         keys={`${MOD}K`}
         icon={LinkIcon}
@@ -234,61 +280,28 @@ export function EditorToolbar({
         disabled={inCode}
         onAction={() => onAction("link")}
       />
-
-      <Divider />
-      <Tool
-        label="Bulleted list"
-        keys={`${MOD}${ALT}8`}
-        icon={BulletListIcon}
-        on={state.list === "bullet"}
-        onAction={() => onAction("bullet")}
-      />
-      <Tool
-        label="Numbered list"
-        keys={`${MOD}${ALT}7`}
-        icon={OrderedListIcon}
-        on={state.list === "ordered"}
-        onAction={() => onAction("ordered")}
-      />
-      <Tool
-        label="To-do list"
-        icon={TaskListIcon}
-        on={state.list === "task"}
-        onAction={() => onAction("task")}
-      />
-      <Tool
-        label="Quote"
-        keys={`${MOD}⇧B`}
-        icon={QuoteIcon}
-        on={state.quote}
-        onAction={() => onAction("quote")}
-      />
-      <Tool
-        label="Code block"
-        keys={`${MOD}${ALT}C`}
-        icon={CodeBlockIcon}
-        on={inCode}
-        onAction={() => onAction("codeBlock")}
-      />
-      <Tool label="Divider" icon={DividerIcon} onAction={() => onAction("divider")} />
-      <Tool label="Table" icon={TableIcon} onAction={() => onAction("table")} />
-      <Tool label="Image" icon={ImagePlusIcon} onAction={() => onAction("image")} />
-
-      <Divider />
-      <Tool
-        label="Undo"
-        keys={`${MOD}Z`}
-        icon={UndoIcon}
-        disabled={!state.canUndo}
-        onAction={() => onAction("undo")}
-      />
-      <Tool
-        label="Redo"
-        keys={`${MOD}Y`}
-        icon={RedoIcon}
-        disabled={!state.canRedo}
-        onAction={() => onAction("redo")}
-      />
     </div>
+  );
+}
+
+function TurnIntoItem({
+  item,
+  on,
+  onAction,
+}: {
+  item: (typeof TURN_INTO)[number];
+  on: boolean;
+  onAction: (action: ToolbarAction) => void;
+}) {
+  return (
+    <DropdownMenuItem onClick={() => onAction(item.id)}>
+      <item.icon />
+      {item.label}
+      {on ? (
+        <CheckIcon className="ml-auto" />
+      ) : (
+        item.keys && <DropdownMenuShortcut>{item.keys}</DropdownMenuShortcut>
+      )}
+    </DropdownMenuItem>
   );
 }

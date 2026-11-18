@@ -53,6 +53,14 @@
     @apply ring-3 ring-ring/50;
   }
 
+  /*
+    As in Notion, the space under the last block is still the page: a click there
+    lands in the editor and puts the cursor at the end, ready to keep writing.
+  */
+  .docs-prose.ProseMirror {
+    @apply min-h-[40svh] pb-[20svh];
+  }
+
   /* The editor's own text selections and caret, in theme tokens. */
   .docs-prose {
     caret-color: var(--foreground);
