@@ -1,24 +1,33 @@
 import * as React from "react";
-import { CheckIcon, InfoIcon, PenLineIcon, XIcon } from "lucide-react";
+import { CheckIcon, FileCodeIcon, InfoIcon, XIcon } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 import { CButton, CuiScope } from "@/components/charged-ui";
 import {
   AgentPane,
   CodeBlock,
   DocSection,
+  Dot,
   Facts,
   PageHeader,
   ReaderSwitch,
+  linkClass,
   proseClass,
   useEffectiveReader,
   type Hover,
 } from "@/components/common";
 import { guidelineFiles, questions, workspace } from "@/data/workspace";
 import { guideLines } from "@/lib/agent-format";
+import {
+  joinFrontmatter,
+  readField,
+  splitFrontmatter,
+  writeField,
+} from "@core/markdown/frontmatter";
 import { Inline, parseMdx, sectionize, type Block } from "@/lib/mdx-lite";
-import { navigate } from "@/lib/router";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -156,7 +165,7 @@ export function GuidelinesIndex() {
   const rows = useGuideSummaries();
   const used = rows.filter((r) => r.asks > 0);
   const asks = used.reduce((n, r) => n + r.asks, 0);
-  const cols = "md:grid-cols-[minmax(0,1fr)_8rem_7rem_4.5rem]";
+  const cols = "md:grid-cols-[minmax(0,1fr)_8rem_7rem]";
   return (
     <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-10">
       <PageHeader
@@ -172,7 +181,6 @@ export function GuidelinesIndex() {
           <span>Guideline</span>
           <span>Answered</span>
           <span>Updated</span>
-          <span />
         </div>
         <ul className="divide-y border-y">
           {rows.map(({ g, headings, examples, asks }) => (
@@ -217,12 +225,6 @@ export function GuidelinesIndex() {
                 )}
               </p>
               <p className="text-sm text-muted-foreground max-md:hidden md:pt-1">{g.updated}</p>
-              <div className="col-start-2 row-start-2 md:col-start-auto md:row-start-auto md:justify-self-end">
-                <Button variant="outline" size="sm" onClick={() => navigate(`edit-${g.id}`)}>
-                  <PenLineIcon />
-                  Edit
-                </Button>
-              </div>
             </li>
           ))}
         </ul>
@@ -231,18 +233,88 @@ export function GuidelinesIndex() {
   );
 }
 
+const DocsEditor = React.lazy(() =>
+  import("@/components/docs-editor/docs-editor").then((m) => ({ default: m.DocsEditor })),
+);
+
+/**
+ * A guideline, always editable, in the same editor as docs pages. Its Do, Don't, and
+ * Callout blocks show as cards with their own forms. The file is in the repository, so
+ * changes wait as "not committed" until Commit, through the prototype's simulated commit.
+ */
 export function GuideReader({ id }: { id: string }) {
-  const { reader, setReader, saved } = useStore();
+  const { reader, setReader, files, saved, setFile, commit } = useStore();
   const mode = useEffectiveReader(reader);
-  const [hover, setHover] = React.useState<Hover>({ key: null, from: null });
+  const [source, setSource] = React.useState(false);
+  // The rich editor loads its text once. Discard and Undo replace it from outside, so they remount it.
+  const [revision, setRevision] = React.useState(0);
   const g = guidelineFiles.find((x) => x.id === id);
   if (!g) return <p className="p-8 text-sm text-muted-foreground">That guideline doesn’t exist.</p>;
-  const body = saved[id] ?? g.body;
-  const lines = guideLines(body);
+
+  const original = saved[id] ?? g.body;
+  const text = files[id] ?? original;
+  const { lines: front, body } = splitFrontmatter(text);
+  const title = readField(front, "title") ?? g.title;
+  const description = readField(front, "description") ?? g.description;
+  const changed = text !== original;
+  const setBody = (next: string) => setFile(id, joinFrontmatter({ lines: front, body: next }));
+  const setMeta = (key: "title" | "description", value: string) =>
+    setFile(id, joinFrontmatter({ lines: writeField(front, key, value), body }));
+  const lines = guideLines(text);
   const request = (
     <>
       <span className="text-muted-foreground">GET</span> {workspace.site}/guidelines/{g.id}.md
     </>
+  );
+
+  const discard = () => {
+    const kept = text;
+    setFile(id, original);
+    setRevision((r) => r + 1);
+    const toastId = toast.add({
+      title: "Changes discarded",
+      description: `${g.path} matches the last commit again.`,
+      actionProps: {
+        children: "Undo",
+        onClick: () => {
+          setFile(id, kept);
+          setRevision((r) => r + 1);
+          toast.close(toastId);
+        },
+      },
+    });
+  };
+  const commitNow = () => {
+    const c = commit({ fileId: id, message: `Update ${title}`, mode: "main" });
+    toast.add({
+      title: "Committed to main",
+      description: `${c.sha}: Update ${title}. Agents get it on their next request.`,
+    });
+  };
+
+  // The same quiet hover as a sidebar row, so the title and description read as fields.
+  const field =
+    "-mx-2 w-[calc(100%+1rem)] rounded-md bg-transparent px-2 outline-none transition-colors hover:bg-muted/60 focus:bg-transparent";
+
+  const editor = source ? (
+    <Textarea
+      value={body}
+      onChange={(e) => setBody(e.target.value)}
+      spellCheck={false}
+      aria-label={`${g.path} source`}
+      className="min-h-[50svh] w-full max-w-[72ch] resize-y rounded-none border-0 bg-transparent p-0 font-mono text-[13px] leading-6 shadow-none focus-visible:ring-0 dark:bg-transparent"
+    />
+  ) : (
+    <React.Suspense fallback={<p className="text-sm text-muted-foreground">Loading the page…</p>}>
+      <DocsEditor
+        key={`${id}-${revision}`}
+        value={body}
+        onChange={setBody}
+        pagePath={g.path}
+        pages={guidelineFiles.map((x) => ({ title: x.title, path: x.path, folder: "Guidelines" }))}
+        mdx
+      />
+    </React.Suspense>
   );
 
   return (
@@ -252,29 +324,79 @@ export function GuideReader({ id }: { id: string }) {
         mode === "split" ? "max-w-[1480px]" : "max-w-[1120px]",
       )}
     >
-      <PageHeader
-        title={g.title}
-        description={g.description}
-        actions={
-          <>
+      <header className="grid gap-6">
+        <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between md:gap-10">
+          <div className="max-w-[72ch] min-w-0 flex-1">
+            <input
+              value={title}
+              onChange={(e) => setMeta("title", e.target.value)}
+              aria-label="Title"
+              placeholder="Untitled"
+              className={cn(
+                field,
+                "text-[28px] leading-tight font-semibold tracking-[-0.03em] placeholder:text-muted-foreground/50 md:text-[32px]",
+              )}
+            />
+            <input
+              value={description}
+              onChange={(e) => setMeta("description", e.target.value)}
+              aria-label="Description"
+              placeholder="Add a one-line description"
+              className={cn(
+                field,
+                "mt-1 py-0.5 text-base leading-relaxed text-foreground/75 placeholder:text-muted-foreground/60 md:text-[17px]",
+              )}
+            />
+          </div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2 md:pt-1.5">
             <ReaderSwitch value={reader} onChange={setReader} />
-            <Button variant="outline" size="sm" onClick={() => navigate(`edit-${g.id}`)}>
-              <PenLineIcon />
-              Edit
-            </Button>
-          </>
-        }
-        meta={
-          <Facts
-            items={[
-              ["File", <code className="font-mono text-[13px]">{g.path}</code>],
-              ["Updated", g.updated],
-            ]}
-          />
-        }
-      />
+            {mode !== "agents" && (
+              <Button
+                variant="outline"
+                size="sm"
+                aria-pressed={source}
+                className="aria-pressed:bg-muted"
+                onClick={() => setSource((s) => !s)}
+              >
+                <FileCodeIcon />
+                Markdown
+              </Button>
+            )}
+          </div>
+        </div>
+        <Facts
+          items={[
+            ["File", <code className="font-mono text-[13px]">{g.path}</code>],
+            changed
+              ? [
+                  "Status",
+                  <span className="flex items-baseline gap-3">
+                    <Dot tone="warn" className="text-warn">
+                      Not committed
+                    </Dot>
+                    <button
+                      type="button"
+                      onClick={commitNow}
+                      className={cn(linkClass, "font-normal")}
+                    >
+                      Commit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={discard}
+                      className={cn(linkClass, "font-normal")}
+                    >
+                      Discard
+                    </button>
+                  </span>,
+                ]
+              : ["Updated", g.updated],
+          ]}
+        />
+      </header>
+
       <div className="mt-10">
-        {mode === "people" && <MdxPeople body={body} />}
+        {mode === "people" && editor}
         {mode === "agents" && (
           <div className="grid gap-3">
             <p className="max-w-[68ch] text-sm text-muted-foreground">
@@ -285,15 +407,14 @@ export function GuideReader({ id }: { id: string }) {
           </div>
         )}
         {mode === "split" && (
+          // Type on the left and the agent's copy updates on the right, word for word.
           <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] gap-8">
-            <MdxPeople body={body} hover={hover} onHover={setHover} />
+            <div className="min-w-0">{editor}</div>
             <div className="min-w-0">
               <AgentPane
                 className="sticky top-16 max-h-[calc(100svh-5.5rem)]"
                 request={request}
                 lines={lines}
-                hover={hover}
-                onHover={setHover}
               />
             </div>
           </div>
