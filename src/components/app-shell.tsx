@@ -77,7 +77,7 @@ import {
 } from "@/components/ui/sidebar";
 import { toast } from "@/components/ui/toast";
 import { copyText } from "@/components/common";
-import { CorpusLogo, CorpusMark } from "@/components/corpus-logo";
+import { CorpusMark } from "@/components/corpus-logo";
 import {
   components,
   docsProjectOf,
@@ -144,74 +144,97 @@ const MOD_KEY =
     ? "⌘"
     : "Ctrl ";
 
+/** The project menu's contents: switch projects, go to all of them, or to this project's setup. */
+function ProjectMenuItems({ current }: { current: ProjectSummary | null }) {
+  const projects = useProjects();
+  const { setOpenMobile } = useSidebar();
+  const go = (route: string) => {
+    setOpenMobile(false);
+    navigate(route);
+  };
+  return (
+    <>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Projects</DropdownMenuLabel>
+        {projects.map((p) => (
+          <DropdownMenuItem key={p.id} onClick={() => go(p.home)}>
+            <span className="grid min-w-0 leading-tight">
+              <span className="truncate">{p.name}</span>
+              <span className="truncate text-xs text-muted-foreground">{KIND_LABEL[p.kind]}</span>
+            </span>
+            {p.id === current?.id && <CheckIcon className="ml-auto" />}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onClick={() => go("projects")}>
+        <LayoutGridIcon />
+        All projects
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => go("plugins")}>
+        <PlugIcon />
+        Plugins
+      </DropdownMenuItem>
+      {current?.kind === "design-system" && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => go("workspace")}>
+            <Settings2Icon />
+            Project settings
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => go("integrations")}>
+            <BlocksIcon />
+            Integrations
+          </DropdownMenuItem>
+        </>
+      )}
+    </>
+  );
+}
+
 /**
- * The current project’s name, which opens a menu to switch projects or go to
- * all of them. In the desktop breadcrumb it looks like any other crumb plus a
- * chevron. On phones it’s the page title.
+ * Where you are, at the top of the sidebar: the Corpus mark, then the current project's
+ * name and kind. It opens the project menu. On the dashboard it reads "All projects".
  */
-function ProjectMenu({
-  variant,
-  current,
-}: {
-  variant: "crumb" | "title";
-  current: ProjectSummary;
-}) {
-  const title = variant === "title";
+function ProjectSwitcher({ current }: { current: ProjectSummary | null }) {
   const projects = useProjects();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={cn(
-          // The same hover grey as the sidebar items. It stays while the menu is open.
-          "group/workspace flex min-w-0 items-center gap-1 rounded-md px-1.5 transition-colors outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground",
-          // Negative margins keep the name where the text sits, so only the grey reaches past it.
-          title ? "-ml-1.5 h-9 text-[15px] font-semibold tracking-tight" : "-mx-1.5 h-7",
-        )}
+        render={
+          <SidebarMenuButton
+            size="lg"
+            className="data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground"
+          />
+        }
       >
+        <CorpusMark className="size-5!" />
+        <span className="grid min-w-0 flex-1 text-left leading-tight">
+          <span className="truncate text-sm font-semibold">{current?.name ?? "All projects"}</span>
+          <span className="truncate text-xs text-muted-foreground">
+            {current ? KIND_LABEL[current.kind] : `${projects.length} projects`}
+          </span>
+        </span>
+        <ChevronsUpDownIcon className="ml-auto text-muted-foreground" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="min-w-60" align="start" sideOffset={6}>
+        <ProjectMenuItems current={current} />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** On phones there's no sidebar, so the project's name is the page title and opens the same menu. */
+function ProjectMenu({ current }: { current: ProjectSummary }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger className="group/workspace -ml-1.5 flex h-9 min-w-0 items-center gap-1 rounded-md px-1.5 text-[15px] font-semibold tracking-tight transition-colors outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground">
         <span className="truncate">{current.name}</span>
-        <ChevronDownIcon
-          className={cn(
-            "shrink-0 transition-transform duration-200 group-data-popup-open/workspace:rotate-180",
-            title ? "size-4 text-muted-foreground" : "size-3.5",
-          )}
-        />
+        <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-popup-open/workspace:rotate-180" />
       </DropdownMenuTrigger>
       {/* Offsets line the menu’s text up with the name above it. */}
-      <DropdownMenuContent
-        className="min-w-56"
-        align="start"
-        alignOffset={-4}
-        sideOffset={title ? 4 : 6}
-      >
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>Projects</DropdownMenuLabel>
-          {projects.map((p) => (
-            <DropdownMenuItem key={p.id} onClick={() => navigate(p.home)}>
-              <span className="grid min-w-0 leading-tight">
-                <span className="truncate">{p.name}</span>
-                <span className="truncate text-xs text-muted-foreground">{KIND_LABEL[p.kind]}</span>
-              </span>
-              {p.id === current.id && <CheckIcon className="ml-auto" />}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate("projects")}>
-          <LayoutGridIcon />
-          All projects
-        </DropdownMenuItem>
-        {current.kind === "design-system" && (
-          <>
-            <DropdownMenuItem onClick={() => navigate("workspace")}>
-              <Settings2Icon />
-              Project settings
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("integrations")}>
-              <BlocksIcon />
-              Integrations
-            </DropdownMenuItem>
-          </>
-        )}
+      <DropdownMenuContent className="min-w-56" align="start" alignOffset={-4} sideOffset={4}>
+        <ProjectMenuItems current={current} />
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -232,11 +255,9 @@ export const KIND_ICON: Record<ProjectKind, React.ComponentType<{ className?: st
 function crumbs(route: string): { label: string; route?: string }[] {
   const docs = docsProjectOf(route);
   if (docs) {
-    if (route === docs.id) return [{ label: "Pages" }];
-    return [
-      { label: "Pages", route: docs.id },
-      { label: docs.pages.find((p) => `${docs.id}-${p.id}` === route)?.title ?? "" },
-    ];
+    if (route === docs.id) return [{ label: "Overview" }];
+    const page = docs.pages.find((p) => `${docs.id}-${p.id}` === route);
+    return [{ label: page?.folder ?? "Pages" }, { label: page?.title ?? "" }];
   }
   const section = sectionOf(route);
   const label = [...NAV, ...SETUP].find((n) => n.key === section)?.label ?? "Overview";
@@ -323,21 +344,16 @@ function AppSidebar({ route }: { route: string }) {
   );
 
   const project = projectOf(route);
+  const current = useCurrentProject(route);
   const docs = docsProjectOf(route);
 
   return (
-    <Sidebar variant="inset" collapsible="icon">
+    <Sidebar collapsible="icon">
       <SidebarHeader>
-        <a
-          href="#projects"
-          aria-label="All projects"
-          onClick={() => setOpenMobile(false)}
-          className="flex h-9 items-center rounded-md px-2 text-sidebar-foreground outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:px-1.5"
-        >
-          <CorpusLogo className="h-5 group-data-[collapsible=icon]:hidden" />
-          <CorpusMark className="hidden size-5 group-data-[collapsible=icon]:block" />
-        </a>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <ProjectSwitcher current={current} />
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Search"
@@ -361,7 +377,6 @@ function AppSidebar({ route }: { route: string }) {
         {project === "charged-ui" && (
           <>
             <SidebarGroup>
-              <SidebarGroupLabel>Design system</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>{NAV.map(item)}</SidebarMenu>
               </SidebarGroupContent>
@@ -472,7 +487,6 @@ function DocsNav({ project, route }: { project: DocsProject; route: string }) {
   return (
     <>
       <SidebarGroup>
-        <SidebarGroupLabel>{KIND_LABEL[project.kind]}</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
@@ -531,8 +545,9 @@ function ThemeToggle({ className }: { className?: string }) {
 
 function DesktopTopbar({ route }: { route: string }) {
   const { setCommandOpen } = useStore();
+  const { state } = useSidebar();
   const project = useCurrentProject(route);
-  const trail = project ? crumbs(route) : [];
+  const trail = project ? crumbs(route) : [{ label: route === "plugins" ? "Plugins" : "Projects" }];
   return (
     <header className="sticky top-0 z-20 hidden h-12 shrink-0 items-center gap-2 border-b bg-background/85 px-3 backdrop-blur-md md:flex">
       <SidebarTrigger className="text-muted-foreground" />
@@ -541,17 +556,11 @@ function DesktopTopbar({ route }: { route: string }) {
       {/* One line at any width: long crumbs truncate instead of wrapping out of the bar. */}
       <Breadcrumb className="min-w-0">
         <BreadcrumbList className="flex-nowrap gap-2">
-          <BreadcrumbItem className="min-w-0 shrink-0">
-            {project ? (
-              <ProjectMenu variant="crumb" current={project} />
-            ) : (
-              <BreadcrumbPage>{route === "plugins" ? "Plugins" : "Projects"}</BreadcrumbPage>
-            )}
-          </BreadcrumbItem>
           {trail.map((c, i) => (
             <React.Fragment key={i}>
-              {/* Slashes, so the workspace chevron is the only one in the trail. */}
-              <BreadcrumbSeparator className="text-muted-foreground/50">/</BreadcrumbSeparator>
+              {i > 0 && (
+                <BreadcrumbSeparator className="text-muted-foreground/50">/</BreadcrumbSeparator>
+              )}
               <BreadcrumbItem className="min-w-0">
                 {c.route && i < trail.length - 1 ? (
                   <BreadcrumbLink href={`#${c.route}`} className="truncate">
@@ -566,18 +575,18 @@ function DesktopTopbar({ route }: { route: string }) {
         </BreadcrumbList>
       </Breadcrumb>
       <div className="ml-auto flex shrink-0 items-center gap-1">
-        {/* Icon only until there’s room for the full field. */}
-        <Button
-          variant="outline"
-          size="sm"
-          aria-label="Search everything"
-          className="w-8 gap-2 px-0 text-muted-foreground lg:w-56 lg:justify-start lg:px-2.5"
-          onClick={() => setCommandOpen(true)}
-        >
-          <SearchIcon />
-          <span className="hidden lg:inline">Search everything</span>
-          <Kbd className="ml-auto hidden lg:inline-flex">{MOD_KEY}K</Kbd>
-        </Button>
+        {/* Search lives in the sidebar. With the sidebar collapsed, it's here. */}
+        {state === "collapsed" && (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Search everything"
+            className="text-muted-foreground"
+            onClick={() => setCommandOpen(true)}
+          >
+            <SearchIcon />
+          </Button>
+        )}
         <ThemeToggle />
       </div>
     </header>
@@ -597,7 +606,7 @@ function MobileTopbar({ route }: { route: string }) {
         <CorpusMark className="size-5" />
       </a>
       {project ? (
-        <ProjectMenu variant="title" current={project} />
+        <ProjectMenu current={project} />
       ) : (
         <span className="text-[15px] font-semibold tracking-tight">
           {route === "plugins" ? "Plugins" : "Projects"}
@@ -913,14 +922,8 @@ export function AppShell({ route, children }: { route: string; children: React.R
   return (
     <SidebarProvider>
       <AppSidebar route={route} />
-      {/*
-        On desktop the content is a panel on the tinted canvas, like an app window, and scrolls on its own.
-        It runs off the bottom of the screen, so only the top corners are rounded and text never meets a curve.
-      */}
-      <SidebarInset
-        data-scroll-root
-        className="min-w-0 md:h-[calc(100svh-0.5rem)] md:overflow-y-auto md:ring-1 md:ring-black/[0.06] md:peer-data-[variant=inset]:mb-0 md:peer-data-[variant=inset]:rounded-b-none md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0 dark:md:ring-white/[0.08]"
-      >
+      {/* On desktop the page sits flat beside the sidebar, split by one rule, and scrolls on its own. */}
+      <SidebarInset data-scroll-root className="min-w-0 md:h-svh md:overflow-y-auto">
         <DesktopTopbar route={route} />
         <MobileTopbar route={route} />
         <div className="flex-1 pb-24 md:pb-12">{children}</div>

@@ -1,13 +1,5 @@
 import * as React from "react";
-import {
-  BlocksIcon,
-  BookImageIcon,
-  BoxesIcon,
-  FileInputIcon,
-  GitBranchIcon,
-  PaletteIcon,
-  RefreshCwIcon,
-} from "lucide-react";
+import { RefreshCwIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,15 +11,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemGroup,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -38,13 +21,13 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
-import { Dot, PageHeader, Section } from "@/components/common";
+import { Dot, PageHeader } from "@/components/common";
 import { workspace } from "@/data/workspace";
 
 function State({ s }: { s: "connected" | "available" | "planned" }) {
   if (s === "connected")
     return (
-      <Dot tone="good" className="text-sm font-normal text-muted-foreground">
+      <Dot tone="good" className="text-sm">
         Connected
       </Dot>
     );
@@ -54,9 +37,6 @@ function State({ s }: { s: "connected" | "available" | "planned" }) {
     </span>
   );
 }
-
-/** Integrations are rows in a divided list, not separate cards. */
-const ROW = "rounded-none px-0 py-4";
 
 function useFakeTask(ms = 900) {
   const [busy, setBusy] = React.useState(false);
@@ -243,6 +223,43 @@ function MintlifyImport({
   );
 }
 
+/**
+ * One kind of source, named once on the left, with its integrations as rows beside it.
+ * The page is a single ruled index, so state and actions each line up in their own column.
+ */
+function Group({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section aria-label={title} className="grid gap-x-6 sm:grid-cols-[10rem_minmax(0,1fr)]">
+      <h2 className="pt-5 text-sm font-medium sm:py-[1.15rem]">{title}</h2>
+      <ul className="divide-y">{children}</ul>
+    </section>
+  );
+}
+
+function Row({
+  name,
+  state,
+  action,
+  children,
+}: {
+  name: React.ReactNode;
+  state: "connected" | "available" | "planned";
+  action?: React.ReactNode;
+  /** One or two plain sentences on what it reads or does. */
+  children: React.ReactNode;
+}) {
+  return (
+    <li className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-2.5 py-4 md:grid-cols-[minmax(0,1fr)_6.5rem_8.5rem]">
+      <div className="col-span-2 min-w-0 md:col-span-1">
+        <p className="text-[15px] font-medium">{name}</p>
+        <p className="mt-0.5 text-sm text-pretty text-muted-foreground">{children}</p>
+      </div>
+      <State s={state} />
+      <div className="justify-self-end">{action}</div>
+    </li>
+  );
+}
+
 export function Integrations() {
   const [provider, setProvider] = React.useState("github");
   const [blockOpen, setBlockOpen] = React.useState(false);
@@ -255,81 +272,54 @@ export function Integrations() {
     { label: "Forgejo", value: "forgejo" },
   ];
 
-  const group = (title: string, children: React.ReactNode) => (
-    <Section title={title} className="mt-12">
-      <ItemGroup className="gap-0 divide-y border-y">{children}</ItemGroup>
-    </Section>
-  );
-
   return (
-    <div className="mx-auto w-full max-w-[920px] px-4 py-8 md:px-8 md:py-12">
+    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-10">
       <PageHeader
         title="Integrations"
-        description="Where Corpus reads components, tokens, and existing docs from."
+        description="3 sources connected. Every push to main rebuilds the site and the agent context."
       />
 
-      {group(
-        "Source of truth",
-        <Item className={`${ROW} flex-wrap`}>
-          <ItemMedia variant="icon" className="text-muted-foreground">
-            <GitBranchIcon />
-          </ItemMedia>
-          <ItemContent>
-            <ItemTitle>
-              <span className="font-mono text-[13px]">{workspace.repo}</span>
-              <State s="connected" />
-            </ItemTitle>
-            <ItemDescription>
-              Branch main. Every push rebuilds the site and the agent context.
-            </ItemDescription>
-          </ItemContent>
-          <ItemActions>
-            <Select
-              items={providers}
-              value={provider}
-              onValueChange={(v) => {
-                if (!v) return;
-                setProvider(v);
-                toast.add({
-                  title: `Using ${providers.find((p) => p.value === v)?.label}`,
-                  description:
-                    "Point Corpus at the same repository on the new host to keep history.",
-                });
-              }}
-            >
-              <SelectTrigger size="sm" className="min-w-28" aria-label="Git provider">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {providers.map((p) => (
-                  <SelectItem key={p.value} value={p.value}>
-                    {p.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </ItemActions>
-        </Item>,
-      )}
+      <div className="mt-8 divide-y border-y">
+        <Group title="Source of truth">
+          <Row
+            name={<span className="font-mono text-[13px]">{workspace.repo}</span>}
+            state="connected"
+            action={
+              <Select
+                items={providers}
+                value={provider}
+                onValueChange={(v) => {
+                  if (!v) return;
+                  setProvider(v);
+                  toast.add({
+                    title: `Using ${providers.find((p) => p.value === v)?.label}`,
+                    description:
+                      "Point Corpus at the same repository on the new host to keep history.",
+                  });
+                }}
+              >
+                <SelectTrigger size="sm" className="min-w-28" aria-label="Git provider">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {providers.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>
+                      {p.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            }
+          >
+            The content repository, on branch main. Corpus never holds the only copy.
+          </Row>
+        </Group>
 
-      {group(
-        "Components",
-        <>
-          <Item className={ROW}>
-            <ItemMedia variant="icon" className="text-muted-foreground">
-              <BoxesIcon />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle>
-                Drupal single directory components
-                <State s="connected" />
-              </ItemTitle>
-              <ItemDescription>
-                Reads <code className="font-mono text-xs">components/**/*.component.yml</code>. 12
-                components in sync.
-              </ItemDescription>
-            </ItemContent>
-            <ItemActions>
+        <Group title="Components">
+          <Row
+            name="Drupal single directory components"
+            state="connected"
+            action={
               <Button
                 variant="outline"
                 size="sm"
@@ -346,97 +336,68 @@ export function Integrations() {
                 {sdcBusy ? <Spinner /> : <RefreshCwIcon />}
                 Rescan
               </Button>
-            </ItemActions>
-          </Item>
-          <Item className={ROW}>
-            <ItemMedia variant="icon" className="text-muted-foreground">
-              <BlocksIcon />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle>
-                WordPress block.json
-                <State s="available" />
-              </ItemTitle>
-              <ItemDescription>
-                Import blocks from a theme or plugin. Attributes become props.
-              </ItemDescription>
-            </ItemContent>
-            <ItemActions>
+            }
+          >
+            Reads <code className="font-mono text-xs">components/**/*.component.yml</code>. 12
+            components in sync.
+          </Row>
+          <Row
+            name="WordPress block.json"
+            state="available"
+            action={
               <Button variant="outline" size="sm" onClick={() => setBlockOpen(true)}>
                 Connect
               </Button>
-            </ItemActions>
-          </Item>
-          <Item className={ROW}>
-            <ItemMedia variant="icon" className="text-muted-foreground">
-              <BookImageIcon />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle>
-                Storybook
-                <State s="planned" />
-              </ItemTitle>
-              <ItemDescription>
-                Use existing React and web component stories as live previews.
-              </ItemDescription>
-            </ItemContent>
-          </Item>
-        </>,
-      )}
+            }
+          >
+            Import blocks from a theme or plugin. Attributes become props.
+          </Row>
+          <Row name="Storybook" state="planned">
+            Use existing React and web component stories as live previews.
+          </Row>
+        </Group>
 
-      {group(
-        "Tokens",
-        <Item className={ROW}>
-          <ItemMedia variant="icon" className="text-muted-foreground">
-            <PaletteIcon />
-          </ItemMedia>
-          <ItemContent>
-            <ItemTitle>
-              Figma variables
-              <State s="connected" />
-            </ItemTitle>
-            <ItemDescription>
-              Charged UI Tokens. Last sync 2 hours ago, 4 values changed.
-            </ItemDescription>
-          </ItemContent>
-          <ItemActions>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={figmaBusy}
-              onClick={() =>
-                runFigma(() =>
-                  toast.add({
-                    title: "Tokens are up to date",
-                    description: "Figma variables match main.",
-                  }),
-                )
-              }
-            >
-              {figmaBusy ? <Spinner /> : <RefreshCwIcon />}
-              Sync now
-            </Button>
-          </ItemActions>
-        </Item>,
-      )}
+        <Group title="Tokens">
+          <Row
+            name="Figma variables"
+            state="connected"
+            action={
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={figmaBusy}
+                onClick={() =>
+                  runFigma(() =>
+                    toast.add({
+                      title: "Tokens are up to date",
+                      description: "Figma variables match main.",
+                    }),
+                  )
+                }
+              >
+                {figmaBusy ? <Spinner /> : <RefreshCwIcon />}
+                Sync now
+              </Button>
+            }
+          >
+            Charged UI Tokens. Last sync 2 hours ago, 4 values changed.
+          </Row>
+        </Group>
 
-      {group(
-        "Bring existing docs",
-        <Item className={ROW}>
-          <ItemMedia variant="icon" className="text-muted-foreground">
-            <FileInputIcon />
-          </ItemMedia>
-          <ItemContent>
-            <ItemTitle>Mintlify</ItemTitle>
-            <ItemDescription>Reads docs.json and MDX pages from your repository.</ItemDescription>
-          </ItemContent>
-          <ItemActions>
-            <Button variant="outline" size="sm" onClick={() => setMintOpen(true)}>
-              Import
-            </Button>
-          </ItemActions>
-        </Item>,
-      )}
+        <Group title="Existing docs">
+          <Row
+            name="Mintlify"
+            state="available"
+            action={
+              <Button variant="outline" size="sm" onClick={() => setMintOpen(true)}>
+                Import
+              </Button>
+            }
+          >
+            Reads docs.json and MDX pages from your repository.
+          </Row>
+        </Group>
+      </div>
 
       <BlockImport open={blockOpen} onOpenChange={setBlockOpen} />
       <MintlifyImport open={mintOpen} onOpenChange={setMintOpen} />

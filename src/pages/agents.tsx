@@ -12,8 +12,9 @@ import {
   CodeBlock,
   CopyButton,
   PageHeader,
+  RailBlock,
   Section,
-  SegmentedControl,
+  SideRail,
   copyText,
   linkClass,
 } from "@/components/common";
@@ -85,9 +86,14 @@ const EXAMPLES: Record<string, { input: string; chips: string[] }> = {
   get_tokens: { input: "color", chips: ["color", "space", "radius", "type"] },
 };
 
-function Playground() {
+/**
+ * The tools and the playground as one object: pick a tool on the left, and the right side
+ * runs it and shows the payload an agent would receive. Picking a tool runs its example,
+ * so the payload is never an empty box.
+ */
+function ToolConsole() {
   const { resolved, saved } = useStore();
-  const [tool, setTool] = React.useState("get_component");
+  const [current, setTool] = React.useState("get_component");
   const [input, setInput] = React.useState(EXAMPLES.get_component.input);
   const [running, setRunning] = React.useState(false);
   const [result, setResult] = React.useState<{
@@ -99,10 +105,10 @@ function Playground() {
   const pick = (t: string) => {
     setTool(t);
     setInput(EXAMPLES[t].input);
-    setResult(null);
+    run(EXAMPLES[t].input, t);
   };
 
-  const run = (value = input) => {
+  const run = (value = input, tool = current) => {
     setRunning(true);
     setResult(null);
     window.setTimeout(() => {
@@ -179,81 +185,139 @@ function Playground() {
     }, 420);
   };
 
+  // Show the first tool's payload as soon as the page opens.
+  const started = React.useRef(false);
+  React.useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    run();
+  });
+
+  const tool = current;
   return (
-    <div className="grid gap-4">
-      <SegmentedControl
-        value={tool}
-        onChange={pick}
-        aria-label="Tool"
-        className="max-w-full flex-wrap justify-self-start"
-        options={Object.keys(EXAMPLES).map((t) => ({
-          value: t,
-          label: t,
-          className: "font-mono text-xs",
-        }))}
-      />
-      <div className="flex flex-col gap-2 sm:flex-row">
-        {tool === "check_usage" ? (
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            spellCheck={false}
-            aria-label="Code to check"
-            className="min-h-24 flex-1 font-mono text-[12.5px] md:text-[12.5px]"
+    <div className="grid overflow-hidden rounded-xl border md:grid-cols-[15rem_minmax(0,1fr)]">
+      <div
+        role="tablist"
+        aria-label="Tools"
+        aria-orientation="vertical"
+        className="grid content-start divide-y border-b bg-muted/30 md:border-r md:border-b-0"
+      >
+        <p className="flex justify-between gap-3 px-4 py-2 text-xs text-muted-foreground">
+          <span>Tool</span>
+          <span>Calls this week</span>
+        </p>
+        {agentStats.tools.map((t) => {
+          const on = t.name === tool;
+          return (
+            <button
+              key={t.name}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              onClick={() => pick(t.name)}
+              className={cn(
+                "grid gap-1 px-4 py-3 text-left transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset",
+                on ? "bg-background" : "hover:bg-muted/60",
+              )}
+            >
+              <span className="flex items-baseline justify-between gap-3">
+                <code
+                  className={cn(
+                    "font-mono text-[13px]",
+                    on ? "font-semibold" : "text-foreground/80",
+                  )}
+                >
+                  {t.name}
+                </code>
+                <span className="text-xs text-muted-foreground tabular">
+                  {t.count.toLocaleString()}
+                </span>
+              </span>
+              <span className="hidden text-[13px] leading-snug text-pretty text-muted-foreground md:block">
+                {t.description}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="flex min-w-0 flex-col">
+        <div className="grid gap-3 border-b p-3 sm:p-4">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {tool === "check_usage" ? (
+              <Textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                spellCheck={false}
+                aria-label="Code to check"
+                className="min-h-24 flex-1 font-mono text-[12.5px] md:text-[12.5px]"
+              />
+            ) : (
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && run()}
+                className="flex-1 font-mono text-[13px] md:text-[13px]"
+                aria-label="Tool input"
+              />
+            )}
+            <Button
+              onClick={() => run()}
+              disabled={running || !input.trim()}
+              className="self-start"
+            >
+              {running ? <Spinner /> : <PlayIcon />}
+              Run
+            </Button>
+          </div>
+          {EXAMPLES[tool].chips.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+              <span className="mr-1">Try</span>
+              {EXAMPLES[tool].chips.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => {
+                    setInput(c);
+                    run(c);
+                  }}
+                  className="rounded-md bg-muted px-2 py-1 font-mono text-xs text-foreground/80 transition-colors outline-none hover:bg-sidebar-accent hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* The payload fills the rest of the object, flush, so there's no box inside a box. */}
+        {result ? (
+          <AgentPane
+            request={
+              <>
+                <span className="text-muted-foreground">mcp</span> {result.request}
+              </>
+            }
+            lines={result.lines}
+            className="flex-1 rounded-none border-0"
+            bodyClassName="h-[26rem]"
           />
         ) : (
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && run()}
-            className="flex-1 font-mono text-[13px] md:text-[13px]"
-            aria-label="Tool input"
-          />
+          <div className="grid h-[calc(26rem+2.5rem)] place-items-center text-sm text-muted-foreground">
+            {running ? <Spinner /> : "Run the call to see what the agent receives."}
+          </div>
         )}
-        <Button onClick={() => run()} disabled={running || !input.trim()} className="self-start">
-          {running ? <Spinner /> : <PlayIcon />}
-          Run
-        </Button>
-      </div>
-      {EXAMPLES[tool].chips.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-          <span className="mr-1">Try</span>
-          {EXAMPLES[tool].chips.map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => {
-                setInput(c);
-                run(c);
-              }}
-              className="rounded-md bg-muted px-2 py-1 font-mono text-xs text-foreground/80 transition-colors outline-none hover:bg-sidebar-accent hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+        {result?.gap && (
+          <div className="border-t p-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`edit-${questions.find((q) => q.id === result.gap)?.fileId}`)}
             >
-              {c}
-            </button>
-          ))}
-        </div>
-      )}
-      {result && (
-        <AgentPane
-          request={
-            <>
-              <span className="text-muted-foreground">mcp</span> {result.request}
-            </>
-          }
-          lines={result.lines}
-          bodyClassName="max-h-96"
-        />
-      )}
-      {result?.gap && (
-        <Button
-          variant="outline"
-          size="sm"
-          className="justify-self-start"
-          onClick={() => navigate(`edit-${questions.find((q) => q.id === result.gap)?.fileId}`)}
-        >
-          Write the answer
-        </Button>
-      )}
+              Write the answer
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -286,7 +350,7 @@ export function Agents() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-12">
+    <div className="mx-auto w-full max-w-[1200px] px-4 py-8 md:px-8 md:py-10">
       <PageHeader
         title="Agents"
         description={`${total.toLocaleString()} requests this week from ${listOf(agentStats.clients.map((c) => c.name))}.`}
@@ -304,37 +368,16 @@ export function Agents() {
         }
       />
 
-      <div className="mt-12 grid gap-16">
-        <div className="grid gap-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-12">
-          <Section
-            title="Endpoints"
-            aside={
-              <a href="#workspace" className={linkClass}>
-                Change in Settings
-              </a>
-            }
-          >
-            <ul className="divide-y border-y">
-              {endpoints.map((e) => (
-                <li key={e.label} className="flex items-center gap-3 py-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="flex flex-wrap items-baseline gap-x-2 text-[15px]">
-                      {e.label}
-                      <span className="text-sm text-muted-foreground">{e.on ? e.note : "Off"}</span>
-                    </p>
-                    <p className="mt-0.5 truncate font-mono text-xs text-muted-foreground">
-                      {e.value}
-                    </p>
-                  </div>
-                  <CopyButton text={e.value} label={`Copy ${e.label}`} />
-                </li>
-              ))}
-            </ul>
+      {/* What agents can call and what they get on the left. Where to reach it and how much it's used on the right. */}
+      <div className="mt-10 grid gap-x-10 gap-y-14 lg:grid-cols-[minmax(0,1fr)_288px]">
+        <div className="grid min-w-0 content-start gap-14">
+          <Section title="Tools" aside={<span>Pick one to see what an agent receives</span>}>
+            <ToolConsole />
           </Section>
 
           <Section title="Connect a client">
             <Tabs defaultValue="claude" className="min-w-0">
-              <TabsList className="max-w-full overflow-x-auto">
+              <TabsList className="max-w-full justify-start overflow-x-auto [scrollbar-width:none]">
                 {SETUP.map((s) => (
                   <TabsTrigger key={s.id} value={s.id}>
                     {s.label}
@@ -352,101 +395,111 @@ export function Agents() {
               ))}
             </Tabs>
           </Section>
+
+          <Section
+            title="Questions"
+            aside={
+              <span className="tabular">{open ? `${open} without an answer` : "All answered"}</span>
+            }
+          >
+            <QuestionList />
+          </Section>
+
+          <Section
+            title="llms.txt"
+            aside={
+              <code className="font-mono text-xs">{workspace.llms.replace("https://", "")}</code>
+            }
+          >
+            <CodeBlock
+              code={llmsTxt({ resolved })}
+              header={<span>Rebuilt on every push</span>}
+              wrap
+              className="[&_pre]:max-h-80"
+            />
+          </Section>
         </div>
 
-        <Section title="Tools" aside={<span className="tabular">Calls this week</span>}>
-          <ul className="divide-y border-y">
-            {agentStats.tools.map((t) => (
-              <li
-                key={t.name}
-                className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-6 gap-y-1 py-3.5 sm:grid-cols-[11rem_minmax(0,1fr)_auto]"
-              >
-                <code className="font-mono text-[13px] font-medium">{t.name}</code>
-                <span className="text-sm text-muted-foreground tabular sm:order-last">
-                  {t.count.toLocaleString()}
-                </span>
-                <p className="col-span-2 text-sm text-muted-foreground sm:col-span-1">
-                  {t.description}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </Section>
-
-        <Section title="Try a tool call">
-          <Playground />
-        </Section>
-
-        <div className="grid gap-16 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:gap-12">
-          <Section
-            title="Requests"
-            aside={<span className="tabular">{total.toLocaleString()} this week</span>}
+        <SideRail>
+          <RailBlock
+            title="Endpoints"
+            aside={
+              <a href="#workspace" className={linkClass}>
+                Settings
+              </a>
+            }
           >
+            <ul className="grid gap-3">
+              {endpoints.map((e) => (
+                <li key={e.label} className="flex items-start gap-1">
+                  <div className="min-w-0 flex-1">
+                    <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
+                      {e.label}
+                      <span className="text-[13px] text-muted-foreground">
+                        {e.on ? e.note : "Off"}
+                      </span>
+                    </p>
+                    <p className="mt-0.5 truncate font-mono text-xs text-muted-foreground">
+                      {e.value.replace("https://", "")}
+                    </p>
+                  </div>
+                  <CopyButton text={e.value} label={`Copy ${e.label}`} />
+                </li>
+              ))}
+            </ul>
+          </RailBlock>
+
+          <RailBlock title="This week">
+            <p className="flex items-baseline gap-2">
+              <span className="text-[28px] leading-none font-semibold tracking-[-0.03em] tabular">
+                {total.toLocaleString()}
+              </span>
+              <span className="text-sm text-muted-foreground">requests</span>
+            </p>
             <div
-              className="flex h-40 items-end gap-2"
+              className="mt-4 flex h-24 items-end gap-1"
               role="img"
-              aria-label={`Requests per day: ${agentStats.week.join(", ")}`}
+              aria-label={`Requests per day: ${agentStats.week.map((v, i) => `${agentStats.days[i]} ${v}`).join(", ")}`}
             >
               {agentStats.week.map((v, i) => (
                 <div
                   key={i}
+                  title={`${agentStats.days[i]}: ${v} requests`}
                   className="flex h-full flex-1 flex-col items-center justify-end gap-1.5"
                 >
-                  <span className="text-[11px] text-muted-foreground tabular">{v}</span>
                   <div
                     className={cn(
-                      "w-full rounded-sm",
+                      "w-full rounded-t-[3px]",
                       i === agentStats.week.length - 1 ? "bg-foreground/80" : "bg-foreground/15",
                     )}
                     style={{ height: `${(v / max) * 100}%` }}
                   />
-                  <span className="text-xs text-muted-foreground">{agentStats.days[i]}</span>
+                  <span className="text-[11px] text-muted-foreground">{agentStats.days[i]}</span>
                 </div>
               ))}
             </div>
-          </Section>
-          <Section title="Clients">
-            <ul className="grid gap-5">
+          </RailBlock>
+
+          <RailBlock title="Clients">
+            <ul className="grid gap-1.5 text-sm">
               {agentStats.clients.map((c) => (
-                <li key={c.name}>
-                  <div className="flex justify-between gap-3">
-                    <span className="text-[15px]">{c.name}</span>
-                    <span className="text-sm text-muted-foreground tabular">{c.share}%</span>
-                  </div>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-foreground/70"
+                <li
+                  key={c.name}
+                  className="grid grid-cols-[minmax(0,1fr)_4.5rem_2.5rem] items-center gap-3"
+                >
+                  <span className="truncate">{c.name}</span>
+                  <span className="h-1 overflow-hidden rounded-full bg-muted" aria-hidden>
+                    <span
+                      className="block h-full rounded-full bg-foreground/60"
                       style={{ width: `${c.share}%` }}
                     />
-                  </div>
+                  </span>
+                  <span className="text-right text-muted-foreground tabular">{c.share}%</span>
                 </li>
               ))}
             </ul>
-          </Section>
-        </div>
-
-        <Section
-          title="Questions"
-          aside={
-            <span className="tabular">{open ? `${open} without an answer` : "All answered"}</span>
-          }
-        >
-          <QuestionList />
-        </Section>
-
-        <Section
-          title="llms.txt"
-          aside={
-            <code className="font-mono text-xs">{workspace.llms.replace("https://", "")}</code>
-          }
-        >
-          <CodeBlock
-            code={llmsTxt({ resolved })}
-            header={<span>Rebuilt on every push</span>}
-            wrap
-            className="[&_pre]:max-h-80"
-          />
-        </Section>
+          </RailBlock>
+        </SideRail>
       </div>
     </div>
   );

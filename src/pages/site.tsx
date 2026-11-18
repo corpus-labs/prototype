@@ -9,6 +9,7 @@ import {
   CreditCardIcon,
   FileTextIcon,
   MoonIcon,
+  PlusIcon,
   RocketIcon,
   SearchIcon,
   SunIcon,
@@ -90,23 +91,9 @@ function SiteHeader({ project, onSearch }: { project: DocsProject; onSearch: () 
           className="ml-auto flex h-9 w-9 items-center gap-2 rounded-lg border border-(--cui-line) px-2.5 text-sm text-(--cui-muted) transition-colors hover:bg-(--cui-subtle) sm:w-60"
         >
           <SearchIcon className="size-4 shrink-0" />
-          <span className="hidden sm:inline">Search help</span>
+          <span className="hidden sm:inline">Search or ask</span>
           <kbd className="ml-auto hidden font-sans text-xs sm:inline">⌘K</kbd>
         </button>
-        <a
-          href="#ask"
-          onClick={(e) => {
-            e.preventDefault();
-            if (window.location.hash !== href(project)) navigate(`site-${project.id}`);
-            window.setTimeout(
-              () => document.getElementById("ask")?.scrollIntoView({ behavior: "smooth" }),
-              50,
-            );
-          }}
-          className="hidden h-9 items-center rounded-lg bg-(--cui-ink) px-3.5 text-sm font-medium text-(--cui-surface) transition-opacity hover:opacity-90 sm:flex"
-        >
-          Ask a question
-        </a>
         <button
           type="button"
           aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
@@ -156,154 +143,168 @@ function BackToCorpus({ project }: { project: DocsProject }) {
   );
 }
 
-/* Search ------------------------------------------------------------------- */
+/* Ask or search ------------------------------------------------------------ */
 
-function SearchBox({
+/** Where an answer came from: the page, and the section when there is one. */
+function Source({
+  project,
+  page,
+  section,
+}: {
+  project: DocsProject;
+  page: DocPage;
+  section?: string | null;
+}) {
+  return (
+    <a
+      href={href(project, page)}
+      className="inline-flex items-center gap-2 text-sm font-medium text-(--cui-charge) hover:underline"
+    >
+      <FileTextIcon className="size-4" />
+      From {page.title}
+      {section ? `, ${section}` : ""}
+    </a>
+  );
+}
+
+/**
+ * One field for both. Typing lists the articles that match. Asking gets an answer written
+ * from those same pages, with a link to the one it used; when no page covers the question,
+ * it says so and passes it to a person instead of guessing.
+ */
+function AskOrSearch({
   project,
   inputRef,
-  large,
 }: {
   project: DocsProject;
   inputRef: React.RefObject<HTMLInputElement | null>;
-  large?: boolean;
 }) {
   const [query, setQuery] = React.useState("");
-  const results = searchPages(project.pages, query);
+  const [asked, setAsked] = React.useState<{ q: string; reply: BotReply } | null>(null);
+  const q = query.trim();
+  const answer = asked && asked.q === q ? asked.reply : null;
+  const matches = q.length > 1 && !answer ? searchPages(project.pages, q) : [];
   return (
-    <div className="relative">
-      <SearchIcon
-        className={cn(
-          "pointer-events-none absolute top-1/2 -translate-y-1/2 text-(--cui-muted)",
-          large ? "left-4 size-5" : "left-3 size-4",
-        )}
-      />
-      <input
-        ref={inputRef}
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search refunds, licenses, installing…"
-        aria-label="Search help"
-        className={cn(
-          "w-full rounded-xl border border-(--cui-line) bg-(--cui-surface) text-(--cui-ink) shadow-xs transition outline-none placeholder:text-(--cui-muted) focus:border-(--cui-charge) focus:ring-4 focus:ring-(--cui-charge-soft)",
-          large ? "h-14 pr-4 pl-12 text-[17px]" : "h-10 pr-3 pl-9 text-sm",
-        )}
-      />
-      {query.trim().length > 1 && (
-        <div className="absolute inset-x-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-(--cui-line) bg-(--cui-surface) shadow-lg">
-          {results.length ? (
-            <ul className="divide-y divide-(--cui-line)">
-              {results.map((p) => (
-                <li key={p.id}>
-                  <a
-                    href={href(project, p)}
-                    className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-(--cui-subtle)"
-                  >
-                    <FileTextIcon className="mt-0.5 size-4 shrink-0 text-(--cui-muted)" />
-                    <span className="min-w-0">
-                      <span className="block text-[15px] font-medium">{p.title}</span>
+    <div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (q) setAsked({ q, reply: answerFrom(q, project.pages) });
+        }}
+        className="flex h-14 items-center gap-3 rounded-xl border border-(--cui-line) bg-(--cui-surface) pr-2 pl-4 shadow-xs transition focus-within:border-(--cui-charge) focus-within:ring-4 focus-within:ring-(--cui-charge-soft)"
+      >
+        <SearchIcon className="size-5 shrink-0 text-(--cui-muted)" />
+        <input
+          ref={inputRef}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Ask a question or search the articles"
+          aria-label="Ask a question or search help"
+          className="h-full min-w-0 flex-1 bg-transparent text-[17px] text-(--cui-ink) outline-none placeholder:text-(--cui-muted)"
+        />
+        <button
+          type="submit"
+          disabled={!q}
+          className="h-10 shrink-0 rounded-lg bg-(--cui-charge) px-4 text-sm font-medium text-white transition-colors hover:bg-(--cui-charge-deep) disabled:opacity-50"
+        >
+          Ask
+        </button>
+      </form>
+      <div aria-live="polite">
+        {answer &&
+          (answer.kind === "answer" ? (
+            <div className="mt-3 rounded-xl border border-(--cui-line) bg-(--cui-surface) p-5">
+              <p className="text-[16px] leading-relaxed text-pretty">{answer.text}</p>
+              <p className="mt-3">
+                <Source project={project} page={answer.page} section={answer.section} />
+              </p>
+            </div>
+          ) : (
+            <div className="mt-3 rounded-xl border border-(--cui-line) bg-(--cui-surface) p-5">
+              <p className="text-[16px] font-medium">No article answers that yet.</p>
+              <p className="mt-1 text-[15px] text-pretty text-(--cui-muted)">
+                We’ve passed it to the team, and a person will reply by email.
+              </p>
+            </div>
+          ))}
+        {q.length > 1 && !answer && (
+          <div className="mt-3 overflow-hidden rounded-xl border border-(--cui-line) bg-(--cui-surface)">
+            {matches.length ? (
+              <ul className="divide-y divide-(--cui-line)">
+                {matches.map((p) => (
+                  <li key={p.id}>
+                    <a
+                      href={href(project, p)}
+                      className="group block px-4 py-3 transition-colors hover:bg-(--cui-subtle)"
+                    >
+                      <span className="block text-[15px] font-medium group-hover:text-(--cui-charge)">
+                        {p.title}
+                      </span>
                       <span className="block truncate text-sm text-(--cui-muted)">
                         {p.folder}, {p.description}
                       </span>
-                    </span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="px-4 py-3 text-sm text-(--cui-muted)">
-              No page matches. Try asking below instead.
-            </p>
-          )}
-        </div>
-      )}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="px-4 py-3 text-sm text-(--cui-muted)">
+                No article title matches. Press Ask to get an answer from the help pages.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-/* Ask ---------------------------------------------------------------------- */
+/* Home --------------------------------------------------------------------- */
 
-function Ask({ project }: { project: DocsProject }) {
-  const [question, setQuestion] = React.useState("");
-  const [asked, setAsked] = React.useState<{ q: string; reply: BotReply } | null>(null);
-  const ask = (q: string) => {
-    const text = q.trim();
-    if (!text) return;
-    setQuestion(text);
-    setAsked({ q: text, reply: answerFrom(text, project.pages) });
-  };
-  const examples = project.questions.filter((q) => q.status === "answered").slice(0, 3);
+/**
+ * What customers ask most, each answered the way the support bot would: from the pages,
+ * with the page it used. Questions no page covers stay off this list.
+ */
+function CommonQuestions({ project }: { project: DocsProject }) {
+  const list = project.questions
+    .filter((q) => q.status === "answered")
+    .sort((a, b) => b.count - a.count);
+  if (!list.length) return null;
   return (
-    <section id="ask" className="scroll-mt-24">
-      <h2 className="text-xl font-semibold tracking-[-0.02em]">Ask a question</h2>
+    <section>
+      <h2 className="text-xl font-semibold tracking-[-0.02em]">Common questions</h2>
       <p className="mt-1 text-[15px] text-(--cui-muted)">
-        Answers come from these pages, with a link to the one used.
+        Answered from these pages, with a link to the one used.
       </p>
-      <div className="mt-5 overflow-hidden rounded-2xl border border-(--cui-line) bg-(--cui-surface)">
-        <form
-          className="flex gap-2 border-b border-(--cui-line) p-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            ask(question);
-          }}
-        >
-          <input
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Ask in your own words"
-            aria-label="Your question"
-            className="h-10 min-w-0 flex-1 rounded-lg bg-transparent px-2 text-[15px] outline-none placeholder:text-(--cui-muted)"
-          />
-          <button
-            type="submit"
-            disabled={!question.trim()}
-            className="h-10 rounded-lg bg-(--cui-charge) px-4 text-sm font-medium text-white transition-colors hover:bg-(--cui-charge-deep) disabled:opacity-50"
-          >
-            Ask
-          </button>
-        </form>
-        <div className="px-5 py-4" aria-live="polite">
-          {asked ? (
-            asked.reply.kind === "answer" ? (
-              <>
-                <p className="text-[15px] leading-relaxed text-pretty">{asked.reply.text}</p>
-                <a
-                  href={href(project, asked.reply.page)}
-                  className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-(--cui-charge) hover:underline"
-                >
-                  <FileTextIcon className="size-4" />
-                  {asked.reply.page.title}
-                  {asked.reply.section ? `, ${asked.reply.section}` : ""}
-                </a>
-              </>
-            ) : (
-              <p className="text-[15px] leading-relaxed text-pretty">
-                <span className="font-medium">No page answers that yet.</span>{" "}
-                <span className="text-(--cui-muted)">
-                  We’ve passed it to the team, and a person will reply by email.
-                </span>
-              </p>
-            )
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {examples.map((q) => (
-                <button
-                  key={q.id}
-                  type="button"
-                  onClick={() => ask(q.text)}
-                  className="rounded-full border border-(--cui-line) px-3 py-1.5 text-sm text-(--cui-muted) transition-colors hover:border-(--cui-charge) hover:text-(--cui-ink)"
-                >
-                  {q.text}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="mt-4 divide-y divide-(--cui-line) border-y border-(--cui-line)">
+        {list.map((q) => {
+          const reply = answerFrom(q.text, project.pages);
+          const fallback = project.pages.find((p) => `${project.id}-${p.id}` === q.source?.route);
+          return (
+            <details key={q.id} className="group">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-4 text-[16px] font-medium outline-none focus-visible:text-(--cui-charge) [&::-webkit-details-marker]:hidden">
+                {q.text}
+                <PlusIcon className="size-4 shrink-0 text-(--cui-muted) transition-transform group-open:rotate-45" />
+              </summary>
+              <div className="max-w-[68ch] pb-5">
+                {reply.kind === "answer" ? (
+                  <>
+                    <p className="text-[15px] leading-relaxed text-pretty">{reply.text}</p>
+                    <p className="mt-2.5">
+                      <Source project={project} page={reply.page} section={reply.section} />
+                    </p>
+                  </>
+                ) : (
+                  fallback && <Source project={project} page={fallback} />
+                )}
+              </div>
+            </details>
+          );
+        })}
       </div>
     </section>
   );
 }
-
-/* Home --------------------------------------------------------------------- */
 
 function SiteHome({
   project,
@@ -322,10 +323,13 @@ function SiteHome({
               How can we help?
             </h1>
             <p className="mt-3 text-[17px] text-(--cui-muted)">
-              Installing, updating, and paying for themes from Acme, Inc.
+              {/* A help center speaks to customers. A handbook's own description says what it covers. */}
+              {project.kind === "help-center"
+                ? "Installing, updating, and paying for themes from Acme, Inc."
+                : project.description}
             </p>
             <div className="mt-7">
-              <SearchBox project={project} inputRef={searchRef} large />
+              <AskOrSearch project={project} inputRef={searchRef} />
             </div>
             <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-(--cui-muted)">
               <span>Popular:</span>
@@ -384,7 +388,7 @@ function SiteHome({
             })}
           </div>
         </section>
-        <Ask project={project} />
+        <CommonQuestions project={project} />
       </div>
     </main>
   );
