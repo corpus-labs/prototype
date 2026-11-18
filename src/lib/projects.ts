@@ -85,8 +85,14 @@ export function useProjects(): ProjectSummary[] {
 
 /** Which project a route belongs to. The projects dashboard belongs to none. */
 export function projectOf(route: string): ProjectId | null {
-  // The dashboard and plugins belong to the whole install, not one project.
-  if (route === "projects" || route === "plugins") return null;
+  // The dashboard, the inbox, and plugins belong to the whole install, not one project.
+  if (
+    route === "projects" ||
+    route === "plugins" ||
+    route === "inbox" ||
+    route.startsWith("inbox-")
+  )
+    return null;
   return docsProjectOf(route)?.id ?? "charged-ui";
 }
 

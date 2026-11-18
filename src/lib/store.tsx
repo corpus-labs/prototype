@@ -43,7 +43,12 @@ type Store = {
   files: Record<string, string>;
   saved: Record<string, string>;
   setFile: (id: string, body: string) => void;
-  commit: (input: { fileId: string; message: string; mode: "main" | "pr" }) => Commit;
+  commit: (input: {
+    fileId: string;
+    message: string;
+    mode: "main" | "pr";
+    body?: string;
+  }) => Commit;
   commits: Commit[];
   resolved: string[];
   inReview: string[];
@@ -203,8 +208,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const commit = React.useCallback(
-    ({ fileId, message, mode }: { fileId: string; message: string; mode: "main" | "pr" }) => {
-      const body = files[fileId] ?? "";
+    ({
+      fileId,
+      message,
+      mode,
+      body: text,
+    }: {
+      fileId: string;
+      message: string;
+      mode: "main" | "pr";
+      /** The text to commit, when the caller has it before the editor's copy updates (the inbox). */
+      body?: string;
+    }) => {
+      const body = text ?? files[fileId] ?? "";
+      if (text !== undefined) setFiles((f) => ({ ...f, [fileId]: text }));
       const c: Commit = { sha: nextSha(), message, author: "Mitch Kostelecky", when: "Just now" };
       const answers: string[] = [];
       if (fileId === "button" && /##\s+Loading state/i.test(body)) answers.push("q-loading");

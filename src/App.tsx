@@ -5,6 +5,7 @@ import { ComponentDetail, ComponentsIndex } from "@/pages/components";
 import { Editor } from "@/pages/editor";
 import { GuideReader, GuidelinesIndex } from "@/pages/guidelines";
 import { DocsOverview, DocsPage } from "@/pages/handbook";
+import { Inbox } from "@/pages/inbox";
 import { Integrations } from "@/pages/integrations";
 import { Overview } from "@/pages/overview";
 import { docsProjectOf, docsProjects } from "@/data/workspace";
@@ -15,6 +16,8 @@ import { WorkspaceSettings } from "@/pages/settings";
 import { Tokens } from "@/pages/tokens";
 
 function Page({ route }: { route: string }) {
+  if (route === "inbox") return <Inbox id={null} />;
+  if (route.startsWith("inbox-")) return <Inbox id={route.slice("inbox-".length)} />;
   if (route === "projects") return <Projects />;
   if (route === "plugins") return <Plugins />;
   const docs = docsProjectOf(route);

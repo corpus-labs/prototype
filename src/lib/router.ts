@@ -2,8 +2,8 @@ import * as React from "react";
 
 // Views are plain #names (letters, digits, hyphens) so links into the page
 // survive being shared.
-// With more than one project, Corpus opens on the projects dashboard.
-const DEFAULT = "projects";
+// Corpus opens on the inbox: what is waiting on a person, beside the library it belongs in.
+const DEFAULT = "inbox";
 
 /** Back to the top of the page: the window on phones, the content panel on desktop. */
 export function toTop() {
