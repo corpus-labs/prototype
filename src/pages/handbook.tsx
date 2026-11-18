@@ -14,10 +14,8 @@ import {
   Dot,
   Facts,
   PageHeader,
-  RailBlock,
   ReaderSwitch,
   Section,
-  SideRail,
   linkClass,
   useEffectiveReader,
 } from "@/components/common";
@@ -41,6 +39,7 @@ import { useStore } from "@/lib/store";
 import { answerFrom, type BotReply } from "@/lib/support";
 import { cn } from "@/lib/utils";
 import { PROVIDER_LABEL, modelLabel } from "@/pages/editor";
+import { InboxNotice } from "@/pages/inbox";
 
 // ProseMirror and Milkdown are the heaviest part of the app, so the editor loads only when a docs page opens.
 const DocsEditor = React.lazy(() =>
@@ -61,27 +60,19 @@ function pageLines(page: DocPage): Line[] {
   return [...intro, ...guideLines(page.body)];
 }
 
-const QUEUE_ROW =
-  "grid grid-cols-[3.25rem_minmax(0,1fr)] gap-x-4 gap-y-1 sm:grid-cols-[4rem_minmax(0,1fr)_auto] sm:gap-x-5";
-
+/**
+ * A docs project's home is a page: what it is, what's waiting in the inbox, the support bot
+ * for a help center, and the index of its pages. The weekly numbers live in Settings and the
+ * questions in the inbox. See docs/decisions/proposed-library-and-inbox.md.
+ */
 export function DocsOverview({ project }: { project: DocsProject }) {
   const { drafts, pages } = usePages(project);
   const help = project.kind === "help-center";
-  const unit = help ? "questions" : "requests";
-  const byCount = [...project.questions].sort((x, y) => y.count - x.count);
-  const gaps = byCount.filter((q) => q.status === "gap");
-  const answered = byCount.filter((q) => q.status === "answered");
-  const asked = gaps.reduce((n, q) => n + q.count, 0);
-  const who = help ? "Customers and agents" : "Agents";
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-4 py-8 md:px-8 md:py-10">
+    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-12">
       <PageHeader
         title={project.name}
-        description={
-          gaps.length
-            ? `${who} asked ${project.requests} times this week. ${gaps.length} ${gaps.length === 1 ? "question" : "questions"} had no answer, asked ${asked} times in all.`
-            : `${who} asked ${project.requests} times this week, and every question found an answer.`
-        }
+        description={project.description}
         actions={
           <>
             <Button variant="outline" onClick={() => navigate(`site-${project.id}`)}>
@@ -103,157 +94,61 @@ export function DocsOverview({ project }: { project: DocsProject }) {
             </Button>
           </>
         }
+        meta={
+          <Facts
+            items={[
+              ["Repository", <code className="font-mono text-[13px]">{project.repo}</code>],
+              ["Site", project.site],
+              ["Updated", project.updated.toLowerCase()],
+            ]}
+          />
+        }
       />
 
-      {/* The work and the pages on the left, the facts on the right. */}
-      <div className="mt-10 grid gap-x-10 gap-y-14 lg:grid-cols-[minmax(0,1fr)_288px]">
-        <div className="grid min-w-0 content-start gap-14">
-          <Section title="Needs an answer" aside={gaps.length > 1 && <span>Most asked first</span>}>
-            {gaps.length ? (
-              <ol className="divide-y border-y">
-                {gaps.map((q) => (
-                  <li key={q.id} className={cn(QUEUE_ROW, "gap-y-3 py-5 sm:items-center")}>
-                    <p className="leading-none">
-                      <span className="block text-[28px] leading-none font-semibold tracking-[-0.03em] tabular">
-                        {q.count}
-                      </span>
-                      <span className="mt-1.5 block text-xs text-muted-foreground">asks</span>
-                    </p>
-                    <div className="min-w-0">
-                      <p className="text-[17px] leading-snug font-medium text-pretty">{q.text}</p>
-                      <p className="mt-1.5 text-sm">
-                        <Dot tone="bad" className="text-bad">
-                          No answer yet
-                        </Dot>
-                      </p>
-                    </div>
-                    <span className="col-start-2 text-sm text-muted-foreground sm:col-start-3">
-                      No page covers this
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <div className="border-y py-8">
-                <Dot tone="good" className="text-[17px] font-medium">
-                  Every question answered
-                </Dot>
-                <p className="mt-1.5 pl-3 text-sm text-muted-foreground">
-                  {help ? "Customers" : "Agents"} found an answer in these pages all week.
-                </p>
-              </div>
-            )}
-          </Section>
+      <InboxNotice project={project.name} className="mt-8" />
 
-          {help && <SupportBot project={project} pages={pages} />}
-
-          {/* An index: each folder named once on the left, its pages beside it. */}
-          <Section
-            title="Pages"
-            aside={
-              <span className="tabular">
-                {pages.length} in {foldersOf(pages).length} folders
-              </span>
-            }
-          >
-            <div className="divide-y border-y">
-              {foldersOf(pages).map(([folder, list]) => (
-                <div key={folder} className="grid gap-x-6 py-2 sm:grid-cols-[9rem_minmax(0,1fr)]">
-                  <h3 className="pt-3 text-sm font-medium sm:pt-[0.9rem]">{folder}</h3>
-                  <ul className="divide-y">
-                    {list.map((p) => (
-                      <li key={p.id}>
-                        <a
-                          href={`#${project.id}-${p.id}`}
-                          className="group -mx-1 flex items-baseline justify-between gap-4 rounded-md px-1 py-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                        >
-                          <span className="min-w-0">
-                            <span className="block text-[15px] font-medium underline-offset-4 group-hover:underline">
-                              {p.title}
-                            </span>
-                            <span className="mt-0.5 block text-sm text-pretty text-muted-foreground">
-                              {p.description}
-                            </span>
-                          </span>
-                          <span className="shrink-0 text-sm text-muted-foreground">
-                            {drafts[p.id] ? <Dot tone="warn">Edited</Dot> : p.updated}
-                          </span>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          {answered.length > 0 && (
-            <Section title="Answered">
-              <ul className="divide-y border-y">
-                {answered.map((q) => (
-                  <li key={q.id} className={cn(QUEUE_ROW, "items-baseline py-3")}>
-                    <span className="text-[15px] text-muted-foreground tabular">{q.count}</span>
-                    <span className="text-[15px] text-pretty">{q.text}</span>
-                    {q.source && (
+      <div className="mt-12 grid gap-14">
+        {/* An index: each folder named once on the left, its pages beside it. */}
+        <Section
+          title="Pages"
+          aside={
+            <span className="tabular">
+              {pages.length} in {foldersOf(pages).length} folders
+            </span>
+          }
+        >
+          <div className="divide-y border-y">
+            {foldersOf(pages).map(([folder, list]) => (
+              <div key={folder} className="grid gap-x-6 py-2 sm:grid-cols-[9rem_minmax(0,1fr)]">
+                <h3 className="pt-3 text-sm font-medium sm:pt-[0.9rem]">{folder}</h3>
+                <ul className="divide-y">
+                  {list.map((p) => (
+                    <li key={p.id}>
                       <a
-                        href={`#${q.source.route}`}
-                        className={cn(linkClass, "col-start-2 text-sm font-normal sm:col-start-3")}
+                        href={`#${project.id}-${p.id}`}
+                        className="group -mx-1 flex items-baseline justify-between gap-4 rounded-md px-1 py-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                       >
-                        {q.source.label}
+                        <span className="min-w-0">
+                          <span className="block text-[15px] font-medium underline-offset-4 group-hover:underline">
+                            {p.title}
+                          </span>
+                          <span className="mt-0.5 block text-sm text-pretty text-muted-foreground">
+                            {p.description}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-sm text-muted-foreground">
+                          {drafts[p.id] ? <Dot tone="warn">Edited</Dot> : p.updated}
+                        </span>
                       </a>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </Section>
-          )}
-        </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </Section>
 
-        <SideRail>
-          <RailBlock title="This week">
-            <p className="flex items-baseline gap-2">
-              <span className="text-[28px] leading-none font-semibold tracking-[-0.03em] tabular">
-                {project.requests.toLocaleString()}
-              </span>
-              <span className="text-sm text-muted-foreground">{unit}</span>
-            </p>
-            <p className="mt-3 text-sm">
-              {gaps.length ? (
-                <Dot tone="bad" className="text-bad">
-                  {gaps.length} without an answer
-                </Dot>
-              ) : (
-                <Dot tone="good">All answered</Dot>
-              )}
-            </p>
-          </RailBlock>
-
-          <RailBlock title="Project">
-            <p className="text-sm leading-relaxed text-pretty text-foreground/75">
-              {project.description}
-            </p>
-            <dl className="mt-4 grid gap-2 text-sm">
-              <div className="flex items-baseline justify-between gap-4">
-                <dt className="text-muted-foreground">Repository</dt>
-                <dd className="truncate">
-                  <code className="font-mono text-[13px]">{project.repo}</code>
-                </dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-4">
-                <dt className="text-muted-foreground">Site</dt>
-                <dd className="truncate">
-                  <a href={`#site-${project.id}`} className={cn(linkClass, "font-normal")}>
-                    {project.site}
-                  </a>
-                </dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-4">
-                <dt className="text-muted-foreground">Updated</dt>
-                <dd>{project.updated.toLowerCase()}</dd>
-              </div>
-            </dl>
-          </RailBlock>
-        </SideRail>
+        {help && <SupportBot project={project} pages={pages} />}
       </div>
     </div>
   );

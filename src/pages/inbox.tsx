@@ -2,7 +2,7 @@
 // you're working on, the way Linear's inbox works. A question opens with a draft written
 // into the page it belongs on. See docs/decisions/proposed-library-and-inbox.md.
 import * as React from "react";
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, InboxIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
@@ -210,6 +210,40 @@ function Detail({ item, next }: { item: InboxItem; next: InboxItem | undefined }
         </section>
       )}
     </article>
+  );
+}
+
+/**
+ * On a project's home page: what of this project is waiting in the inbox, one click from
+ * the first item. Nothing shows when nothing is waiting.
+ */
+export function InboxNotice({ project, className }: { project: string; className?: string }) {
+  const items = useInbox().filter((i) => i.project === project);
+  if (!items.length) return null;
+  const questions = items.filter((i) => i.kind === "question").length;
+  const notes = items.length - questions;
+  const parts = [
+    questions && `${questions} ${questions === 1 ? "question" : "questions"} nobody could answer`,
+    notes && `${notes} ${notes === 1 ? "note" : "notes"} to review`,
+  ].filter(Boolean);
+  return (
+    <a
+      href={`#inbox-${items[0].id}`}
+      className={cn(
+        "group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 rounded-lg border px-4 py-3 transition-colors outline-none hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring/50",
+        className,
+      )}
+    >
+      <span className="flex min-w-0 items-center gap-3 text-[15px]">
+        <InboxIcon className="size-4 shrink-0 text-muted-foreground" />
+        <span className="text-pretty">
+          <span className="font-medium">{parts.join(" and ")}</span>, waiting in the inbox
+        </span>
+      </span>
+      <span className="text-sm text-muted-foreground group-hover:text-foreground">
+        Open the inbox
+      </span>
+    </a>
   );
 }
 
