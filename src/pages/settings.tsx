@@ -45,6 +45,9 @@ import { ChoiceTile, CopyButton, PageHeader } from "@/components/common";
 import { workspace } from "@/data/workspace";
 import { useStore, type Base, type Provider, type Theme } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { AgentsSettings } from "@/pages/agents";
+import { IntegrationsSettings } from "@/pages/integrations";
+import { PluginsSettings } from "@/pages/plugins";
 import { modelLabel } from "@/pages/editor";
 
 function ToggleRow({
@@ -579,12 +582,27 @@ function Appearance() {
   );
 }
 
-export function WorkspaceSettings() {
+/**
+ * Every setting for the library on one screen, including how agents connect, which AI tools
+ * are installed, and where content comes from. Their old routes open this screen at their section.
+ */
+export function WorkspaceSettings({ focus }: { focus?: string }) {
   const toLicense = () =>
     document.getElementById("settings-license")?.scrollIntoView({ behavior: "smooth" });
+  React.useEffect(() => {
+    if (focus) document.getElementById(`settings-${focus}`)?.scrollIntoView();
+  }, [focus]);
   const sections = [
     { id: "general", label: "General", narrow: true, content: <General /> },
     { id: "ai", label: "AI", narrow: true, content: <AISettings /> },
+    { id: "agents", label: "Agents and MCP", narrow: false, content: <AgentsSettings /> },
+    { id: "plugins", label: "Plugins", narrow: false, content: <PluginsSettings /> },
+    {
+      id: "integrations",
+      label: "Integrations",
+      narrow: false,
+      content: <IntegrationsSettings />,
+    },
     {
       id: "publishing",
       label: "Publishing",

@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
-import { Dot, PageHeader } from "@/components/common";
+import { Dot } from "@/components/common";
 import { workspace } from "@/data/workspace";
 
 function State({ s }: { s: "connected" | "available" | "planned" }) {
@@ -260,7 +260,8 @@ function Row({
   );
 }
 
-export function Integrations() {
+/** Where Corpus reads components, tokens, and existing docs from, as one section of Settings. */
+export function IntegrationsSettings() {
   const [provider, setProvider] = React.useState("github");
   const [blockOpen, setBlockOpen] = React.useState(false);
   const [mintOpen, setMintOpen] = React.useState(false);
@@ -273,13 +274,8 @@ export function Integrations() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-10">
-      <PageHeader
-        title="Integrations"
-        description="3 sources connected. Every push to main rebuilds the site and the agent context."
-      />
-
-      <div className="mt-8 divide-y border-y">
+    <>
+      <div className="divide-y border-y">
         <Group title="Source of truth">
           <Row
             name={<span className="font-mono text-[13px]">{workspace.repo}</span>}
@@ -401,6 +397,6 @@ export function Integrations() {
 
       <BlockImport open={blockOpen} onOpenChange={setBlockOpen} />
       <MintlifyImport open={mintOpen} onOpenChange={setMintOpen} />
-    </div>
+    </>
   );
 }

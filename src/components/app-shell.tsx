@@ -357,7 +357,7 @@ function AppSidebar({ route }: { route: string }) {
 
 /** Screens that belong to the whole library, not one project. */
 function wholeInstallTitle(route: string) {
-  if (route === "plugins") return "Plugins";
+  if (["plugins", "agents", "integrations", "workspace"].includes(route)) return "Settings";
   if (route === "inbox" || route.startsWith("inbox-")) return "Inbox";
   return "Projects";
 }

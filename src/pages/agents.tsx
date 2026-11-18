@@ -1,23 +1,12 @@
 import * as React from "react";
-import { CopyIcon, PlayIcon } from "lucide-react";
+import { PlayIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/components/ui/toast";
-import {
-  AgentPane,
-  CodeBlock,
-  CopyButton,
-  PageHeader,
-  RailBlock,
-  Section,
-  SideRail,
-  copyText,
-  linkClass,
-} from "@/components/common";
+import { AgentPane, CodeBlock, CopyButton } from "@/components/common";
 import { agentStats, components, questions, workspace } from "@/data/workspace";
 import {
   checkUsage,
@@ -30,7 +19,6 @@ import {
 import { navigate } from "@/lib/router";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { QuestionList } from "@/pages/overview";
 
 const SERVER = "charged-ui";
 
@@ -328,11 +316,36 @@ function listOf(names: string[]) {
     : names[0];
 }
 
-export function Agents() {
+/** A part of the Agents section: a small heading, an optional aside, then its content. */
+function Part({
+  title,
+  aside,
+  children,
+}: {
+  title: string;
+  aside?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="min-w-0">
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h3 className="text-sm font-medium">{title}</h3>
+        {aside && <div className="text-[13px] text-muted-foreground">{aside}</div>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * How agents reach the library and what they get, as one section of Settings: how much it's
+ * used, the endpoints, how to connect a client, each tool's payload, and llms.txt. The
+ * questions they couldn't answer live in the inbox.
+ */
+export function AgentsSettings() {
   const { resolved, publishing } = useStore();
   const total = agentStats.week.reduce((a, b) => a + b, 0);
   const max = Math.max(...agentStats.week);
-  const open = questions.filter((q) => q.status === "gap" && !resolved.includes(q.id)).length;
   const endpoints = [
     {
       label: "MCP server",
@@ -350,157 +363,108 @@ export function Agents() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-4 py-8 md:px-8 md:py-10">
-      <PageHeader
-        title="Agents"
-        description={`${total.toLocaleString()} requests this week from ${listOf(agentStats.clients.map((c) => c.name))}.`}
-        actions={
-          <Button
-            variant="outline"
-            onClick={async () => {
-              if (await copyText(workspace.mcp))
-                toast.add({ title: "MCP endpoint copied", description: workspace.mcp });
-            }}
+    <div className="grid gap-12">
+      <Part title="This week">
+        <p className="text-[15px] text-pretty">
+          <span className="font-medium tabular">{total.toLocaleString()}</span> requests from{" "}
+          {listOf(agentStats.clients.map((c) => c.name))}.
+        </p>
+        <div className="mt-4 grid gap-8 sm:grid-cols-2">
+          <div
+            className="flex h-24 items-end gap-1"
+            role="img"
+            aria-label={`Requests per day: ${agentStats.week.map((v, i) => `${agentStats.days[i]} ${v}`).join(", ")}`}
           >
-            <CopyIcon />
-            Copy MCP endpoint
-          </Button>
-        }
-      />
-
-      {/* What agents can call and what they get on the left. Where to reach it and how much it's used on the right. */}
-      <div className="mt-10 grid gap-x-10 gap-y-14 lg:grid-cols-[minmax(0,1fr)_288px]">
-        <div className="grid min-w-0 content-start gap-14">
-          <Section title="Tools" aside={<span>Pick one to see what an agent receives</span>}>
-            <ToolConsole />
-          </Section>
-
-          <Section title="Connect a client">
-            <Tabs defaultValue="claude" className="min-w-0">
-              <TabsList className="max-w-full justify-start overflow-x-auto [scrollbar-width:none]">
-                {SETUP.map((s) => (
-                  <TabsTrigger key={s.id} value={s.id}>
-                    {s.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              {SETUP.map((s) => (
-                <TabsContent key={s.id} value={s.id} className="min-w-0">
-                  <CodeBlock
-                    code={s.code}
-                    header={<span className="font-mono">{s.file}</span>}
-                    wrap={s.id === "agents-md" || s.id === "claude"}
-                  />
-                </TabsContent>
-              ))}
-            </Tabs>
-          </Section>
-
-          <Section
-            title="Questions"
-            aside={
-              <span className="tabular">{open ? `${open} without an answer` : "All answered"}</span>
-            }
-          >
-            <QuestionList />
-          </Section>
-
-          <Section
-            title="llms.txt"
-            aside={
-              <code className="font-mono text-xs">{workspace.llms.replace("https://", "")}</code>
-            }
-          >
-            <CodeBlock
-              code={llmsTxt({ resolved })}
-              header={<span>Rebuilt on every push</span>}
-              wrap
-              className="[&_pre]:max-h-80"
-            />
-          </Section>
-        </div>
-
-        <SideRail>
-          <RailBlock
-            title="Endpoints"
-            aside={
-              <a href="#workspace" className={linkClass}>
-                Settings
-              </a>
-            }
-          >
-            <ul className="grid gap-3">
-              {endpoints.map((e) => (
-                <li key={e.label} className="flex items-start gap-1">
-                  <div className="min-w-0 flex-1">
-                    <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
-                      {e.label}
-                      <span className="text-[13px] text-muted-foreground">
-                        {e.on ? e.note : "Off"}
-                      </span>
-                    </p>
-                    <p className="mt-0.5 truncate font-mono text-xs text-muted-foreground">
-                      {e.value.replace("https://", "")}
-                    </p>
-                  </div>
-                  <CopyButton text={e.value} label={`Copy ${e.label}`} />
-                </li>
-              ))}
-            </ul>
-          </RailBlock>
-
-          <RailBlock title="This week">
-            <p className="flex items-baseline gap-2">
-              <span className="text-[28px] leading-none font-semibold tracking-[-0.03em] tabular">
-                {total.toLocaleString()}
-              </span>
-              <span className="text-sm text-muted-foreground">requests</span>
-            </p>
-            <div
-              className="mt-4 flex h-24 items-end gap-1"
-              role="img"
-              aria-label={`Requests per day: ${agentStats.week.map((v, i) => `${agentStats.days[i]} ${v}`).join(", ")}`}
-            >
-              {agentStats.week.map((v, i) => (
+            {agentStats.week.map((v, i) => (
+              <div
+                key={i}
+                title={`${agentStats.days[i]}: ${v} requests`}
+                className="flex h-full flex-1 flex-col items-center justify-end gap-1.5"
+              >
                 <div
-                  key={i}
-                  title={`${agentStats.days[i]}: ${v} requests`}
-                  className="flex h-full flex-1 flex-col items-center justify-end gap-1.5"
-                >
-                  <div
-                    className={cn(
-                      "w-full rounded-t-[3px]",
-                      i === agentStats.week.length - 1 ? "bg-foreground/80" : "bg-foreground/15",
-                    )}
-                    style={{ height: `${(v / max) * 100}%` }}
+                  className={cn(
+                    "w-full rounded-t-[3px]",
+                    i === agentStats.week.length - 1 ? "bg-foreground/80" : "bg-foreground/15",
+                  )}
+                  style={{ height: `${(v / max) * 100}%` }}
+                />
+                <span className="text-[11px] text-muted-foreground">{agentStats.days[i]}</span>
+              </div>
+            ))}
+          </div>
+          <ul className="grid content-center gap-1.5 text-sm">
+            {agentStats.clients.map((c) => (
+              <li
+                key={c.name}
+                className="grid grid-cols-[minmax(0,1fr)_6rem_2.5rem] items-center gap-3"
+              >
+                <span className="truncate">{c.name}</span>
+                <span className="h-1 overflow-hidden rounded-full bg-muted" aria-hidden>
+                  <span
+                    className="block h-full rounded-full bg-foreground/60"
+                    style={{ width: `${c.share}%` }}
                   />
-                  <span className="text-[11px] text-muted-foreground">{agentStats.days[i]}</span>
-                </div>
-              ))}
-            </div>
-          </RailBlock>
+                </span>
+                <span className="text-right text-muted-foreground tabular">{c.share}%</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Part>
 
-          <RailBlock title="Clients">
-            <ul className="grid gap-1.5 text-sm">
-              {agentStats.clients.map((c) => (
-                <li
-                  key={c.name}
-                  className="grid grid-cols-[minmax(0,1fr)_4.5rem_2.5rem] items-center gap-3"
-                >
-                  <span className="truncate">{c.name}</span>
-                  <span className="h-1 overflow-hidden rounded-full bg-muted" aria-hidden>
-                    <span
-                      className="block h-full rounded-full bg-foreground/60"
-                      style={{ width: `${c.share}%` }}
-                    />
-                  </span>
-                  <span className="text-right text-muted-foreground tabular">{c.share}%</span>
-                </li>
-              ))}
-            </ul>
-          </RailBlock>
-        </SideRail>
-      </div>
+      <Part title="Endpoints" aside="Turn them on and off under Publishing">
+        <ul className="divide-y border-y">
+          {endpoints.map((e) => (
+            <li key={e.label} className="flex items-center gap-3 py-3">
+              <div className="min-w-0 flex-1">
+                <p className="flex flex-wrap items-baseline gap-x-2 text-[15px]">
+                  {e.label}
+                  <span className="text-sm text-muted-foreground">{e.on ? e.note : "Off"}</span>
+                </p>
+                <p className="mt-0.5 truncate font-mono text-xs text-muted-foreground">{e.value}</p>
+              </div>
+              <CopyButton text={e.value} label={`Copy ${e.label}`} />
+            </li>
+          ))}
+        </ul>
+      </Part>
+
+      <Part title="Connect a client">
+        <Tabs defaultValue="claude" className="min-w-0">
+          <TabsList className="max-w-full justify-start overflow-x-auto [scrollbar-width:none]">
+            {SETUP.map((s) => (
+              <TabsTrigger key={s.id} value={s.id}>
+                {s.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {SETUP.map((s) => (
+            <TabsContent key={s.id} value={s.id} className="min-w-0">
+              <CodeBlock
+                code={s.code}
+                header={<span className="font-mono">{s.file}</span>}
+                wrap={s.id === "agents-md" || s.id === "claude"}
+              />
+            </TabsContent>
+          ))}
+        </Tabs>
+      </Part>
+
+      <Part title="Tools" aside="Pick one to see what an agent receives">
+        <ToolConsole />
+      </Part>
+
+      <Part
+        title="llms.txt"
+        aside={<code className="font-mono text-xs">{workspace.llms.replace("https://", "")}</code>}
+      >
+        <CodeBlock
+          code={llmsTxt({ resolved })}
+          header={<span>Rebuilt on every push</span>}
+          wrap
+          className="[&_pre]:max-h-80"
+        />
+      </Part>
     </div>
   );
 }
