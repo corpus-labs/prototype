@@ -376,7 +376,7 @@ export type ViewMode = "grid" | "rows";
  * How a screen lists its items: cards in a grid, or rows in a ruled list. The choice is
  * remembered per screen, in this browser only, and falls back to the default when storage is blocked.
  */
-export function useViewMode(screen: string, fallback: ViewMode = "rows") {
+export function useViewMode(screen: string, fallback: ViewMode = "grid") {
   const key = `corpus.view.${screen}`;
   const [mode, setMode] = React.useState<ViewMode>(() => {
     try {
