@@ -902,7 +902,7 @@ export function DocsEditor({
     <>
       <EditorToolbar state={toolbar} onAction={act} className="sticky top-14 z-10 mb-6 md:top-14" />
       <div
-        className="relative md:-ml-12 md:pl-12"
+        className="relative"
         onMouseOver={(e) => {
           const target = e.target instanceof Element ? e.target : null;
           const anchor = target?.closest?.("a");

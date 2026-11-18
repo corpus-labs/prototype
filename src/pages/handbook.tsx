@@ -457,93 +457,95 @@ function PageEditor({
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-14 md:py-12">
-      <header className="grid gap-6">
-        <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between md:gap-10">
-          <div className="min-w-0 flex-1">
-            <input
-              value={page.title}
-              onChange={(e) => update({ title: e.target.value })}
-              aria-label="Title"
-              aria-invalid={!!problem || undefined}
-              placeholder="Untitled"
-              className="w-full bg-transparent text-[28px] leading-tight font-semibold tracking-[-0.03em] outline-none placeholder:text-muted-foreground/50 md:text-[32px]"
-            />
-            <input
-              value={page.description}
-              onChange={(e) => update({ description: e.target.value })}
-              aria-label="Description"
-              placeholder="Add a one-line description"
-              className="mt-2 w-full max-w-[60ch] bg-transparent text-base leading-relaxed text-foreground/75 outline-none placeholder:text-muted-foreground/60 md:text-[17px]"
-            />
-            {problem && <p className="mt-2 text-sm text-bad">{problem}</p>}
-          </div>
-          <div className="flex shrink-0 flex-wrap items-center gap-2 md:pt-1.5">
-            <SegmentedControl
-              value={view}
-              onChange={(v) => onView(v as "rich" | "markdown")}
-              aria-label="Editor view"
-              options={[
-                { value: "rich", label: "Rich" },
-                { value: "markdown", label: "Markdown" },
-              ]}
-            />
-            {changed && (
-              <Button variant="ghost" size="sm" onClick={discard}>
-                Discard
-              </Button>
-            )}
-            <Button size="sm" disabled={!!problem} onClick={onDone}>
-              Done
+    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-10">
+      {/* Chrome: what the file is and what you can do with it, off the canvas. */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 md:mb-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <code className="truncate font-mono text-[13px] text-muted-foreground">{file.path}</code>
+          {changed ? (
+            <Dot tone="warn" className="shrink-0 text-warn">
+              Unsaved changes
+            </Dot>
+          ) : (
+            <Dot tone="off" className="shrink-0">
+              No changes
+            </Dot>
+          )}
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <SegmentedControl
+            value={view}
+            onChange={(v) => onView(v as "rich" | "markdown")}
+            aria-label="Editor view"
+            options={[
+              { value: "rich", label: "Rich" },
+              { value: "markdown", label: "Markdown" },
+            ]}
+          />
+          {changed && (
+            <Button variant="ghost" size="sm" onClick={discard}>
+              Discard
             </Button>
+          )}
+          <Button size="sm" disabled={!!problem} onClick={onDone}>
+            Done
+          </Button>
+        </div>
+      </div>
+
+      {/* The document itself: one bordered surface to type on, so the canvas reads
+          as an object next to the chrome above it. */}
+      <article className="rounded-xl border bg-background shadow-xs">
+        <div className="px-5 py-8 md:px-14 md:py-11">
+          <input
+            value={page.title}
+            onChange={(e) => update({ title: e.target.value })}
+            aria-label="Title"
+            aria-invalid={!!problem || undefined}
+            placeholder="Untitled"
+            className="w-full bg-transparent text-[28px] leading-tight font-semibold tracking-[-0.03em] outline-none placeholder:text-muted-foreground/50 md:text-[32px]"
+          />
+          <input
+            value={page.description}
+            onChange={(e) => update({ description: e.target.value })}
+            aria-label="Description"
+            placeholder="Add a one-line description"
+            className="mt-2 w-full max-w-[60ch] bg-transparent text-base leading-relaxed text-foreground/75 outline-none placeholder:text-muted-foreground/60 md:text-[17px]"
+          />
+          {problem && <p className="mt-2 text-sm text-bad">{problem}</p>}
+
+          <div className="mt-8">
+            {view === "rich" ? (
+              <React.Suspense
+                fallback={<p className="text-sm text-muted-foreground">Loading the editor…</p>}
+              >
+                <DocsEditor
+                  // Switching back from Markdown remounts it too, so it always loads the latest text.
+                  key={`${file.id}-rich-${revision}`}
+                  value={page.body}
+                  onChange={(body) => update({ body })}
+                  pagePath={file.path}
+                  pages={pages.map((p) => ({ title: p.title, path: p.path, folder: p.folder }))}
+                  autoFocus
+                />
+              </React.Suspense>
+            ) : (
+              <Textarea
+                value={page.body}
+                onChange={(e) => update({ body: e.target.value })}
+                spellCheck={false}
+                aria-label={`${file.path} source`}
+                className="min-h-[60svh] w-full resize-y rounded-lg border-0 bg-muted/40 p-3.5 font-mono text-[13px] leading-6 focus-visible:ring-0"
+              />
+            )}
           </div>
         </div>
-        <Facts
-          items={[
-            ["File", <code className="font-mono text-[13px]">{file.path}</code>],
-            [
-              "Status",
-              changed ? (
-                <Dot tone="warn" className="text-warn">
-                  Unsaved changes
-                </Dot>
-              ) : (
-                <Dot tone="off">No changes</Dot>
-              ),
-            ],
-          ]}
-        />
-        <p className="-mt-3 text-sm text-muted-foreground">
-          Edits stay in this tab. Committing them to the repository arrives with the server in Phase
-          5.
-        </p>
-      </header>
+      </article>
 
-      <div className="mt-10">
-        {view === "rich" ? (
-          <React.Suspense
-            fallback={<p className="text-sm text-muted-foreground">Loading the editor…</p>}
-          >
-            <DocsEditor
-              // Switching back from Markdown remounts it too, so it always loads the latest text.
-              key={`${file.id}-rich-${revision}`}
-              value={page.body}
-              onChange={(body) => update({ body })}
-              pagePath={file.path}
-              pages={pages.map((p) => ({ title: p.title, path: p.path, folder: p.folder }))}
-              autoFocus
-            />
-          </React.Suspense>
-        ) : (
-          <Textarea
-            value={page.body}
-            onChange={(e) => update({ body: e.target.value })}
-            spellCheck={false}
-            aria-label={`${file.path} source`}
-            className="min-h-[60svh] max-w-[72ch] resize-y rounded-xl bg-card p-4 font-mono text-[13px] leading-6 md:text-[13px]"
-          />
-        )}
-      </div>
+      <p className="mt-3 text-sm text-muted-foreground">
+        Edits stay in this tab. Committing them to the repository arrives with the server in Phase
+        5.
+      </p>
     </div>
   );
 }
