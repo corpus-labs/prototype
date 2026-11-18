@@ -33,11 +33,14 @@ export const blockFilter: FilterNodes = ($pos: ResolvedPos, node: { type: { name
 
 /**
  * A rect as tall as the block's first line, so the gutter sits beside that line
- * instead of centering on a tall block's middle.
+ * instead of centering on a tall block's middle. A computed line height of
+ * "normal" parses to NaN, so fall back to the type size.
  */
 export function firstLineRect(el: HTMLElement) {
   const rect = el.getBoundingClientRect();
-  const line = parseFloat(getComputedStyle(el).lineHeight) || 24;
+  const style = getComputedStyle(el);
+  const parsed = parseFloat(style.lineHeight);
+  const line = Number.isNaN(parsed) ? parseFloat(style.fontSize) * 1.45 : parsed;
   return {
     x: rect.x,
     y: rect.y,
@@ -49,6 +52,9 @@ export function firstLineRect(el: HTMLElement) {
     height: Math.min(rect.height, line),
   };
 }
+
+/** How far the gutter's vertical center sits below the plus button's center. */
+export const GRIP_DROP = 12.5;
 
 export type BlockAction = "duplicate" | "up" | "down" | "delete";
 

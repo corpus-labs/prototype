@@ -44,6 +44,7 @@ import {
   BlockGutter,
   blockFilter,
   firstLineRect,
+  GRIP_DROP,
   runBlockAction,
   type BlockAction,
 } from "./block-handle";
@@ -88,42 +89,42 @@ const BLOCKS: Block[] = [
     label: "Text",
     detail: "Plain paragraph text",
     icon: TextIcon,
-    run: callCommand(turnIntoTextCommand.key),
+    run: (ctx) => callCommand(turnIntoTextCommand.key)(ctx),
   },
   {
     id: "h1",
     label: "Heading 1",
     detail: "Section title",
     icon: Heading1Icon,
-    run: callCommand(wrapInHeadingCommand.key, 1),
+    run: (ctx) => callCommand(wrapInHeadingCommand.key, 1)(ctx),
   },
   {
     id: "h2",
     label: "Heading 2",
     detail: "Subsection title",
     icon: Heading2Icon,
-    run: callCommand(wrapInHeadingCommand.key, 2),
+    run: (ctx) => callCommand(wrapInHeadingCommand.key, 2)(ctx),
   },
   {
     id: "h3",
     label: "Heading 3",
     detail: "Minor heading",
     icon: Heading3Icon,
-    run: callCommand(wrapInHeadingCommand.key, 3),
+    run: (ctx) => callCommand(wrapInHeadingCommand.key, 3)(ctx),
   },
   {
     id: "ul",
     label: "Bulleted list",
     detail: "Simple bulleted list",
     icon: BulletListIcon,
-    run: callCommand(wrapInBulletListCommand.key),
+    run: (ctx) => callCommand(wrapInBulletListCommand.key)(ctx),
   },
   {
     id: "ol",
     label: "Numbered list",
     detail: "Steps in order",
     icon: OrderedListIcon,
-    run: callCommand(wrapInOrderedListCommand.key),
+    run: (ctx) => callCommand(wrapInOrderedListCommand.key)(ctx),
   },
   {
     id: "todo",
@@ -137,28 +138,28 @@ const BLOCKS: Block[] = [
     label: "Quote",
     detail: "Call out a quotation",
     icon: QuoteIcon,
-    run: callCommand(wrapInBlockquoteCommand.key),
+    run: (ctx) => callCommand(wrapInBlockquoteCommand.key)(ctx),
   },
   {
     id: "code",
     label: "Code block",
     detail: "Fenced code with a language",
     icon: CodeBlockIcon,
-    run: callCommand(createCodeBlockCommand.key),
+    run: (ctx) => callCommand(createCodeBlockCommand.key)(ctx),
   },
   {
     id: "hr",
     label: "Divider",
     detail: "Horizontal rule",
     icon: DividerIcon,
-    run: callCommand(insertHrCommand.key),
+    run: (ctx) => callCommand(insertHrCommand.key)(ctx),
   },
   {
     id: "table",
     label: "Table",
     detail: "Rows and columns",
     icon: TableIcon,
-    run: callCommand(insertTableCommand.key, { row: 3, col: 3 }),
+    run: (ctx) => callCommand(insertTableCommand.key, { row: 3, col: 3 })(ctx),
   },
   {
     id: "image",
@@ -511,6 +512,8 @@ export function DocsEditor({
           view.dispatch(tr);
         } else if (kind === "slash" && "id" in item) {
           view.dispatch(view.state.tr.delete(at.from, at.to));
+          // The choice consumed the typed slash itself.
+          autoSlash.current = null;
           if (item.id === "page") view.dispatch(view.state.tr.insertText("[["));
           else if (item.id === "image") setInserting(true);
           else item.run?.(ctx);
@@ -531,7 +534,11 @@ export function DocsEditor({
     const providers: Partial<Record<"slash" | "page", SlashProvider>> = {};
 
     const closeIf = (kind: "slash" | "page") => {
-      if (menuRef.current?.kind === kind) setMenu(null);
+      if (menuRef.current?.kind === kind) {
+        setMenu(null);
+        // The reader moved on without choosing, so take the typed slash back.
+        if (kind === "slash") tidyAutoSlash();
+      }
     };
 
     // Opens the menu while the text before the cursor matches, and closes it when it stops matching.
@@ -580,6 +587,7 @@ export function DocsEditor({
           if (event.key === "Escape") {
             dismissed.current = now.from;
             setMenu(null);
+            if (open.kind === "slash") tidyAutoSlash();
             providers[open.kind]?.hide();
             return true;
           }
@@ -636,7 +644,8 @@ export function DocsEditor({
               ctx,
               content: els.handle,
               getPlacement: () => "left",
-              getOffset: () => 14,
+              // Down the stack so the plus rides on the line and the grip below it.
+              getOffset: () => ({ mainAxis: 14, crossAxis: GRIP_DROP }),
               getPosition: ({ active }) => firstLineRect(active.el),
             });
             blockProvider.current = provider;
@@ -712,7 +721,27 @@ export function DocsEditor({
     // The editor loads `value` once. The parent remounts it to load new content.
   }, []);
 
-  /** Opens an empty line below the gutter's block and starts a slash command there. */
+  // Where the plus button typed a slash, so an abandoned menu can undo it.
+  const autoSlash = React.useRef<number | null>(null);
+
+  /** Removes the slash the plus button typed, unless the reader typed on it. */
+  const tidyAutoSlash = React.useCallback(() => {
+    const at = autoSlash.current;
+    if (at === null) return;
+    autoSlash.current = null;
+    run((ctx) => {
+      const view = ctx.get(editorViewCtx);
+      const $pos = view.state.doc.resolve(at);
+      if ($pos.parent.type.name !== "paragraph" || $pos.parent.textContent !== "/") return;
+      view.dispatch(view.state.tr.insertText("", at, at + 1));
+    });
+  }, [run]);
+
+  /**
+   * Opens an empty line below the gutter's block and starts a slash command
+   * there. The slash is typed for the reader, so if they abandon the menu the
+   * line is tidied back to empty.
+   */
   const addBelow = (active: ActiveNode) => {
     run((ctx) => {
       const view = ctx.get(editorViewCtx);
@@ -721,6 +750,7 @@ export function DocsEditor({
       let tr = view.state.tr.insert(after, paragraph.create());
       tr = tr.setSelection(TextSelection.create(tr.doc, after + 1)).insertText("/");
       view.dispatch(tr.scrollIntoView());
+      autoSlash.current = after + 1;
       view.focus();
     });
   };
@@ -888,6 +918,14 @@ export function DocsEditor({
           stopHover();
           if (cardHide.current !== null) window.clearTimeout(cardHide.current);
           cardHide.current = window.setTimeout(() => setCard(null), 120);
+        }}
+        // Leaving the editor closes whatever was open, since no typing follows
+        // to do it. The floats live inside this wrapper, so choosing from a
+        // menu never blurs.
+        onBlur={(e) => {
+          if (e.currentTarget.contains(e.relatedTarget)) return;
+          setMenu(null);
+          tidyAutoSlash();
         }}
       >
         <div ref={host} data-docs-editor className="relative" />
