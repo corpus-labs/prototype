@@ -24,8 +24,29 @@ The prototype read like an analytics product wrapped around a library: it opened
 
 **Why.** An edit mode is the clearest way the prototype felt unlike Notion. Showing the agent's copy beside the text you're typing is the product's idea made visible.
 
+## 4. A project's home is a page
+
+**Decision.** Charged UI's Overview and each docs project's overview become home pages: what the project is, one line linking what of it is waiting in the inbox, and an index of its pages. The weekly request counts and client shares move to Settings, and the questions to the inbox.
+
+**Why.** The numbers were the first thing on every project, which made each one read as a dashboard. They matter less day to day than what's in the project and what's waiting.
+
+## 5. One Settings screen
+
+**Decision.** Agents and MCP, Plugins, and Integrations become sections of the one Settings screen, next to General, AI, Publishing, License, and Appearance. Their old routes open Settings at their section, and the workspace menu links to each.
+
+**Why.** Five screens of configuration were five places to look. What's left on them that's about content, like questions and saved notes, lives in the inbox.
+
+## 6. One editor for docs pages, guidelines, and component files
+
+**Decision.** Guidelines are always editable in the docs editor, like docs pages. Component files open in the same editor from their Edit screen, with Markdown for the source. On these MDX pages, `<Do>`, `<Dont>`, `<Callout>`, and `<Preview>` blocks show as cards that read like the page, each with a small form; the slash menu adds Do, Don't, and Callout blocks. The file keeps each block's exact source: a test reads every guideline and component file through the editor and expects the same text back. Guideline and component edits wait as "not committed" until Commit, through the prototype's simulated commit.
+
+**Why.** Three ways to write (a rich editor for docs, a source textarea with a preview for MDX, and a separate screen per file) made the design system feel like a different product from the docs.
+
+**Revisit if** writing the block forms by hand costs more than a general MDX block editor.
+
 ## Not in this exploration
 
-- Component and guideline pages still use their own MDX editor and Edit button.
+- Component pages still render from the structured sample data (props, examples with rendered previews and code, rules), and editing stays on their own screen. Making a component page a plain MDX page needs Do and Don't blocks that carry a rendered preview and code, which the MDX dialect in `CLAUDE.md` doesn't have. That's a dialect change to decide first.
+- The component agent payload is still built from that structured data, so editing a component file doesn't change it until Phase 1 builds payloads from the files.
 - The Projects dashboard still exists at `#projects`, reachable from the workspace menu.
 - Publishing, history, and who changed what wait for Phase 5.

@@ -173,7 +173,7 @@ export function Overview() {
             </a>
           }
         >
-          <ul className="grid gap-x-10 border-t sm:grid-cols-2">
+          <ul className="grid grid-cols-[minmax(0,1fr)] gap-x-10 border-t sm:grid-cols-[repeat(2,minmax(0,1fr))]">
             {components.map((c) => (
               <li key={c.id} className="border-b">
                 <a
