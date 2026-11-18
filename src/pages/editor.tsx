@@ -46,8 +46,11 @@ import { drafts, questions } from "@/data/workspace";
 import { slug } from "@/lib/mdx-lite";
 import { navigate } from "@/lib/router";
 import { fileMeta, templateFor, useStore, type Provider } from "@/lib/store";
-import { cn } from "@/lib/utils";
-import { MdxPeople } from "@/pages/guidelines";
+import { joinFrontmatter, splitFrontmatter } from "@core/markdown/frontmatter";
+
+const DocsEditor = React.lazy(() =>
+  import("@/components/docs-editor/docs-editor").then((m) => ({ default: m.DocsEditor })),
+);
 
 /** How each AI provider is named in the UI. Corpus works with whichever one the owner picks. */
 export const PROVIDER_LABEL: Record<Provider, string> = {
@@ -64,17 +67,6 @@ export function modelLabel(provider: string, model: string) {
   if (provider === "anthropic" && m)
     return `Claude ${m[1][0].toUpperCase()}${m[1].slice(1)} ${m[2]}.${m[3]}`;
   return model || "your model";
-}
-
-function useWide(query = "(min-width: 1024px)") {
-  const [wide, setWide] = React.useState(() => window.matchMedia(query).matches);
-  React.useEffect(() => {
-    const mq = window.matchMedia(query);
-    const on = () => setWide(mq.matches);
-    mq.addEventListener("change", on);
-    return () => mq.removeEventListener("change", on);
-  }, [query]);
-  return wide;
 }
 
 function diffStats(before: string, after: string) {
@@ -125,11 +117,11 @@ export function Editor({ id }: { id: string }) {
   const { files, saved, setFile, commit, resolved, inReview, ai, pendingDraft, setPendingDraft } =
     useStore();
   const meta = fileMeta(id);
-  const wide = useWide();
-  const [mode, setMode] = React.useState<"write" | "preview" | "split">(() =>
-    window.matchMedia("(min-width: 1024px)").matches ? "split" : "write",
-  );
-  const effective = mode === "split" && !wide ? "write" : mode;
+  // Rich is the same editor docs pages and guidelines use; Markdown is the file's source.
+  const [mode, setMode] = React.useState<"rich" | "markdown">("rich");
+  // The rich editor loads its text once, so anything that replaces the text from outside remounts it.
+  const [revision, setRevision] = React.useState(0);
+  const remount = () => setRevision((r) => r + 1);
   const area = React.useRef<HTMLTextAreaElement>(null);
   const placed = React.useRef(false);
   const timer = React.useRef<number | null>(null);
@@ -194,6 +186,8 @@ export function Editor({ id }: { id: string }) {
     setHint(null);
     setDrafting(qid);
     setNotice(null);
+    const back = mode;
+    setMode("markdown");
     timer.current = window.setInterval(() => {
       i = Math.min(text.length, i + Math.ceil(text.length / 45));
       setFile(id, start + text.slice(0, i));
@@ -205,6 +199,8 @@ export function Editor({ id }: { id: string }) {
         setPendingDraft(null);
         setMessage(d.commit);
         setNotice({ qid, lines: text.trim().split("\n").length, before });
+        setMode(back);
+        remount();
       }
     }, 28);
   };
@@ -286,6 +282,7 @@ export function Editor({ id }: { id: string }) {
                   // Discarding is one click, so it gets one click to take back.
                   const discarded = body;
                   setFile(id, base ?? "");
+                  remount();
                   setNotice(null);
                   const toastId = toast.add({
                     title: "Changes discarded",
@@ -294,6 +291,7 @@ export function Editor({ id }: { id: string }) {
                       children: "Undo",
                       onClick: () => {
                         setFile(id, discarded);
+                        remount();
                         toast.close(toastId);
                       },
                     },
@@ -414,6 +412,7 @@ export function Editor({ id }: { id: string }) {
             className="self-start sm:self-auto"
             onClick={() => {
               setFile(id, notice.before);
+              remount();
               setNotice(null);
             }}
           >
@@ -425,20 +424,20 @@ export function Editor({ id }: { id: string }) {
 
       <div className="mt-8 flex flex-wrap items-center gap-2">
         <SegmentedControl
-          value={effective}
+          value={mode}
           onChange={(v) => {
-            // Preview unmounts the source, and its caret with it.
-            if (v === "preview") placed.current = false;
+            // Leaving the source drops its caret.
+            placed.current = false;
             setMode(v as typeof mode);
           }}
           aria-label="Editor view"
           options={[
-            { value: "write", label: "Write" },
-            { value: "preview", label: "Preview" },
-            { value: "split", label: "Split", className: "hidden lg:inline-flex" },
+            { value: "rich", label: "Rich" },
+            { value: "markdown", label: "Markdown" },
           ]}
         />
-        {effective !== "preview" && (
+        {/* In the rich editor, the slash menu adds these blocks. */}
+        {mode === "markdown" && (
           <div
             className="flex items-center gap-0.5 rounded-lg border p-0.5"
             role="toolbar"
@@ -475,8 +474,8 @@ export function Editor({ id }: { id: string }) {
         </p>
       </div>
 
-      <div className={cn("mt-3 grid gap-4", effective === "split" && "grid-cols-2")}>
-        {effective !== "preview" && (
+      <div className="mt-3">
+        {mode === "markdown" ? (
           <Textarea
             ref={area}
             value={body}
@@ -487,10 +486,22 @@ export function Editor({ id }: { id: string }) {
             aria-label={`${meta.path} source`}
             className="h-[62svh] min-h-80 resize-none rounded-xl bg-card p-4 font-mono text-[13px] leading-6 field-sizing-fixed md:text-[13px] lg:h-[calc(100svh-22rem)]"
           />
-        )}
-        {effective !== "write" && (
-          <div className="h-[62svh] min-h-80 overflow-auto rounded-xl border p-5 lg:h-[calc(100svh-22rem)]">
-            <MdxPeople body={body} className="max-w-none" />
+        ) : (
+          <div className="rounded-xl border px-5 py-6 md:px-10 md:py-8">
+            <React.Suspense
+              fallback={<p className="text-sm text-muted-foreground">Loading the editor…</p>}
+            >
+              <DocsEditor
+                key={`${id}-${revision}`}
+                value={splitFrontmatter(body).body}
+                onChange={(next) =>
+                  setFile(id, joinFrontmatter({ lines: splitFrontmatter(body).lines, body: next }))
+                }
+                pagePath={meta.path}
+                pages={[]}
+                mdx
+              />
+            </React.Suspense>
           </div>
         )}
       </div>
