@@ -204,7 +204,7 @@ function ProjectSwitcher({ current }: { current: ProjectSummary | null }) {
         render={
           <SidebarMenuButton
             size="lg"
-            className="data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground group-data-[collapsible=icon]:p-1.5!"
+            className="data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground group-data-[collapsible=icon]:h-9! group-data-[collapsible=icon]:p-1.5!"
           />
         }
       >
@@ -348,12 +348,15 @@ function AppSidebar({ route }: { route: string }) {
   const docs = docsProjectOf(route);
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <ProjectSwitcher current={current} />
           </SidebarMenuItem>
+        </SidebarMenu>
+        {/* Its own menu, so the header's gap separates it from the switcher, collapsed or not. */}
+        <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Search"
@@ -922,8 +925,14 @@ export function AppShell({ route, children }: { route: string; children: React.R
   return (
     <SidebarProvider>
       <AppSidebar route={route} />
-      {/* On desktop the page sits flat beside the sidebar, split by one rule, and scrolls on its own. */}
-      <SidebarInset data-scroll-root className="min-w-0 md:h-svh md:overflow-y-auto">
+      {/*
+        On desktop the content is a panel on the tinted canvas, like an app window, and scrolls on its own.
+        It runs off the bottom of the screen, so only the top corners are rounded and text never meets a curve.
+      */}
+      <SidebarInset
+        data-scroll-root
+        className="min-w-0 md:h-[calc(100svh-0.5rem)] md:overflow-y-auto md:ring-1 md:ring-black/[0.06] md:peer-data-[variant=inset]:mb-0 md:peer-data-[variant=inset]:rounded-b-none md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0 dark:md:ring-white/[0.08]"
+      >
         <DesktopTopbar route={route} />
         <MobileTopbar route={route} />
         <div className="flex-1 pb-24 md:pb-12">{children}</div>
