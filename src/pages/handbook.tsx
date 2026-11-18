@@ -535,7 +535,7 @@ function PageEditor({
                 onChange={(e) => update({ body: e.target.value })}
                 spellCheck={false}
                 aria-label={`${file.path} source`}
-                className="min-h-[60svh] w-full resize-y rounded-lg border-0 bg-muted/40 p-3.5 font-mono text-[13px] leading-6 focus-visible:ring-0"
+                className="min-h-[60svh] w-full resize-y rounded-none border-0 bg-transparent p-0 font-mono text-[13px] leading-6 focus-visible:ring-0"
               />
             )}
           </div>
