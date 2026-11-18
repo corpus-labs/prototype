@@ -204,18 +204,18 @@ function ProjectSwitcher({ current }: { current: ProjectSummary | null }) {
         render={
           <SidebarMenuButton
             size="lg"
-            className="data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground"
+            className="data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground group-data-[collapsible=icon]:p-1.5!"
           />
         }
       >
         <CorpusMark className="size-5!" />
-        <span className="grid min-w-0 flex-1 text-left leading-tight">
+        <span className="grid min-w-0 flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
           <span className="truncate text-sm font-semibold">{current?.name ?? "All projects"}</span>
           <span className="truncate text-xs text-muted-foreground">
             {current ? KIND_LABEL[current.kind] : `${projects.length} projects`}
           </span>
         </span>
-        <ChevronsUpDownIcon className="ml-auto text-muted-foreground" />
+        <ChevronsUpDownIcon className="ml-auto text-muted-foreground group-data-[collapsible=icon]:hidden" />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-60" align="start" sideOffset={6}>
         <ProjectMenuItems current={current} />
