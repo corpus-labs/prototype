@@ -39,7 +39,6 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { ChoiceTile, CopyButton, PageHeader } from "@/components/common";
@@ -581,9 +580,22 @@ function Appearance() {
 }
 
 export function WorkspaceSettings() {
-  const [tab, setTab] = React.useState("ai");
+  const toLicense = () =>
+    document.getElementById("settings-license")?.scrollIntoView({ behavior: "smooth" });
+  const sections = [
+    { id: "general", label: "General", narrow: true, content: <General /> },
+    { id: "ai", label: "AI", narrow: true, content: <AISettings /> },
+    {
+      id: "publishing",
+      label: "Publishing",
+      narrow: true,
+      content: <Publishing toLicense={toLicense} />,
+    },
+    { id: "license", label: "License", narrow: false, content: <License /> },
+    { id: "appearance", label: "Appearance", narrow: false, content: <Appearance /> },
+  ];
   return (
-    <div className="mx-auto w-full max-w-[920px] px-4 py-8 md:px-8 md:py-12">
+    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-10">
       <PageHeader
         title="Settings"
         description={
@@ -593,42 +605,25 @@ export function WorkspaceSettings() {
           </>
         }
       />
-      <Tabs value={tab} onValueChange={(v: string) => setTab(v)} className="mt-10">
-        <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-          <TabsList variant="line" className="w-full min-w-max justify-start border-b">
-            <TabsTrigger value="general" className="flex-none px-3">
-              General
-            </TabsTrigger>
-            <TabsTrigger value="ai" className="flex-none px-3">
-              AI
-            </TabsTrigger>
-            <TabsTrigger value="publishing" className="flex-none px-3">
-              Publishing
-            </TabsTrigger>
-            <TabsTrigger value="license" className="flex-none px-3">
-              License
-            </TabsTrigger>
-            <TabsTrigger value="appearance" className="flex-none px-3">
-              Appearance
-            </TabsTrigger>
-          </TabsList>
-        </div>
-        <TabsContent value="general" className="mt-6 max-w-xl">
-          <General />
-        </TabsContent>
-        <TabsContent value="ai" className="mt-6 max-w-xl">
-          <AISettings />
-        </TabsContent>
-        <TabsContent value="publishing" className="mt-6 max-w-xl">
-          <Publishing toLicense={() => setTab("license")} />
-        </TabsContent>
-        <TabsContent value="license" className="mt-6">
-          <License />
-        </TabsContent>
-        <TabsContent value="appearance" className="mt-6">
-          <Appearance />
-        </TabsContent>
-      </Tabs>
+      {/* Every setting on one page: the section named on the left, its fields beside it. */}
+      <div className="mt-8 divide-y border-y">
+        {sections.map((sec) => (
+          <section
+            key={sec.id}
+            id={`settings-${sec.id}`}
+            aria-labelledby={`settings-${sec.id}-title`}
+            className="grid scroll-mt-16 gap-x-10 gap-y-5 py-10 lg:grid-cols-[11rem_minmax(0,1fr)]"
+          >
+            <h2
+              id={`settings-${sec.id}-title`}
+              className="text-xl leading-snug font-semibold tracking-[-0.02em] lg:sticky lg:top-20 lg:self-start"
+            >
+              {sec.label}
+            </h2>
+            <div className={cn("min-w-0", sec.narrow && "max-w-xl")}>{sec.content}</div>
+          </section>
+        ))}
+      </div>
     </div>
   );
 }

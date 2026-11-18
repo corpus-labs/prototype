@@ -15,7 +15,7 @@ import {
   useEffectiveReader,
   type Hover,
 } from "@/components/common";
-import { guidelineFiles, workspace } from "@/data/workspace";
+import { guidelineFiles, questions, workspace } from "@/data/workspace";
 import { guideLines } from "@/lib/agent-format";
 import { Inline, parseMdx, sectionize, type Block } from "@/lib/mdx-lite";
 import { navigate } from "@/lib/router";
@@ -131,38 +131,102 @@ export function MdxPeople({
   );
 }
 
+/** What a guideline covers, read from its own headings, and how often agents were sent to it. */
+function useGuideSummaries() {
+  const { saved } = useStore();
+  return guidelineFiles.map((g) => {
+    const blocks = parseMdx(saved[g.id] ?? g.body);
+    const headings = blocks.filter((b) => b.t === "h2").map((b) => (b as { text: string }).text);
+    const examples = blocks.filter((b) => b.t === "do" || b.t === "dont").length;
+    const answered = questions.filter((q) => q.source?.route === `guide-${g.id}`);
+    return {
+      g,
+      headings,
+      examples,
+      asks: answered.reduce((n, q) => n + q.count, 0),
+    };
+  });
+}
+
+/**
+ * Guidelines as one ruled index: what each one covers, read from its headings, then how
+ * many agent questions it answered this week. Columns line up like the other indexes.
+ */
 export function GuidelinesIndex() {
+  const rows = useGuideSummaries();
+  const used = rows.filter((r) => r.asks > 0);
+  const asks = used.reduce((n, r) => n + r.asks, 0);
+  const cols = "md:grid-cols-[minmax(0,1fr)_8rem_7rem_4.5rem]";
   return (
-    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-12">
+    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-10">
       <PageHeader
         title="Guidelines"
-        description="How the components work together: choosing between them, writing their labels, and spacing them."
+        description={
+          asks
+            ? `${guidelineFiles.length} guidelines on how the components work together. ${used.length} of them answered ${asks} agent questions this week.`
+            : `${guidelineFiles.length} guidelines on how the components work together.`
+        }
       />
-      <ul className="mt-10 divide-y border-y">
-        {guidelineFiles.map((g) => (
-          <li
-            key={g.id}
-            className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8"
-          >
-            <a
-              href={`#guide-${g.id}`}
-              className="group -m-1 min-w-0 rounded-md p-1 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      <div className="mt-8">
+        <div className={cn("hidden gap-x-6 pb-2 text-[13px] text-muted-foreground md:grid", cols)}>
+          <span>Guideline</span>
+          <span>Answered</span>
+          <span>Updated</span>
+          <span />
+        </div>
+        <ul className="divide-y border-y">
+          {rows.map(({ g, headings, examples, asks }) => (
+            <li
+              key={g.id}
+              className={cn(
+                "grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-6 gap-y-3 py-5",
+                cols,
+              )}
             >
-              <p className="text-[15px] font-medium underline-offset-4 group-hover:underline">
-                {g.title}
+              <a
+                href={`#guide-${g.id}`}
+                className="group col-span-2 -m-1 min-w-0 rounded-md p-1 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:col-span-1"
+              >
+                <p className="text-[17px] font-semibold tracking-[-0.01em] decoration-foreground/30 underline-offset-4 group-hover:underline">
+                  {g.title}
+                </p>
+                <p className="mt-1 max-w-[60ch] text-[15px] text-pretty text-foreground/75">
+                  {g.description}
+                </p>
+                {headings.length > 0 && (
+                  <p className="mt-2 max-w-[60ch] text-sm text-pretty text-muted-foreground">
+                    {headings.join(", ")}
+                    {examples > 0 &&
+                      `. ${examples} do and don’t ${examples === 1 ? "example" : "examples"}`}
+                    .
+                  </p>
+                )}
+              </a>
+              <p className="flex items-baseline gap-1.5 md:block md:pt-1">
+                {asks ? (
+                  <>
+                    <span className="text-xl leading-none font-semibold tracking-[-0.02em] tabular">
+                      {asks}
+                    </span>{" "}
+                    <span className="text-sm text-muted-foreground">
+                      {asks === 1 ? "question" : "questions"}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-sm text-muted-foreground">None this week</span>
+                )}
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">{g.description}</p>
-            </a>
-            <div className="flex shrink-0 items-center gap-4">
-              <span className="text-sm text-muted-foreground">Updated {g.updated}</span>
-              <Button variant="outline" size="sm" onClick={() => navigate(`edit-${g.id}`)}>
-                <PenLineIcon />
-                Edit
-              </Button>
-            </div>
-          </li>
-        ))}
-      </ul>
+              <p className="text-sm text-muted-foreground max-md:hidden md:pt-1">{g.updated}</p>
+              <div className="col-start-2 row-start-2 md:col-start-auto md:row-start-auto md:justify-self-end">
+                <Button variant="outline" size="sm" onClick={() => navigate(`edit-${g.id}`)}>
+                  <PenLineIcon />
+                  Edit
+                </Button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

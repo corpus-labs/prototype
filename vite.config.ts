@@ -14,11 +14,14 @@ export default defineConfig({
   fmt: {},
   plugins: lazyPlugins(() => [react(), tailwindcss(), ...(single ? [viteSingleFile()] : [])]),
   resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    alias: [
+      { find: "@", replacement: fileURLToPath(new URL("./src", import.meta.url)) },
       // Framework-free code shared by the app and, from Phase 2, the server.
-      "@core": fileURLToPath(new URL("./core", import.meta.url)),
-    },
+      { find: "@core", replacement: fileURLToPath(new URL("./core", import.meta.url)) },
+      // The docs editor registers the languages it offers, so prism gets
+      // refractor's empty core rather than the build with all 62.
+      { find: /^refractor$/, replacement: "refractor/core" },
+    ],
   },
   build: single ? { assetsInlineLimit: 100_000_000 } : undefined,
 });

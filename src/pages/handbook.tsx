@@ -14,9 +14,11 @@ import {
   Dot,
   Facts,
   PageHeader,
+  RailBlock,
   ReaderSwitch,
   Section,
   SegmentedControl,
+  SideRail,
   linkClass,
   useEffectiveReader,
   type Hover,
@@ -62,14 +64,27 @@ function pageLines(page: DocPage): Line[] {
   return [...intro, ...guideLines(page.body)];
 }
 
+const QUEUE_ROW =
+  "grid grid-cols-[3.25rem_minmax(0,1fr)] gap-x-4 gap-y-1 sm:grid-cols-[4rem_minmax(0,1fr)_auto] sm:gap-x-5";
+
 export function DocsOverview({ project }: { project: DocsProject }) {
   const { drafts, pages } = usePages(project);
   const help = project.kind === "help-center";
+  const unit = help ? "questions" : "requests";
+  const byCount = [...project.questions].sort((x, y) => y.count - x.count);
+  const gaps = byCount.filter((q) => q.status === "gap");
+  const answered = byCount.filter((q) => q.status === "answered");
+  const asked = gaps.reduce((n, q) => n + q.count, 0);
+  const who = help ? "Customers and agents" : "Agents";
   return (
-    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-12">
+    <div className="mx-auto w-full max-w-[1200px] px-4 py-8 md:px-8 md:py-10">
       <PageHeader
         title={project.name}
-        description={project.description}
+        description={
+          gaps.length
+            ? `${who} asked ${project.requests} times this week. ${gaps.length} ${gaps.length === 1 ? "question" : "questions"} had no answer, asked ${asked} times in all.`
+            : `${who} asked ${project.requests} times this week, and every question found an answer.`
+        }
         actions={
           <>
             <Button variant="outline" onClick={() => navigate(`site-${project.id}`)}>
@@ -91,83 +106,157 @@ export function DocsOverview({ project }: { project: DocsProject }) {
             </Button>
           </>
         }
-        meta={
-          <Facts
-            items={[
-              ["Repository", <code className="font-mono text-[13px]">{project.repo}</code>],
-              ["Site", project.site],
-              ["Pages", project.pages.length],
-              ["Updated", project.updated.toLowerCase()],
-            ]}
-          />
-        }
       />
 
-      <div className="mt-12 grid gap-16">
-        {help && <SupportBot project={project} pages={pages} />}
-        <Section
-          title={help ? "Customer questions" : "Agent questions"}
-          aside={
-            <span className="tabular">
-              {project.requests} {help ? "questions" : "requests"} this week
-            </span>
-          }
-        >
-          <ul className="divide-y border-y">
-            {project.questions.map((q) => (
-              <li key={q.id} className="py-4">
-                <p className="text-[15px] text-pretty">{q.text}</p>
-                <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                  {q.status === "gap" ? (
-                    <Dot tone="bad" className="text-bad">
-                      No answer yet
-                    </Dot>
-                  ) : (
-                    <Dot tone="good">Answered</Dot>
-                  )}
-                  <span className="tabular">Asked {q.count} times</span>
-                  {q.source && (
-                    <a href={`#${q.source.route}`} className={cn(linkClass, "font-normal")}>
-                      {q.source.label}
-                    </a>
-                  )}
+      {/* The work and the pages on the left, the facts on the right. */}
+      <div className="mt-10 grid gap-x-10 gap-y-14 lg:grid-cols-[minmax(0,1fr)_288px]">
+        <div className="grid min-w-0 content-start gap-14">
+          <Section title="Needs an answer" aside={gaps.length > 1 && <span>Most asked first</span>}>
+            {gaps.length ? (
+              <ol className="divide-y border-y">
+                {gaps.map((q) => (
+                  <li key={q.id} className={cn(QUEUE_ROW, "gap-y-3 py-5 sm:items-center")}>
+                    <p className="leading-none">
+                      <span className="block text-[28px] leading-none font-semibold tracking-[-0.03em] tabular">
+                        {q.count}
+                      </span>
+                      <span className="mt-1.5 block text-xs text-muted-foreground">asks</span>
+                    </p>
+                    <div className="min-w-0">
+                      <p className="text-[17px] leading-snug font-medium text-pretty">{q.text}</p>
+                      <p className="mt-1.5 text-sm">
+                        <Dot tone="bad" className="text-bad">
+                          No answer yet
+                        </Dot>
+                      </p>
+                    </div>
+                    <span className="col-start-2 text-sm text-muted-foreground sm:col-start-3">
+                      No page covers this
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <div className="border-y py-8">
+                <Dot tone="good" className="text-[17px] font-medium">
+                  Every question answered
+                </Dot>
+                <p className="mt-1.5 pl-3 text-sm text-muted-foreground">
+                  {help ? "Customers" : "Agents"} found an answer in these pages all week.
                 </p>
-              </li>
-            ))}
-          </ul>
-        </Section>
-
-        <Section title="Pages">
-          <div className="grid gap-x-10 gap-y-10 md:grid-cols-2">
-            {foldersOf(pages).map(([folder, list]) => (
-              <div key={folder}>
-                <h3 className="text-sm font-semibold">{folder}</h3>
-                <ul className="mt-3 divide-y border-y">
-                  {list.map((p) => (
-                    <li key={p.id}>
-                      <a
-                        href={`#${project.id}-${p.id}`}
-                        className="group -mx-1 flex items-baseline justify-between gap-4 rounded-md px-1 py-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                      >
-                        <span className="min-w-0">
-                          <span className="block text-[15px] font-medium underline-offset-4 group-hover:underline">
-                            {p.title}
-                          </span>
-                          <span className="mt-0.5 block text-sm text-muted-foreground">
-                            {p.description}
-                          </span>
-                        </span>
-                        <span className="shrink-0 text-sm text-muted-foreground">
-                          {drafts[p.id] ? <Dot tone="warn">Edited</Dot> : p.updated}
-                        </span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
               </div>
-            ))}
-          </div>
-        </Section>
+            )}
+          </Section>
+
+          {help && <SupportBot project={project} pages={pages} />}
+
+          {/* An index: each folder named once on the left, its pages beside it. */}
+          <Section
+            title="Pages"
+            aside={
+              <span className="tabular">
+                {pages.length} in {foldersOf(pages).length} folders
+              </span>
+            }
+          >
+            <div className="divide-y border-y">
+              {foldersOf(pages).map(([folder, list]) => (
+                <div key={folder} className="grid gap-x-6 py-2 sm:grid-cols-[9rem_minmax(0,1fr)]">
+                  <h3 className="pt-3 text-sm font-medium sm:pt-[0.9rem]">{folder}</h3>
+                  <ul className="divide-y">
+                    {list.map((p) => (
+                      <li key={p.id}>
+                        <a
+                          href={`#${project.id}-${p.id}`}
+                          className="group -mx-1 flex items-baseline justify-between gap-4 rounded-md px-1 py-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                        >
+                          <span className="min-w-0">
+                            <span className="block text-[15px] font-medium underline-offset-4 group-hover:underline">
+                              {p.title}
+                            </span>
+                            <span className="mt-0.5 block text-sm text-pretty text-muted-foreground">
+                              {p.description}
+                            </span>
+                          </span>
+                          <span className="shrink-0 text-sm text-muted-foreground">
+                            {drafts[p.id] ? <Dot tone="warn">Edited</Dot> : p.updated}
+                          </span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </Section>
+
+          {answered.length > 0 && (
+            <Section title="Answered">
+              <ul className="divide-y border-y">
+                {answered.map((q) => (
+                  <li key={q.id} className={cn(QUEUE_ROW, "items-baseline py-3")}>
+                    <span className="text-[15px] text-muted-foreground tabular">{q.count}</span>
+                    <span className="text-[15px] text-pretty">{q.text}</span>
+                    {q.source && (
+                      <a
+                        href={`#${q.source.route}`}
+                        className={cn(linkClass, "col-start-2 text-sm font-normal sm:col-start-3")}
+                      >
+                        {q.source.label}
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
+        </div>
+
+        <SideRail>
+          <RailBlock title="This week">
+            <p className="flex items-baseline gap-2">
+              <span className="text-[28px] leading-none font-semibold tracking-[-0.03em] tabular">
+                {project.requests.toLocaleString()}
+              </span>
+              <span className="text-sm text-muted-foreground">{unit}</span>
+            </p>
+            <p className="mt-3 text-sm">
+              {gaps.length ? (
+                <Dot tone="bad" className="text-bad">
+                  {gaps.length} without an answer
+                </Dot>
+              ) : (
+                <Dot tone="good">All answered</Dot>
+              )}
+            </p>
+          </RailBlock>
+
+          <RailBlock title="Project">
+            <p className="text-sm leading-relaxed text-pretty text-foreground/75">
+              {project.description}
+            </p>
+            <dl className="mt-4 grid gap-2 text-sm">
+              <div className="flex items-baseline justify-between gap-4">
+                <dt className="text-muted-foreground">Repository</dt>
+                <dd className="truncate">
+                  <code className="font-mono text-[13px]">{project.repo}</code>
+                </dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-4">
+                <dt className="text-muted-foreground">Site</dt>
+                <dd className="truncate">
+                  <a href={`#site-${project.id}`} className={cn(linkClass, "font-normal")}>
+                    {project.site}
+                  </a>
+                </dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-4">
+                <dt className="text-muted-foreground">Updated</dt>
+                <dd>{project.updated.toLowerCase()}</dd>
+              </div>
+            </dl>
+          </RailBlock>
+        </SideRail>
       </div>
     </div>
   );
@@ -367,29 +456,38 @@ function PageEditor({
     });
   };
 
+  // The same quiet hover as a sidebar row, so the title and description read as fields you can
+  // type in. Negative margins keep their text where it sits when reading.
+  const field =
+    "-mx-2 w-[calc(100%+1rem)] rounded-md bg-transparent px-2 outline-none transition-colors hover:bg-muted/60 focus:bg-transparent";
+
   return (
-    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-14 md:py-12">
-      <header className="grid gap-6">
-        <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between md:gap-10">
-          <div className="min-w-0 flex-1">
-            <input
-              value={page.title}
-              onChange={(e) => update({ title: e.target.value })}
-              aria-label="Title"
-              aria-invalid={!!problem || undefined}
-              placeholder="Untitled"
-              className="w-full bg-transparent text-[28px] leading-tight font-semibold tracking-[-0.03em] outline-none placeholder:text-muted-foreground/50 md:text-[32px]"
-            />
-            <input
-              value={page.description}
-              onChange={(e) => update({ description: e.target.value })}
-              aria-label="Description"
-              placeholder="Add a one-line description"
-              className="mt-2 w-full max-w-[60ch] bg-transparent text-base leading-relaxed text-foreground/75 outline-none placeholder:text-muted-foreground/60 md:text-[17px]"
-            />
-            {problem && <p className="mt-2 text-sm text-bad">{problem}</p>}
+    <>
+      {/*
+        Editing chrome, pinned under the top bar: what's being edited, whether it's saved,
+        and how to finish. Everything below it is the page, and all of it is editable.
+      */}
+      <div className="sticky top-[calc(env(safe-area-inset-top,0px)+3.25rem)] z-10 border-b bg-background/90 backdrop-blur-md md:top-12">
+        <div className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 md:px-8">
+          <div className="flex min-w-0 items-center gap-3 text-sm">
+            <span className="shrink-0 font-medium">Editing</span>
+            <code className="hidden truncate font-mono text-xs text-muted-foreground sm:inline">
+              {file.path}
+            </code>
+            <span
+              className="shrink-0"
+              title="Edits stay in this tab. Committing them to the repository arrives with the server in Phase 5."
+            >
+              {changed ? (
+                <Dot tone="warn" className="text-warn">
+                  Unsaved changes
+                </Dot>
+              ) : (
+                <span className="text-muted-foreground">No changes</span>
+              )}
+            </span>
           </div>
-          <div className="flex shrink-0 flex-wrap items-center gap-2 md:pt-1.5">
+          <div className="flex shrink-0 items-center gap-2">
             <SegmentedControl
               value={view}
               onChange={(v) => onView(v as "rich" | "markdown")}
@@ -409,53 +507,62 @@ function PageEditor({
             </Button>
           </div>
         </div>
-        <Facts
-          items={[
-            ["File", <code className="font-mono text-[13px]">{file.path}</code>],
-            [
-              "Status",
-              changed ? (
-                <Dot tone="warn" className="text-warn">
-                  Unsaved changes
-                </Dot>
-              ) : (
-                <Dot tone="off">No changes</Dot>
-              ),
-            ],
-          ]}
-        />
-        <p className="-mt-3 text-sm text-muted-foreground">
-          Edits stay in this tab. Committing them to the repository arrives with the server in Phase
-          5.
-        </p>
-      </header>
-
-      <div className="mt-10">
-        {view === "rich" ? (
-          <React.Suspense
-            fallback={<p className="text-sm text-muted-foreground">Loading the editor…</p>}
-          >
-            <DocsEditor
-              // Switching back from Markdown remounts it too, so it always loads the latest text.
-              key={`${file.id}-rich-${revision}`}
-              value={page.body}
-              onChange={(body) => update({ body })}
-              pagePath={file.path}
-              pages={pages.map((p) => ({ title: p.title, path: p.path, folder: p.folder }))}
-              autoFocus
-            />
-          </React.Suspense>
-        ) : (
-          <Textarea
-            value={page.body}
-            onChange={(e) => update({ body: e.target.value })}
-            spellCheck={false}
-            aria-label={`${file.path} source`}
-            className="min-h-[60svh] max-w-[72ch] resize-y rounded-xl bg-card p-4 font-mono text-[13px] leading-6 md:text-[13px]"
-          />
-        )}
       </div>
-    </div>
+
+      {/* The page itself, in the same place and type as when reading it. */}
+      <article className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-12">
+        <div className="max-w-[72ch]">
+          <input
+            value={page.title}
+            onChange={(e) => update({ title: e.target.value })}
+            aria-label="Title"
+            aria-invalid={!!problem || undefined}
+            placeholder="Untitled"
+            className={cn(
+              field,
+              "text-[28px] leading-tight font-semibold tracking-[-0.03em] placeholder:text-muted-foreground/50 md:text-[32px]",
+            )}
+          />
+          <input
+            value={page.description}
+            onChange={(e) => update({ description: e.target.value })}
+            aria-label="Description"
+            placeholder="Add a one-line description"
+            className={cn(
+              field,
+              "mt-1 py-0.5 text-base leading-relaxed text-foreground/75 placeholder:text-muted-foreground/60 md:text-[17px]",
+            )}
+          />
+          {problem && <p className="mt-2 text-sm text-bad">{problem}</p>}
+        </div>
+
+        <div className="mt-10">
+          {view === "rich" ? (
+            <React.Suspense
+              fallback={<p className="text-sm text-muted-foreground">Loading the editor…</p>}
+            >
+              <DocsEditor
+                // Switching back from Markdown remounts it too, so it always loads the latest text.
+                key={`${file.id}-rich-${revision}`}
+                value={page.body}
+                onChange={(body) => update({ body })}
+                pagePath={file.path}
+                pages={pages.map((p) => ({ title: p.title, path: p.path, folder: p.folder }))}
+                autoFocus
+              />
+            </React.Suspense>
+          ) : (
+            <Textarea
+              value={page.body}
+              onChange={(e) => update({ body: e.target.value })}
+              spellCheck={false}
+              aria-label={`${file.path} source`}
+              className="min-h-[60svh] w-full max-w-[72ch] resize-y rounded-none border-0 bg-transparent p-0 font-mono text-[13px] leading-6 shadow-none focus-visible:ring-0 dark:bg-transparent"
+            />
+          )}
+        </div>
+      </article>
+    </>
   );
 }
 
@@ -491,74 +598,92 @@ function SupportBot({ project, pages }: { project: DocsProject; pages: DocPage[]
     }, 600);
   };
 
+  // Show an answer as soon as the page opens, so the object is never an empty box.
+  const started = React.useRef(false);
+  React.useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    ask(BOT_EXAMPLES[0]);
+  });
+
   return (
     <Section title="Ask the support bot" aside={<span>Answers only from these pages</span>}>
-      <form
-        className="flex gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          ask(question);
-        }}
-      >
-        <Input
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          placeholder="Ask what a customer would ask"
-          aria-label="Question for the support bot"
-          className="max-w-xl"
-        />
-        <Button type="submit" disabled={thinking || !question.trim()}>
-          {thinking && <Spinner />}
-          Ask
-        </Button>
-      </form>
-      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-        {BOT_EXAMPLES.map((q) => (
-          <button
-            key={q}
-            type="button"
-            className={cn(linkClass, "font-normal text-muted-foreground")}
-            onClick={() => ask(q)}
+      <div className="overflow-hidden rounded-xl border">
+        <div className="grid gap-3 border-b bg-muted/30 p-3 sm:p-4">
+          <form
+            className="flex gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              ask(question);
+            }}
           >
-            {q}
-          </button>
-        ))}
-      </div>
-      {asked && (
-        <div className="mt-6 max-w-3xl rounded-xl border" aria-live="polite">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b px-4 py-3">
-            <p className="text-[15px] font-medium">“{asked.q}”</p>
-            <p className="text-sm text-muted-foreground">{via}</p>
+            <Input
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder="Ask what a customer would ask"
+              aria-label="Question for the support bot"
+              className="flex-1 bg-background"
+            />
+            <Button type="submit" disabled={thinking || !question.trim()}>
+              {thinking && <Spinner />}
+              Ask
+            </Button>
+          </form>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            {BOT_EXAMPLES.map((q) => (
+              <button
+                key={q}
+                type="button"
+                className={cn(linkClass, "font-normal text-muted-foreground")}
+                onClick={() => ask(q)}
+              >
+                {q}
+              </button>
+            ))}
           </div>
-          {asked.reply.kind === "answer" ? (
-            <div className="px-4 py-4">
-              <p className="text-[15px] leading-relaxed text-pretty">{asked.reply.text}</p>
-              <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                <Dot tone="good">From</Dot>
-                <a
-                  href={`#${project.id}-${asked.reply.page.id}`}
-                  className={cn(linkClass, "font-normal text-foreground")}
-                >
-                  {asked.reply.page.title}
-                  {asked.reply.section ? `, ${asked.reply.section}` : ""}
-                </a>
-                <code className="font-mono text-xs">{asked.reply.page.path}</code>
-              </p>
+        </div>
+        <div className="min-h-36" aria-live="polite">
+          {!asked ? (
+            <div className="grid h-36 place-items-center text-sm text-muted-foreground">
+              {thinking ? <Spinner /> : "Ask a question to see what a customer gets."}
             </div>
           ) : (
-            <div className="px-4 py-4">
-              <Dot tone="bad" className="text-[15px] text-bad">
-                No page answers this yet
-              </Dot>
-              <p className="mt-2 text-sm leading-relaxed text-pretty text-muted-foreground">
-                The bot tells the customer it doesn’t know and hands them to a person, instead of
-                guessing. The question joins the list below, so someone can write the page once and
-                every reader gets it.
-              </p>
-            </div>
+            <>
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 pt-4">
+                <p className="text-[15px] font-medium">“{asked.q}”</p>
+                <p className="text-sm text-muted-foreground">{via}</p>
+              </div>
+              {asked.reply.kind === "answer" ? (
+                <div className="px-4 pt-2 pb-4">
+                  <p className="text-[15px] leading-relaxed text-pretty">{asked.reply.text}</p>
+                  <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                    <Dot tone="good">From</Dot>
+                    <a
+                      href={`#${project.id}-${asked.reply.page.id}`}
+                      className={cn(linkClass, "font-normal text-foreground")}
+                    >
+                      {asked.reply.page.title}
+                      {asked.reply.section ? `, ${asked.reply.section}` : ""}
+                    </a>
+                    <code className="font-mono text-xs">{asked.reply.page.path}</code>
+                  </p>
+                </div>
+              ) : (
+                <div className="px-4 pt-2 pb-4">
+                  <Dot tone="bad" className="text-[15px] text-bad">
+                    No page answers this yet
+                  </Dot>
+                  <p className="mt-2 text-sm leading-relaxed text-pretty text-muted-foreground">
+                    The bot tells the customer it doesn’t know and hands them to a person, instead
+                    of guessing. The question joins the list below, so someone can write the page
+                    once and every reader gets it.
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
-      )}
+      </div>
     </Section>
   );
 }

@@ -1,6 +1,14 @@
 import * as React from "react";
 import { Radio as RadioPrimitive } from "@base-ui/react/radio";
-import { BookOpenTextIcon, BotIcon, CheckIcon, Columns2Icon, CopyIcon } from "lucide-react";
+import {
+  BookOpenTextIcon,
+  BotIcon,
+  CheckIcon,
+  Columns2Icon,
+  CopyIcon,
+  LayoutGridIcon,
+  Rows3Icon,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -89,6 +97,50 @@ export function Section({
         <p className="mt-1 max-w-[68ch] text-sm text-muted-foreground">{description}</p>
       )}
       <div className="mt-5">{children}</div>
+    </section>
+  );
+}
+
+/**
+ * The quiet column beside a page's main work: facts, counts, and settings at a glance.
+ * It sits to the right on wide screens, split off by one rule, and drops under the work on smaller ones.
+ */
+export function SideRail({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <aside
+      className={cn(
+        "grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-6 lg:sticky lg:top-20 lg:self-start lg:border-l lg:pl-8",
+        className,
+      )}
+    >
+      {children}
+    </aside>
+  );
+}
+
+/** One block in the side rail: a small label, an optional aside, then its content. Rules between blocks, no boxes. */
+export function RailBlock({
+  title,
+  aside,
+  children,
+}: {
+  title: string;
+  aside?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="min-w-0 border-t pt-5 first:border-t-0 first:pt-0">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="text-sm font-medium">{title}</h2>
+        {aside && <div className="text-[13px] text-muted-foreground">{aside}</div>}
+      </div>
+      <div className="mt-3">{children}</div>
     </section>
   );
 }
@@ -315,6 +367,57 @@ export function SegmentedControl({
         </ToggleGroupItem>
       ))}
     </ToggleGroup>
+  );
+}
+
+export type ViewMode = "grid" | "rows";
+
+/**
+ * How a screen lists its items: cards in a grid, or rows in a ruled list. The choice is
+ * remembered per screen, in this browser only, and falls back to the default when storage is blocked.
+ */
+export function useViewMode(screen: string, fallback: ViewMode = "grid") {
+  const key = `corpus.view.${screen}`;
+  const [mode, setMode] = React.useState<ViewMode>(() => {
+    try {
+      const saved = window.localStorage.getItem(key);
+      return saved === "grid" || saved === "rows" ? saved : fallback;
+    } catch {
+      return fallback;
+    }
+  });
+  const choose = (next: ViewMode) => {
+    setMode(next);
+    try {
+      window.localStorage.setItem(key, next);
+    } catch {
+      // Storage is blocked. The choice still holds until the page reloads.
+    }
+  };
+  return [mode, choose] as const;
+}
+
+/** Switches a list between cards and rows. */
+export function ViewSwitch({
+  value,
+  onChange,
+  className,
+}: {
+  value: ViewMode;
+  onChange: (mode: ViewMode) => void;
+  className?: string;
+}) {
+  return (
+    <SegmentedControl
+      value={value}
+      onChange={(v) => onChange(v as ViewMode)}
+      aria-label="Show as"
+      className={className}
+      options={[
+        { value: "grid", label: "Grid", icon: LayoutGridIcon, title: "Show as cards in a grid" },
+        { value: "rows", label: "Rows", icon: Rows3Icon, title: "Show as rows" },
+      ]}
+    />
   );
 }
 

@@ -1,0 +1,127 @@
+/*
+  Editor chrome that floats beside the content: the menus Milkdown positions,
+  the block gutter, and the drop line. The prose itself keeps its styles in
+  index.css, which the reader view shares. The reference pulls in the theme
+  this file's @apply rules borrow from.
+*/
+@reference "../../index.css";
+
+@layer components {
+  .docs-editor-float {
+    @apply absolute z-40;
+  }
+  .docs-editor-float[data-show="false"] {
+    @apply hidden;
+  }
+
+  /* The line shown where a dragged block would land. */
+  .docs-editor-drop-line {
+    @apply z-30 rounded-full;
+  }
+
+  /*
+    The block gutter, table bar, and code chip hide by visibility, not display.
+    They are measured or anchored while still marked hidden, and a display:none
+    box has no offset parent to measure against. A hidden-but-laid-out box
+    works.
+  */
+  .docs-editor-handle,
+  .docs-editor-tablebar,
+  .docs-editor-codechip {
+    @apply absolute z-40;
+  }
+  .docs-editor-handle[data-show="false"],
+  .docs-editor-tablebar[data-show="false"],
+  .docs-editor-codechip[data-show="false"] {
+    @apply invisible block;
+  }
+
+  /* Tables: the stock colors are hard-coded blue, so tokens take over. */
+  .docs-prose .selectedCell:after {
+    background: color-mix(in oklch, var(--foreground) 8%, transparent);
+  }
+  .docs-prose .column-resize-handle {
+    background-color: color-mix(in oklch, var(--foreground) 30%, transparent);
+  }
+
+  /* Images: rounded into the page, with a ring while selected. */
+  .docs-prose img {
+    @apply max-w-full rounded-lg;
+  }
+  .docs-prose .ProseMirror-selectednode img,
+  .docs-prose img.ProseMirror-selectednode {
+    @apply ring-3 ring-ring/50;
+  }
+
+  /*
+    As in Notion, the space under the last block is still the page: a click there
+    lands in the editor and puts the cursor at the end, ready to keep writing.
+  */
+  .docs-prose.ProseMirror {
+    @apply min-h-[40svh] pb-[20svh];
+  }
+
+  /* The editor's own text selections and caret, in theme tokens. */
+  .docs-prose {
+    caret-color: var(--foreground);
+  }
+  .docs-prose ::selection {
+    background: color-mix(in oklch, var(--foreground) 14%, transparent);
+  }
+}
+
+/*
+  Code syntax, kept quiet: comments recede, strings, keywords, and names carry
+  the only color. The hues are the code's own presentation, not chrome, and
+  lift for dark themes the same way data-theme and the system preference do.
+*/
+.docs-prose pre {
+  --code-string: oklch(46% 0.1 150);
+  --code-keyword: oklch(46% 0.11 300);
+  --code-name: oklch(44% 0.1 250);
+  --code-tag: oklch(48% 0.09 30);
+}
+:root[data-theme="dark"] .docs-prose pre {
+  --code-string: oklch(74% 0.09 150);
+  --code-keyword: oklch(76% 0.09 300);
+  --code-name: oklch(74% 0.08 250);
+  --code-tag: oklch(74% 0.08 30);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .docs-prose pre {
+    --code-string: oklch(74% 0.09 150);
+    --code-keyword: oklch(76% 0.09 300);
+    --code-name: oklch(74% 0.08 250);
+    --code-tag: oklch(74% 0.08 30);
+  }
+}
+.docs-prose pre .token.comment,
+.docs-prose pre .token.prolog,
+.docs-prose pre .token.doctype,
+.docs-prose pre .token.cdata {
+  color: var(--muted-foreground);
+}
+.docs-prose pre .token.string,
+.docs-prose pre .token.char,
+.docs-prose pre .token.attr-value,
+.docs-prose pre .token.regex {
+  color: var(--code-string);
+}
+.docs-prose pre .token.keyword,
+.docs-prose pre .token.boolean,
+.docs-prose pre .token.number,
+.docs-prose pre .token.constant,
+.docs-prose pre .token.operator {
+  color: var(--code-keyword);
+}
+.docs-prose pre .token.function,
+.docs-prose pre .token.class-name,
+.docs-prose pre .token.maybe-class-name {
+  color: var(--code-name);
+}
+.docs-prose pre .token.property,
+.docs-prose pre .token.tag,
+.docs-prose pre .token.selector,
+.docs-prose pre .token.attr-name {
+  color: var(--code-tag);
+}

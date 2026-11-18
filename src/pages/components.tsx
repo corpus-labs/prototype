@@ -50,14 +50,17 @@ import {
   AgentPane,
   CodeBlock,
   DocSection,
+  Dot,
   Facts,
   PageHeader,
   ReaderSwitch,
   SegmentedControl,
   StatusLabel,
+  ViewSwitch,
   linkClass,
   proseClass,
   useEffectiveReader,
+  useViewMode,
   type Hover,
 } from "@/components/common";
 import { components, questions, tokens, type ComponentDoc } from "@/data/workspace";
@@ -79,17 +82,34 @@ export function ComponentsIndex() {
   const { dark } = useStore();
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState("all");
+  const [view, setView] = useViewMode("components");
   const list = components.filter(
     (c) =>
       (status === "all" || c.status === status) &&
       (c.name + c.machine + c.category).toLowerCase().includes(query.toLowerCase()),
   );
 
+  // Categories in the order they first appear, each with its most requested component first.
+  const groups: [string, ComponentDoc[]][] = [];
+  for (const c of list) {
+    const g = groups.find(([name]) => name === c.category);
+    if (g) g[1].push(c);
+    else groups.push([c.category, [c]]);
+  }
+  for (const [, items] of groups) items.sort((x, y) => y.requests - x.requests);
+  const thin = components.filter(
+    (c) => c.status !== "deprecated" && !c.whenToUse?.length && !c.agentRules?.length,
+  ).length;
+
   return (
-    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-12">
+    <div className="mx-auto w-full max-w-[1120px] px-4 py-8 md:px-8 md:py-10">
       <PageHeader
         title="Components"
-        description="Props and slots sync from each component.yml. Everything else on a component page is written here."
+        description={
+          thin
+            ? `${components.length} components in ${new Set(components.map((c) => c.category)).size} categories. ${thin} have no usage guidance yet.`
+            : `${components.length} components in ${new Set(components.map((c) => c.category)).size} categories, all with usage guidance.`
+        }
         actions={
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button variant="outline" />}>
@@ -123,7 +143,7 @@ export function ComponentsIndex() {
         }
       />
 
-      <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <InputGroup className="sm:max-w-72">
           <InputGroupAddon>
             <SearchIcon />
@@ -134,73 +154,164 @@ export function ComponentsIndex() {
             onChange={(e) => setQuery(e.target.value)}
           />
         </InputGroup>
-        <SegmentedControl
-          value={status}
-          onChange={setStatus}
-          aria-label="Status"
-          className="self-start sm:self-auto"
-          options={[
-            { value: "all", label: "All" },
-            { value: "stable", label: "Stable" },
-            { value: "beta", label: "Beta" },
-            { value: "deprecated", label: "Deprecated" },
-          ]}
-        />
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <SegmentedControl
+            value={status}
+            onChange={setStatus}
+            aria-label="Status"
+            options={[
+              { value: "all", label: "All" },
+              { value: "stable", label: "Stable" },
+              { value: "beta", label: "Beta" },
+              { value: "deprecated", label: "Deprecated" },
+            ]}
+          />
+          <ViewSwitch value={view} onChange={setView} />
+        </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-5 sm:grid-cols-2 xl:grid-cols-3">
-        {list.map((c) => {
-          const noUsage = !c.whenToUse?.length && !c.agentRules?.length;
-          return (
-            <a
-              key={c.id}
-              href={`#component-${c.id}`}
-              className="group flex flex-col overflow-hidden rounded-xl border transition-colors outline-none hover:border-foreground/25 focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              <CuiScope
-                dark={dark}
-                className={cn(
-                  "pointer-events-none flex h-40 items-center justify-center bg-(--cui-subtle) p-5",
-                  c.status === "deprecated" && "opacity-50 grayscale",
-                )}
+      {view === "grid" ? (
+        <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-5 sm:grid-cols-2 xl:grid-cols-3">
+          {list.map((c) => {
+            const noUsage = !c.whenToUse?.length && !c.agentRules?.length;
+            return (
+              <a
+                key={c.id}
+                href={`#component-${c.id}`}
+                className="group flex flex-col overflow-hidden rounded-xl border transition-colors outline-none hover:border-foreground/25 focus-visible:ring-3 focus-visible:ring-ring/50"
               >
-                <ComponentThumb id={c.id} />
-              </CuiScope>
-              <div className="grid gap-1 border-t px-4 py-3.5">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="truncate text-[15px] font-medium">{c.name}</p>
-                  <StatusLabel
-                    status={c.status}
-                    className="shrink-0 text-sm text-muted-foreground"
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {c.status === "deprecated" ? (
-                    <>Replaced by {components.find((x) => x.id === c.replacedBy)?.name}</>
-                  ) : noUsage ? (
-                    <>
-                      <span className="text-warn">No usage guidance</span>,{" "}
-                      <span className="tabular">{c.requests} requests this week</span>
-                    </>
-                  ) : (
-                    <span className="tabular">{c.requests} agent requests this week</span>
+                <CuiScope
+                  dark={dark}
+                  className={cn(
+                    "pointer-events-none flex h-40 items-center justify-center bg-(--cui-subtle) p-5",
+                    c.status === "deprecated" && "opacity-50 grayscale",
                   )}
-                </p>
-              </div>
-            </a>
-          );
-        })}
-        {list.length === 0 && (
-          <p className="col-span-full py-10 text-center text-sm text-muted-foreground">
-            No components match “{query}”. Clear the filter to see all {components.length}.
-          </p>
-        )}
-      </div>
+                >
+                  <ComponentThumb id={c.id} />
+                </CuiScope>
+                <div className="grid gap-1 border-t px-4 py-3.5">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="truncate text-[15px] font-medium">{c.name}</p>
+                    <StatusLabel
+                      status={c.status}
+                      className="shrink-0 text-sm text-muted-foreground"
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {c.status === "deprecated" ? (
+                      <>Replaced by {components.find((x) => x.id === c.replacedBy)?.name}</>
+                    ) : noUsage ? (
+                      <>
+                        <span className="text-warn">No usage guidance</span>,{" "}
+                        <span className="tabular">{c.requests} requests this week</span>
+                      </>
+                    ) : (
+                      <span className="tabular">{c.requests} agent requests this week</span>
+                    )}
+                  </p>
+                </div>
+              </a>
+            );
+          })}
+          {list.length === 0 && (
+            <p className="col-span-full py-10 text-center text-sm text-muted-foreground">
+              No components match “{query}”. Clear the filter to see all {components.length}.
+            </p>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* An index by category: each category named once on the left, its components as rows beside it. */}
+          <div className="mt-6 divide-y border-y">
+            {groups.map(([category, items]) => (
+              <section
+                key={category}
+                aria-label={category}
+                className="grid gap-x-6 sm:grid-cols-[8rem_minmax(0,1fr)]"
+              >
+                <h2 className="pt-5 text-sm font-medium sm:sticky sm:top-12 sm:self-start sm:py-6">
+                  {category}
+                  <span className="ml-2 font-normal text-muted-foreground tabular">
+                    {items.length}
+                  </span>
+                </h2>
+                <ul className="divide-y">
+                  {items.map((c) => {
+                    const noUsage = !c.whenToUse?.length && !c.agentRules?.length;
+                    const retired = c.status === "deprecated";
+                    return (
+                      <li key={c.id}>
+                        <a
+                          href={`#component-${c.id}`}
+                          className="group grid grid-cols-[minmax(0,1fr)] items-center gap-x-6 gap-y-3 py-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:grid-cols-[13rem_minmax(0,1fr)_8.5rem]"
+                        >
+                          <CuiScope
+                            dark={dark}
+                            className={cn(
+                              "pointer-events-none flex h-28 items-center justify-center overflow-hidden rounded-lg border bg-(--cui-subtle) transition-colors group-hover:border-foreground/25",
+                              retired && "opacity-50 grayscale",
+                            )}
+                          >
+                            <div className="scale-[0.8]">
+                              <ComponentThumb id={c.id} />
+                            </div>
+                          </CuiScope>
+                          <div className="min-w-0">
+                            <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                              <span className="text-[17px] font-semibold tracking-[-0.01em] decoration-foreground/30 underline-offset-4 group-hover:underline">
+                                {c.name}
+                              </span>
+                              <code className="font-mono text-xs text-muted-foreground">
+                                {c.machine}
+                              </code>
+                            </p>
+                            <p className="mt-1 line-clamp-2 max-w-[56ch] text-sm leading-relaxed text-pretty text-foreground/75">
+                              {c.summary}
+                            </p>
+                            {retired ? (
+                              <p className="mt-2 text-sm text-muted-foreground">
+                                Replaced by {components.find((x) => x.id === c.replacedBy)?.name}
+                              </p>
+                            ) : (
+                              noUsage && (
+                                <p className="mt-2 text-sm">
+                                  <Dot tone="warn" className="text-warn">
+                                    No usage guidance
+                                  </Dot>
+                                </p>
+                              )
+                            )}
+                          </div>
+                          <div className="flex items-baseline gap-x-4 md:block md:self-stretch md:border-l md:pt-1 md:pl-6">
+                            <p className="flex items-baseline gap-1.5">
+                              <span className="text-xl leading-none font-semibold tracking-[-0.02em] tabular">
+                                {c.requests}
+                              </span>
+                              <span className="text-sm text-muted-foreground">requests</span>
+                            </p>
+                            <StatusLabel
+                              status={c.status}
+                              className="text-sm text-muted-foreground md:mt-2"
+                            />
+                          </div>
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ))}
+            {list.length === 0 && (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                No components match “{query}”. Clear the filter to see all {components.length}.
+              </p>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
-
-/* ---------------------------------------------------------------- Preview */
 
 function twigFor(
   p: Required<Pick<CButtonProps, "variant" | "size" | "label">> & {

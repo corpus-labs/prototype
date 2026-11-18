@@ -2,11 +2,13 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { editorViewCtx, editorViewOptionsCtx, type Editor } from "@milkdown/core";
 import type { Ctx } from "@milkdown/ctx";
+import { BlockProvider, blockConfig, blockSpec, type ActiveNode } from "@milkdown/plugin-block";
 import { SlashProvider, slashFactory } from "@milkdown/plugin-slash";
 import { TooltipProvider, tooltipFactory } from "@milkdown/plugin-tooltip";
 import {
   createCodeBlockCommand,
   insertHrCommand,
+  insertImageCommand,
   liftListItemCommand,
   toggleEmphasisCommand,
   toggleInlineCodeCommand,
@@ -21,40 +23,49 @@ import {
 } from "@milkdown/preset-commonmark";
 import { insertTableCommand, toggleStrikethroughCommand } from "@milkdown/preset-gfm";
 import { redoCommand, undoCommand } from "@milkdown/plugin-history";
+import { uploadConfig } from "@milkdown/plugin-upload";
 import { lift } from "@milkdown/prose/commands";
+import { getMarkRange } from "@milkdown/prose";
 import { redoDepth, undoDepth } from "@milkdown/prose/history";
 import { Plugin, TextSelection, type EditorState } from "@milkdown/prose/state";
 import { Decoration, DecorationSet, type EditorView } from "@milkdown/prose/view";
 import { $prose, callCommand } from "@milkdown/utils";
+import "@milkdown/prose/view/style/prosemirror.css";
+import "@milkdown/prose/tables/style/tables.css";
+import "@milkdown/prose/gapcursor/style/gapcursor.css";
+import "./editor.css";
+
+import { relativeLink } from "@core/markdown/links";
+import { CodeLanguageChip, codeAid, runCodeLanguage, type CodeInfo } from "./code-block";
+import { embedImages, ImageForm } from "./image-form";
+import { LinkCard, type LinkCardInfo } from "./link-card";
 import {
-  BoldIcon,
-  CodeIcon,
+  BlockGutter,
+  blockFilter,
+  firstLineRect,
+  GRIP_DROP,
+  runBlockAction,
+  type BlockAction,
+} from "./block-handle";
+import {
+  CodeBlockIcon,
+  DividerIcon,
   FileTextIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
-  ItalicIcon,
-  LinkIcon,
-  ListIcon,
-  ListOrderedIcon,
-  ListTodoIcon,
-  MinusIcon,
-  PilcrowIcon,
-  PlusIcon,
+  ImageIcon,
+  BulletListIcon,
+  OrderedListIcon,
+  TaskListIcon,
   QuoteIcon,
-  SquareCodeIcon,
-  StrikethroughIcon,
   TableIcon,
-} from "lucide-react";
-import "@milkdown/prose/view/style/prosemirror.css";
-import "@milkdown/prose/tables/style/tables.css";
-
-import { relativeLink } from "@core/markdown/links";
-import { cn } from "@/lib/utils";
+  TextIcon,
+} from "./icons";
+import { BlockMenu, LinkForm, MenuList, type Block, type LinkTarget } from "./menus";
 import { createDocsEditor } from "./milkdown";
-import { EMPTY_TOOLBAR, EditorToolbar, type ToolbarAction, type ToolbarState } from "./toolbar";
-
-export type LinkTarget = { title: string; path: string; folder: string };
+import { TableMenu, runTableAction, tableAid, type TableInfo } from "./table-menu";
+import { EMPTY_TOOLBAR, SelectionBar, type ToolbarAction, type ToolbarState } from "./toolbar";
 
 type Menu = { kind: "slash" | "page"; query: string; from: number; to: number } | null;
 type Marks = {
@@ -65,89 +76,98 @@ type Marks = {
   link: string | null;
 };
 
-type Block = {
-  id: string;
-  label: string;
-  hint: string;
-  icon: React.ComponentType<{ className?: string }>;
-  run?: (ctx: Ctx) => boolean;
-};
-
 // Milkdown gives commands their keys when the editor starts, so each block looks its command up when it runs.
 const BLOCKS: Block[] = [
   {
     id: "text",
     label: "Text",
-    hint: "",
-    icon: PilcrowIcon,
+    detail: "Plain paragraph text",
+    icon: TextIcon,
     run: (ctx) => callCommand(turnIntoTextCommand.key)(ctx),
   },
   {
     id: "h1",
     label: "Heading 1",
-    hint: "#",
+    detail: "Section title",
     icon: Heading1Icon,
     run: (ctx) => callCommand(wrapInHeadingCommand.key, 1)(ctx),
   },
   {
     id: "h2",
     label: "Heading 2",
-    hint: "##",
+    detail: "Subsection title",
     icon: Heading2Icon,
     run: (ctx) => callCommand(wrapInHeadingCommand.key, 2)(ctx),
   },
   {
     id: "h3",
     label: "Heading 3",
-    hint: "###",
+    detail: "Minor heading",
     icon: Heading3Icon,
     run: (ctx) => callCommand(wrapInHeadingCommand.key, 3)(ctx),
   },
   {
     id: "ul",
     label: "Bulleted list",
-    hint: "-",
-    icon: ListIcon,
+    detail: "Simple bulleted list",
+    icon: BulletListIcon,
     run: (ctx) => callCommand(wrapInBulletListCommand.key)(ctx),
   },
   {
     id: "ol",
     label: "Numbered list",
-    hint: "1.",
-    icon: ListOrderedIcon,
+    detail: "Steps in order",
+    icon: OrderedListIcon,
     run: (ctx) => callCommand(wrapInOrderedListCommand.key)(ctx),
   },
-  { id: "todo", label: "To-do list", hint: "[ ]", icon: ListTodoIcon, run: toggleTaskList },
+  {
+    id: "todo",
+    label: "To-do list",
+    detail: "Track work with checkboxes",
+    icon: TaskListIcon,
+    run: toggleTaskList,
+  },
   {
     id: "quote",
     label: "Quote",
-    hint: ">",
+    detail: "Call out a quotation",
     icon: QuoteIcon,
     run: (ctx) => callCommand(wrapInBlockquoteCommand.key)(ctx),
   },
   {
     id: "code",
     label: "Code block",
-    hint: "```",
-    icon: SquareCodeIcon,
+    detail: "Fenced code with a language",
+    icon: CodeBlockIcon,
     run: (ctx) => callCommand(createCodeBlockCommand.key)(ctx),
   },
   {
     id: "hr",
     label: "Divider",
-    hint: "---",
-    icon: MinusIcon,
+    detail: "Horizontal rule",
+    icon: DividerIcon,
     run: (ctx) => callCommand(insertHrCommand.key)(ctx),
   },
   {
     id: "table",
     label: "Table",
-    hint: "",
+    detail: "Rows and columns",
     icon: TableIcon,
     run: (ctx) => callCommand(insertTableCommand.key, { row: 3, col: 3 })(ctx),
   },
-  // Doesn't run a command. It types [[, which opens the page picker.
-  { id: "page", label: "Link to a page", hint: "[[", icon: FileTextIcon },
+  {
+    id: "image",
+    label: "Image",
+    detail: "Link one or embed a file",
+    icon: ImageIcon,
+  },
+  {
+    id: "page",
+    label: "Link to a page",
+    detail: "Search every page in this project",
+    icon: FileTextIcon,
+  },
+  // The image and page items open dialogs instead of running a command.
 ];
 
 const NO_MARKS: Marks = { strong: false, emphasis: false, strike: false, code: false, link: null };
@@ -294,10 +314,6 @@ function floating() {
   return el;
 }
 
-function matches(text: string, query: string) {
-  return text.toLowerCase().includes(query.trim().toLowerCase());
-}
-
 /** Best matches first: the text starts with the query, then a word does, then it appears anywhere. */
 function ranked<T>(items: T[], query: string, text: (item: T) => string): T[] {
   const q = query.trim().toLowerCase();
@@ -388,15 +404,29 @@ export function DocsEditor({
 }) {
   const host = React.useRef<HTMLDivElement>(null);
   const editor = React.useRef<Editor | null>(null);
-  const [els] = React.useState(() => ({
-    toolbar: floating(),
-    slash: floating(),
-    page: floating(),
-  }));
+  const [els] = React.useState(() => {
+    const handle = floating();
+    handle.classList.add("docs-editor-handle");
+    const table = floating();
+    table.classList.add("docs-editor-tablebar");
+    const code = floating();
+    code.classList.add("docs-editor-codechip");
+    return {
+      toolbar: floating(),
+      slash: floating(),
+      page: floating(),
+      handle,
+      table,
+      code,
+      card: floating(),
+    };
+  });
   // The open menu and its highlighted item live in refs that change the moment the
   // text does. React state mirrors them for rendering only. Key handling reads the
   // refs, so fast typing never acts on a menu from a keystroke ago.
   const menuRef = React.useRef<Menu>(null);
+  // The block gutter's provider, once the editor has mounted it.
+  const blockProvider = React.useRef<BlockProvider | null>(null);
   const activeRef = React.useRef(0);
   const [menu, setMenuState] = React.useState<Menu>(null);
   const [active, setActiveState] = React.useState(0);
@@ -411,6 +441,25 @@ export function DocsEditor({
     setToolbarState(next);
   }, []);
   const [linking, setLinking] = React.useState(false);
+  const [inserting, setInserting] = React.useState(false);
+  const [card, setCard] = React.useState<LinkCardInfo | null>(null);
+  const [table, setTableState] = React.useState<TableInfo | null>(null);
+  // Like the formatting bar, the table bar reports on every keystroke.
+  const tableKey = React.useRef("");
+  const setTable = React.useCallback((next: TableInfo | null) => {
+    const key = JSON.stringify(next);
+    if (key === tableKey.current) return;
+    tableKey.current = key;
+    setTableState(next);
+  }, []);
+  const [code, setCodeState] = React.useState<CodeInfo | null>(null);
+  const codeKey = React.useRef("");
+  const setCode = React.useCallback((next: CodeInfo | null) => {
+    const key = JSON.stringify(next);
+    if (key === codeKey.current) return;
+    codeKey.current = key;
+    setCodeState(next);
+  }, []);
   // Where the reader pressed Escape, so the same menu doesn't reopen until they start over.
   const dismissed = React.useRef<number | null>(null);
 
@@ -457,7 +506,10 @@ export function DocsEditor({
           view.dispatch(tr);
         } else if (kind === "slash" && "id" in item) {
           view.dispatch(view.state.tr.delete(at.from, at.to));
+          // The choice consumed the typed slash itself.
+          autoSlash.current = null;
           if (item.id === "page") view.dispatch(view.state.tr.insertText("[["));
+          else if (item.id === "image") setInserting(true);
           else item.run?.(ctx);
         }
         view.focus();
@@ -476,7 +528,11 @@ export function DocsEditor({
     const providers: Partial<Record<"slash" | "page", SlashProvider>> = {};
 
     const closeIf = (kind: "slash" | "page") => {
-      if (menuRef.current?.kind === kind) setMenu(null);
+      if (menuRef.current?.kind === kind) {
+        setMenu(null);
+        // The reader moved on without choosing, so take the typed slash back.
+        if (kind === "slash") tidyAutoSlash();
+      }
     };
 
     // Opens the menu while the text before the cursor matches, and closes it when it stops matching.
@@ -525,6 +581,7 @@ export function DocsEditor({
           if (event.key === "Escape") {
             dismissed.current = now.from;
             setMenu(null);
+            if (open.kind === "slash") tidyAutoSlash();
             providers[open.kind]?.hide();
             return true;
           }
@@ -543,13 +600,52 @@ export function DocsEditor({
     const slash = slashFactory("CORPUS_SLASH");
     const pageLink = slashFactory("CORPUS_PAGE_LINK");
 
+    // The table bar, the code chip, and the link card position themselves
+    // against the host, so they live there.
+    host.current.appendChild(els.table);
+    host.current.appendChild(els.code);
+    host.current.appendChild(els.card);
+
     createDocsEditor({
       root: host.current,
       value,
       onChange: (markdown) => latest.current.onChange(markdown),
-      plugins: [...selection, ...slash, ...pageLink, editingAids(setToolbar)],
+      plugins: [
+        ...selection,
+        ...slash,
+        ...pageLink,
+        editingAids(setToolbar),
+        tableAid(els.table, setTable),
+        codeAid(els.code, setCode),
+      ],
       configure: (ctx) => {
         ctx.update(editorViewOptionsCtx, (prev) => ({ ...prev, handleKeyDown }));
+        ctx.update(blockConfig.key, (prev) => ({ ...prev, filterNodes: blockFilter }));
+        // Pasted and dropped images embed as downscaled data URLs until Phase 5
+        // writes them to the repository.
+        ctx.update(uploadConfig.key, (prev) => ({
+          ...prev,
+          uploader: async (files, schema) => {
+            const embedded = await embedImages([...files]);
+            return embedded
+              .map((image) => schema.nodes.image.createAndFill(image))
+              .filter((node): node is NonNullable<typeof node> => node !== null);
+          },
+        }));
+        ctx.set(blockSpec.key, {
+          view: (view: EditorView) => {
+            const provider = new BlockProvider({
+              ctx,
+              content: els.handle,
+              getPlacement: () => "left",
+              // Down the stack so the plus rides on the line and the grip below it.
+              getOffset: () => ({ mainAxis: 14, crossAxis: GRIP_DROP }),
+              getPosition: ({ active }) => firstLineRect(active.el),
+            });
+            blockProvider.current = provider;
+            return providerView(provider, view);
+          },
+        });
         ctx.set(selection.key, {
           view: (view: EditorView) =>
             providerView(
@@ -611,6 +707,7 @@ export function DocsEditor({
     return () => {
       cancelled = true;
       editor.current = null;
+      blockProvider.current = null;
       void instance?.destroy();
       // destroy() leaves Milkdown's DOM behind, and Strict Mode mounts twice.
       node.replaceChildren();
@@ -618,27 +715,91 @@ export function DocsEditor({
     // The editor loads `value` once. The parent remounts it to load new content.
   }, []);
 
-  // The block the pointer is over, for the "+" beside it.
-  const hoverBlock = React.useRef<{ el: HTMLElement } | null>(null);
-  const [handleTop, setHandleTop] = React.useState<number | null>(null);
+  // Where the plus button typed a slash, so an abandoned menu can undo it.
+  const autoSlash = React.useRef<number | null>(null);
 
-  /** Opens an empty line below the hovered block and starts a slash command there. */
-  const addBelow = () => {
-    const el = hoverBlock.current?.el;
-    if (!el) return;
+  /** Removes the slash the plus button typed, unless the reader typed on it. */
+  const tidyAutoSlash = React.useCallback(() => {
+    const at = autoSlash.current;
+    if (at === null) return;
+    autoSlash.current = null;
     run((ctx) => {
       const view = ctx.get(editorViewCtx);
-      const inside = view.state.doc.resolve(view.posAtDOM(el, 0));
-      const after = inside.depth > 0 ? inside.after(1) : inside.pos;
+      const $pos = view.state.doc.resolve(at);
+      if ($pos.parent.type.name !== "paragraph" || $pos.parent.textContent !== "/") return;
+      view.dispatch(view.state.tr.insertText("", at, at + 1));
+    });
+  }, [run]);
+
+  /**
+   * Opens an empty line below the gutter's block and starts a slash command
+   * there. The slash is typed for the reader, so if they abandon the menu the
+   * line is tidied back to empty.
+   */
+  const addBelow = (active: ActiveNode) => {
+    run((ctx) => {
+      const view = ctx.get(editorViewCtx);
+      const after = active.$pos.pos + active.node.nodeSize;
       const { paragraph } = view.state.schema.nodes;
       let tr = view.state.tr.insert(after, paragraph.create());
       tr = tr.setSelection(TextSelection.create(tr.doc, after + 1)).insertText("/");
       view.dispatch(tr.scrollIntoView());
+      autoSlash.current = after + 1;
       view.focus();
     });
   };
 
-  // The formatting bar's buttons, mapped to Milkdown commands.
+  /** Runs one action from the block menu on its block, then hands focus back. */
+  const actOnBlock = (action: BlockAction, active: ActiveNode) => {
+    run((ctx) => runBlockAction(action, ctx.get(editorViewCtx), active));
+    run((ctx) => ctx.get(editorViewCtx).focus());
+  };
+
+  // The link card: after the pointer rests on a link for a moment, show where
+  // it points. Editing selects the link first, so the link form opens on it.
+  const cardAnchor = React.useRef<HTMLAnchorElement | null>(null);
+  const hoverTimer = React.useRef<number | null>(null);
+  const cardHide = React.useRef<number | null>(null);
+  const stopHover = () => {
+    if (hoverTimer.current !== null) window.clearTimeout(hoverTimer.current);
+    hoverTimer.current = null;
+  };
+  const showCard = (anchor: HTMLAnchorElement) => {
+    const base = host.current?.getBoundingClientRect();
+    if (!base) return;
+    const rect = anchor.getBoundingClientRect();
+    cardAnchor.current = anchor;
+    setCard({
+      href: anchor.getAttribute("href") ?? "",
+      top: rect.bottom - base.top + 6,
+      left: rect.left - base.left,
+    });
+  };
+  React.useEffect(() => {
+    els.card.dataset.show = card ? "true" : "false";
+    if (card) {
+      els.card.style.top = `${card.top}px`;
+      els.card.style.left = `${card.left}px`;
+    }
+  }, [card, els.card]);
+
+  const editHoveredLink = () => {
+    const anchor = cardAnchor.current;
+    setCard(null);
+    if (!anchor) return;
+    run((ctx) => {
+      const view = ctx.get(editorViewCtx);
+      const $pos = view.state.doc.resolve(view.posAtDOM(anchor, 0));
+      const range = getMarkRange($pos, view.state.schema.marks.link);
+      if (!range) return;
+      view.dispatch(
+        view.state.tr.setSelection(TextSelection.create(view.state.doc, range.from, range.to)),
+      );
+    });
+    setLinking(true);
+  };
+
+  // The selection menu's and the block menus' actions, mapped to Milkdown commands.
   const act = (action: ToolbarAction) => {
     const toggleList = (kind: "bullet" | "ordered", wrap: typeof wrapInBulletListCommand.key) =>
       run((ctx) => {
@@ -710,6 +871,9 @@ export function DocsEditor({
       case "table":
         run(callCommand(insertTableCommand.key, { row: 3, col: 3 }));
         break;
+      case "image":
+        setInserting(true);
+        break;
       case "undo":
         run(callCommand(undoCommand.key));
         break;
@@ -730,43 +894,71 @@ export function DocsEditor({
 
   return (
     <>
-      <EditorToolbar state={toolbar} onAction={act} className="sticky top-14 z-10 mb-6 md:top-14" />
       <div
-        className="group/editor relative md:-ml-12 md:pl-12"
-        onMouseMove={(e) => {
-          const root = host.current?.querySelector(".docs-prose");
-          if (!root) return;
-          // The top-level block under the pointer, like a paragraph, heading, or list.
-          let el = e.target instanceof Element ? e.target : null;
-          while (el && el.parentElement !== root) el = el.parentElement;
-          if (el instanceof HTMLElement && el !== hoverBlock.current?.el) {
-            const hostTop = host.current!.getBoundingClientRect().top;
-            const box = el.getBoundingClientRect();
-            const line = parseFloat(getComputedStyle(el).lineHeight) || 24;
-            hoverBlock.current = { el };
-            setHandleTop(box.top - hostTop + Math.min(line, box.height) / 2 - 12);
-          }
+        className="relative"
+        onMouseOver={(e) => {
+          const target = e.target instanceof Element ? e.target : null;
+          const anchor = target?.closest?.("a");
+          if (!(anchor instanceof HTMLAnchorElement) || !host.current?.contains(anchor)) return;
+          if (cardHide.current !== null) window.clearTimeout(cardHide.current);
+          if (cardAnchor.current === anchor) return;
+          stopHover();
+          hoverTimer.current = window.setTimeout(() => showCard(anchor), 250);
         }}
-        onMouseLeave={() => {
-          hoverBlock.current = null;
-          setHandleTop(null);
+        onMouseOut={(e) => {
+          const to = e.relatedTarget;
+          if (to instanceof Node && (els.card.contains(to) || to.nodeName === "A")) return;
+          stopHover();
+          if (cardHide.current !== null) window.clearTimeout(cardHide.current);
+          cardHide.current = window.setTimeout(() => setCard(null), 120);
+        }}
+        // Leaving the editor closes whatever was open, since no typing follows
+        // to do it. The floats live inside this wrapper, so choosing from a
+        // menu never blurs.
+        onBlur={(e) => {
+          if (e.currentTarget.contains(e.relatedTarget)) return;
+          setMenu(null);
+          tidyAutoSlash();
         }}
       >
-        {handleTop !== null && (
-          <button
-            type="button"
-            aria-label="Add a block below"
-            title="Add a block below"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={addBelow}
-            style={{ top: handleTop }}
-            className="absolute left-3 hidden size-6 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity outline-none group-hover/editor:opacity-100 hover:bg-accent hover:text-foreground focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50 md:flex [&_svg]:size-4"
-          >
-            <PlusIcon />
-          </button>
-        )}
         <div ref={host} data-docs-editor className="relative" />
       </div>
+
+      <BlockGutter
+        into={els.handle}
+        getActive={() => blockProvider.current?.active ?? null}
+        onAddBelow={addBelow}
+        onAction={actOnBlock}
+      />
+
+      <TableMenu
+        into={els.table}
+        info={table}
+        onAction={(action) => {
+          run((ctx) => runTableAction(action, ctx));
+          run((ctx) => ctx.get(editorViewCtx).focus());
+        }}
+      />
+
+      <CodeLanguageChip
+        into={els.code}
+        info={code}
+        onPick={(pos, language) => {
+          run((ctx) => runCodeLanguage(pos, language, ctx));
+          run((ctx) => ctx.get(editorViewCtx).focus());
+        }}
+      />
+
+      <LinkCard into={els.card} info={card} onEdit={editHoveredLink} />
+
+      <ImageForm
+        open={inserting}
+        onOpenChange={setInserting}
+        onApply={(image) => {
+          run(callCommand(insertImageCommand.key, image));
+          run((ctx) => ctx.get(editorViewCtx).focus());
+        }}
+      />
 
       {createPortal(
         linking ? (
@@ -785,70 +977,18 @@ export function DocsEditor({
             }}
           />
         ) : (
-          <div
-            role="toolbar"
-            aria-label="Format"
-            className="flex items-center gap-0.5 rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10"
-          >
-            {(
-              [
-                ["Bold", BoldIcon, marks.strong, () => run(callCommand(toggleStrongCommand.key))],
-                [
-                  "Italic",
-                  ItalicIcon,
-                  marks.emphasis,
-                  () => run(callCommand(toggleEmphasisCommand.key)),
-                ],
-                [
-                  "Strikethrough",
-                  StrikethroughIcon,
-                  marks.strike,
-                  () => run(callCommand(toggleStrikethroughCommand.key)),
-                ],
-                ["Code", CodeIcon, marks.code, () => run(callCommand(toggleInlineCodeCommand.key))],
-                ["Link", LinkIcon, !!marks.link, () => setLinking(true)],
-              ] as const
-            ).map(([label, Icon, on, action]) => (
-              <button
-                key={label}
-                type="button"
-                aria-label={label}
-                aria-pressed={on}
-                title={label}
-                // Keep the editor's selection while clicking.
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={action}
-                className={cn(
-                  "flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors outline-none hover:bg-sidebar-accent hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-4",
-                  on && "bg-sidebar-accent text-foreground",
-                )}
-              >
-                <Icon />
-              </button>
-            ))}
-          </div>
+          <SelectionBar
+            state={toolbar}
+            onAction={act}
+            editorElement={() => host.current?.querySelector<HTMLElement>(".ProseMirror") ?? null}
+          />
         ),
         els.toolbar,
       )}
 
       {createPortal(
         menu?.kind === "slash" ? (
-          <MenuList
-            label="Insert a block"
-            items={items as Block[]}
-            active={active}
-            onChoose={choose}
-            empty="No block matches."
-            render={(b) => (
-              <>
-                <b.icon className="size-4 text-muted-foreground" />
-                <span className="flex-1">{b.label}</span>
-                {b.hint && (
-                  <span className="font-mono text-xs text-muted-foreground">{b.hint}</span>
-                )}
-              </>
-            )}
-          />
+          <BlockMenu items={items as Block[]} active={active} onChoose={choose} />
         ) : null,
         els.slash,
       )}
@@ -873,162 +1013,5 @@ export function DocsEditor({
         els.page,
       )}
     </>
-  );
-}
-
-function MenuList<T>({
-  label,
-  items,
-  active,
-  onChoose,
-  render,
-  empty,
-}: {
-  label: string;
-  items: T[];
-  active: number;
-  onChoose: (item: T) => void;
-  render: (item: T) => React.ReactNode;
-  empty: string;
-}) {
-  const list = React.useRef<HTMLDivElement>(null);
-  // Arrow keys move the highlight past the menu's edge, so keep it in view.
-  React.useEffect(() => {
-    list.current
-      ?.querySelector<HTMLElement>('[aria-selected="true"]')
-      ?.scrollIntoView({ block: "nearest" });
-  }, [active]);
-  return (
-    <div
-      ref={list}
-      role="listbox"
-      aria-label={label}
-      className="max-h-72 w-64 overflow-y-auto rounded-lg bg-popover p-1 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10"
-    >
-      {items.length === 0 ? (
-        <p className="px-2 py-1.5 text-muted-foreground">{empty}</p>
-      ) : (
-        items.map((item, i) => (
-          <button
-            key={i}
-            type="button"
-            role="option"
-            aria-selected={i === active}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => onChoose(item)}
-            className={cn(
-              "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left outline-none",
-              i === active && "bg-accent text-accent-foreground",
-            )}
-          >
-            {render(item)}
-          </button>
-        ))
-      )}
-    </div>
-  );
-}
-
-/** Inside the selection toolbar: link to a page by name, or paste any URL. */
-function LinkForm({
-  current,
-  targets,
-  pagePath,
-  onApply,
-  onRemove,
-  onCancel,
-}: {
-  current: string | null;
-  targets: LinkTarget[];
-  pagePath: string;
-  onApply: (href: string) => void;
-  onRemove: () => void;
-  onCancel: () => void;
-}) {
-  const [text, setText] = React.useState(current ?? "");
-  const [active, setActive] = React.useState(0);
-  const pages = targets.filter((p) => matches(`${p.title} ${p.folder}`, text)).slice(0, 5);
-  // Something that looks like an address links as typed. Otherwise the top page wins.
-  const literal = /^(https?:\/\/|mailto:|\.{0,2}\/|#)/.test(text.trim());
-  const options = [
-    ...(literal ? [{ kind: "url" as const }] : []),
-    ...pages.map((p) => ({ kind: "page" as const, page: p })),
-  ];
-
-  const pick = (i: number) => {
-    const option = options[i];
-    if (!option) return;
-    onApply(option.kind === "url" ? text : relativeLink(pagePath, option.page.path));
-  };
-
-  return (
-    <div className="w-72 rounded-lg bg-popover p-1.5 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10">
-      <input
-        autoFocus
-        value={text}
-        onChange={(e) => {
-          setText(e.target.value);
-          setActive(0);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-            e.preventDefault();
-            setActive((i) =>
-              options.length
-                ? (i + (e.key === "ArrowDown" ? 1 : -1) + options.length) % options.length
-                : 0,
-            );
-          } else if (e.key === "Enter") {
-            e.preventDefault();
-            pick(active);
-          } else if (e.key === "Escape") {
-            e.preventDefault();
-            onCancel();
-          }
-        }}
-        placeholder="Search pages or paste a link"
-        aria-label="Link to"
-        className="h-8 w-full rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-      />
-      <div role="listbox" aria-label="Link options" className="mt-1">
-        {options.map((option, i) => (
-          <button
-            key={option.kind === "url" ? "url" : option.page.path}
-            type="button"
-            role="option"
-            aria-selected={i === active}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => pick(i)}
-            className={cn(
-              "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left outline-none",
-              i === active && "bg-accent text-accent-foreground",
-            )}
-          >
-            {option.kind === "url" ? (
-              <>
-                <LinkIcon className="size-4 shrink-0 text-muted-foreground" />
-                <span className="truncate">Link to {text.trim()}</span>
-              </>
-            ) : (
-              <>
-                <FileTextIcon className="size-4 shrink-0 text-muted-foreground" />
-                <span className="min-w-0 flex-1 truncate">{option.page.title}</span>
-                <span className="text-xs text-muted-foreground">{option.page.folder}</span>
-              </>
-            )}
-          </button>
-        ))}
-        {current && (
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={onRemove}
-            className="mt-1 flex w-full items-center rounded-md px-2 py-1.5 text-left text-muted-foreground outline-none hover:bg-accent hover:text-accent-foreground"
-          >
-            Remove link
-          </button>
-        )}
-      </div>
-    </div>
   );
 }
