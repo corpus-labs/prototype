@@ -8,11 +8,11 @@ import {
   ChevronsUpDownIcon,
   ComponentIcon,
   CopyIcon,
-  EllipsisIcon,
   FileTextIcon,
   HouseIcon,
+  InboxIcon,
+  LibraryIcon,
   LayoutGridIcon,
-  LifeBuoyIcon,
   MoonIcon,
   PaletteIcon,
   PenLineIcon,
@@ -78,6 +78,7 @@ import {
 import { toast } from "@/components/ui/toast";
 import { copyText } from "@/components/common";
 import { CorpusMark } from "@/components/corpus-logo";
+import { KIND_ICON, LibraryTree, WorkspaceMenu } from "@/components/library-nav";
 import {
   components,
   docsProjectOf,
@@ -86,21 +87,14 @@ import {
   questions,
   tokens,
   workspace,
-  type DocsProject,
-  type ProjectKind,
 } from "@/data/workspace";
-import {
-  KIND_LABEL,
-  foldersOf,
-  projectOf,
-  useCurrentProject,
-  useProjects,
-  type ProjectSummary,
-} from "@/lib/projects";
+import { KIND_LABEL, useCurrentProject, useProjects, type ProjectSummary } from "@/lib/projects";
+import { useInbox } from "@/lib/inbox";
 import { navigate } from "@/lib/router";
-import { useDocDrafts, withDraft } from "@/lib/docs-drafts";
 import { useStore, type Base, type Theme } from "@/lib/store";
 import { cn } from "@/lib/utils";
+
+export { KIND_ICON };
 
 type NavKey =
   | "overview"
@@ -192,38 +186,6 @@ function ProjectMenuItems({ current }: { current: ProjectSummary | null }) {
   );
 }
 
-/**
- * Where you are, at the top of the sidebar: the Corpus mark, then the current project's
- * name and kind. It opens the project menu. On the dashboard it reads "All projects".
- */
-function ProjectSwitcher({ current }: { current: ProjectSummary | null }) {
-  const projects = useProjects();
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <SidebarMenuButton
-            size="lg"
-            className="data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground group-data-[collapsible=icon]:h-9! group-data-[collapsible=icon]:p-1.5!"
-          />
-        }
-      >
-        <CorpusMark className="size-5!" />
-        <span className="grid min-w-0 flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
-          <span className="truncate text-sm font-semibold">{current?.name ?? "All projects"}</span>
-          <span className="truncate text-xs text-muted-foreground">
-            {current ? KIND_LABEL[current.kind] : `${projects.length} projects`}
-          </span>
-        </span>
-        <ChevronsUpDownIcon className="ml-auto text-muted-foreground group-data-[collapsible=icon]:hidden" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="min-w-60" align="start" sideOffset={6}>
-        <ProjectMenuItems current={current} />
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
 /** On phones there's no sidebar, so the project's name is the page title and opens the same menu. */
 function ProjectMenu({ current }: { current: ProjectSummary }) {
   return (
@@ -244,13 +206,6 @@ export function useOpenGaps() {
   const { resolved } = useStore();
   return questions.filter((q) => q.status === "gap" && !resolved.includes(q.id));
 }
-
-/** Each kind of project gets one icon, wherever projects are listed. */
-export const KIND_ICON: Record<ProjectKind, React.ComponentType<{ className?: string }>> = {
-  "design-system": ComponentIcon,
-  docs: BookOpenIcon,
-  "help-center": LifeBuoyIcon,
-};
 
 function crumbs(route: string): { label: string; route?: string }[] {
   const docs = docsProjectOf(route);
@@ -309,53 +264,20 @@ function ThemeRadio() {
 }
 
 function AppSidebar({ route }: { route: string }) {
-  const section = sectionOf(route);
   const { setOpenMobile } = useSidebar();
   const { setCommandOpen } = useStore();
-  const gaps = useOpenGaps();
-  const counts: Partial<Record<NavKey, React.ReactNode>> = {
-    components: components.length,
-    tokens: tokens.length,
-    guidelines: guidelineFiles.length,
-    agents: gaps.length ? (
-      <span className="flex items-center gap-1.5">
-        <span className="size-1.5 rounded-full bg-bad" />
-        {gaps.length}
-      </span>
-    ) : undefined,
-  };
-
-  const item = (n: (typeof NAV)[number]) => (
-    <SidebarMenuItem key={n.key}>
-      <SidebarMenuButton
-        isActive={section === n.key}
-        tooltip={n.label}
-        render={<a href={`#${n.key}`} onClick={() => setOpenMobile(false)} />}
-      >
-        <n.icon />
-        <span>{n.label}</span>
-      </SidebarMenuButton>
-      {counts[n.key] !== undefined && (
-        <SidebarMenuBadge className="text-muted-foreground tabular">
-          {counts[n.key]}
-        </SidebarMenuBadge>
-      )}
-    </SidebarMenuItem>
-  );
-
-  const project = projectOf(route);
-  const current = useCurrentProject(route);
-  const docs = docsProjectOf(route);
+  const inbox = useInbox();
+  const inInbox = route === "inbox" || route.startsWith("inbox-");
 
   return (
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <ProjectSwitcher current={current} />
+            <WorkspaceMenu />
           </SidebarMenuItem>
         </SidebarMenu>
-        {/* Its own menu, so the header's gap separates it from the switcher, collapsed or not. */}
+        {/* Its own menu, so the header's gap separates it from the workspace, collapsed or not. */}
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -373,26 +295,33 @@ function AppSidebar({ route }: { route: string }) {
               </Kbd>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={inInbox}
+              tooltip="Inbox"
+              render={<a href="#inbox" onClick={() => setOpenMobile(false)} />}
+            >
+              <InboxIcon />
+              <span>Inbox</span>
+            </SidebarMenuButton>
+            {inbox.length > 0 && (
+              <SidebarMenuBadge className="text-muted-foreground tabular">
+                <span className="flex items-center gap-1.5">
+                  <span className="size-1.5 rounded-full bg-bad" />
+                  {inbox.length}
+                </span>
+              </SidebarMenuBadge>
+            )}
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {project === null && <ProjectsNav route={route} />}
-        {project === "charged-ui" && (
-          <>
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>{NAV.map(item)}</SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            <SidebarGroup>
-              <SidebarGroupLabel>Setup</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>{SETUP.map(item)}</SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
-        )}
-        {docs && <DocsNav project={docs} route={route} />}
+        <SidebarGroup>
+          <SidebarGroupLabel>Library</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <LibraryTree route={route} />
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
@@ -426,109 +355,11 @@ function AppSidebar({ route }: { route: string }) {
   );
 }
 
-/** On the projects dashboard, the sidebar lists the projects themselves. */
-function ProjectsNav({ route }: { route: string }) {
-  const { setOpenMobile } = useSidebar();
-  const projects = useProjects();
-  return (
-    <>
-      <SidebarGroup>
-        <SidebarGroupLabel>Projects</SidebarGroupLabel>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            {projects.map((p) => {
-              const Icon = KIND_ICON[p.kind];
-              return (
-                <SidebarMenuItem key={p.id}>
-                  <SidebarMenuButton
-                    tooltip={p.name}
-                    render={<a href={`#${p.home}`} onClick={() => setOpenMobile(false)} />}
-                  >
-                    <Icon />
-                    <span>{p.name}</span>
-                  </SidebarMenuButton>
-                  {p.open > 0 && (
-                    <SidebarMenuBadge className="text-muted-foreground tabular">
-                      <span className="flex items-center gap-1.5">
-                        <span className="size-1.5 rounded-full bg-bad" />
-                        {p.open}
-                      </span>
-                    </SidebarMenuBadge>
-                  )}
-                </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-      <SidebarGroup>
-        <SidebarGroupLabel>Workspace</SidebarGroupLabel>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                isActive={route === "plugins"}
-                tooltip="Plugins"
-                render={<a href="#plugins" onClick={() => setOpenMobile(false)} />}
-              >
-                <PlugIcon />
-                <span>Plugins</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-    </>
-  );
-}
-
-/** A docs project’s sidebar is its page tree: one group per folder, like a notes app. */
-function DocsNav({ project, route }: { project: DocsProject; route: string }) {
-  const { setOpenMobile } = useSidebar();
-  const drafts = useDocDrafts();
-  const link = (to: string) => <a href={`#${to}`} onClick={() => setOpenMobile(false)} />;
-  return (
-    <>
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                isActive={route === project.id}
-                tooltip="Overview"
-                render={link(project.id)}
-              >
-                <HouseIcon />
-                <span>Overview</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-      {/* Titles come from this tab's drafts while a page is being edited. */}
-      {foldersOf(project.pages.map((p) => withDraft(p, drafts))).map(([folder, pages]) => (
-        <SidebarGroup key={folder}>
-          <SidebarGroupLabel>{folder}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {pages.map((p) => (
-                <SidebarMenuItem key={p.id}>
-                  <SidebarMenuButton
-                    isActive={route === `${project.id}-${p.id}`}
-                    tooltip={p.title}
-                    render={link(`${project.id}-${p.id}`)}
-                  >
-                    <FileTextIcon />
-                    <span>{p.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      ))}
-    </>
-  );
+/** Screens that belong to the whole library, not one project. */
+function wholeInstallTitle(route: string) {
+  if (route === "plugins") return "Plugins";
+  if (route === "inbox" || route.startsWith("inbox-")) return "Inbox";
+  return "Projects";
 }
 
 function ThemeToggle({ className }: { className?: string }) {
@@ -550,7 +381,9 @@ function DesktopTopbar({ route }: { route: string }) {
   const { setCommandOpen } = useStore();
   const { state } = useSidebar();
   const project = useCurrentProject(route);
-  const trail = project ? crumbs(route) : [{ label: route === "plugins" ? "Plugins" : "Projects" }];
+  const trail = project
+    ? [{ label: project.name, route: project.home }, ...crumbs(route)]
+    : [{ label: wholeInstallTitle(route) }];
   return (
     <header className="sticky top-0 z-20 hidden h-12 shrink-0 items-center gap-2 border-b bg-background/85 px-3 backdrop-blur-md md:flex">
       <SidebarTrigger className="text-muted-foreground" />
@@ -611,9 +444,7 @@ function MobileTopbar({ route }: { route: string }) {
       {project ? (
         <ProjectMenu current={project} />
       ) : (
-        <span className="text-[15px] font-semibold tracking-tight">
-          {route === "plugins" ? "Plugins" : "Projects"}
-        </span>
+        <span className="text-[15px] font-semibold tracking-tight">{wholeInstallTitle(route)}</span>
       )}
       <div className="ml-auto flex items-center">
         <Button
@@ -643,65 +474,17 @@ type Tab = {
 
 const COLS: Record<number, string> = { 3: "grid-cols-3", 4: "grid-cols-4", 5: "grid-cols-5" };
 
-/** Phone tabs follow the context: the dashboard, a design system, or a docs project. */
+/** Phone tabs are the same everywhere: the inbox, search, and the library tree in a sheet. */
 function MobileTabbar({ route }: { route: string }) {
-  const section = sectionOf(route);
-  const project = projectOf(route);
-  const docs = docsProjectOf(route);
   const { setOpenMobile } = useSidebar();
   const { setCommandOpen } = useStore();
-  const gaps = useOpenGaps();
-  const search: Tab = {
-    key: "search",
-    label: "Search",
-    icon: SearchIcon,
-    action: "search",
-    active: false,
-  };
-  const tabs: Tab[] =
-    project === "charged-ui"
-      ? [
-          { key: "overview", label: "Overview", icon: HouseIcon, active: section === "overview" },
-          {
-            key: "components",
-            label: "Components",
-            icon: ComponentIcon,
-            active: section === "components",
-          },
-          { key: "tokens", label: "Tokens", icon: SwatchBookIcon, active: section === "tokens" },
-          {
-            key: "agents",
-            label: "Agents",
-            icon: BotIcon,
-            active: section === "agents",
-            dot: gaps.length > 0,
-          },
-          {
-            key: "more",
-            label: "More",
-            icon: EllipsisIcon,
-            action: "more",
-            active: ["guidelines", "integrations", "workspace"].includes(section),
-          },
-        ]
-      : docs
-        ? [
-            { key: docs.id, label: "Overview", icon: HouseIcon, active: route === docs.id },
-            search,
-            { key: "projects", label: "Projects", icon: LayoutGridIcon, active: false },
-            {
-              key: "more",
-              label: "Pages",
-              icon: FileTextIcon,
-              action: "more",
-              active: route.startsWith(`${docs.id}-`),
-            },
-          ]
-        : [
-            { key: "projects", label: "Projects", icon: LayoutGridIcon, active: true },
-            search,
-            { key: "more", label: "More", icon: EllipsisIcon, action: "more", active: false },
-          ];
+  const inbox = useInbox();
+  const inInbox = route === "inbox" || route.startsWith("inbox-");
+  const tabs: Tab[] = [
+    { key: "inbox", label: "Inbox", icon: InboxIcon, active: inInbox, dot: inbox.length > 0 },
+    { key: "search", label: "Search", icon: SearchIcon, action: "search", active: false },
+    { key: "more", label: "Library", icon: LibraryIcon, action: "more", active: !inInbox },
+  ];
   return (
     <nav
       aria-label="Primary"
