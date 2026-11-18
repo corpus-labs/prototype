@@ -5,3 +5,6 @@ dist/
 .claude/
 .vitest/
 .wrangler/
+
+# ZCode session artifacts
+.zcode/
