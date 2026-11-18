@@ -61,6 +61,17 @@
     @apply min-h-[40svh] pb-[20svh];
   }
 
+  /* An MDX block's card sits on its own line inside the paragraph that holds it. */
+  .docs-mdx-card {
+    @apply block whitespace-normal select-none;
+  }
+  /* ProseMirror puts a separator and a line break around a lone inline node so the cursor has a place. A card doesn't need them. */
+  .docs-prose p:has(> .docs-mdx-card) > br.ProseMirror-trailingBreak,
+  .docs-prose p:has(> .docs-mdx-card) > img.ProseMirror-separator {
+    /* ProseMirror's own stylesheet shows the separators with !important. */
+    @apply hidden!;
+  }
+
   /* The editor's own text selections and caret, in theme tokens. */
   .docs-prose {
     caret-color: var(--foreground);

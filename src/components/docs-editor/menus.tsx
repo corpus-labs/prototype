@@ -26,6 +26,8 @@ export const BLOCK_GROUPS: { label: string; ids: string[] }[] = [
     ids: ["text", "h1", "h2", "h3", "ul", "ol", "todo", "quote", "code", "hr"],
   },
   { label: "Insert", ids: ["table", "image", "page"] },
+  // Only MDX pages, like guidelines, offer these.
+  { label: "Page blocks", ids: ["mdx-do", "mdx-dont", "mdx-callout"] },
 ];
 
 /**

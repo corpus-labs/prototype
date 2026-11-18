@@ -9,6 +9,7 @@ import { TextSelection } from "@milkdown/prose/state";
 import { callCommand } from "@milkdown/utils";
 import { afterEach, describe, expect, it } from "vite-plus/test";
 
+import { componentFiles, guidelineFiles } from "@/data/workspace";
 import { handbookFixtures } from "@core/markdown/fixtures";
 import { splitFrontmatter } from "@core/markdown/frontmatter";
 import { normalizeMarkdown } from "@core/markdown/normalize";
@@ -133,5 +134,19 @@ describe("docs editor round-trip", () => {
       callCommand(insertImageCommand.key, { src: "https://x.test/a.png", alt: "A ship" }),
     );
     expect(readMarkdown(editor)).toBe("One.![A ship](https://x.test/a.png)\n");
+  });
+});
+
+// Guidelines and components are MDX pages in the same editor. Their Do, Don't, Callout,
+// and Preview blocks show as cards, and the file has to come back exactly as written.
+describe("MDX pages in the docs editor", () => {
+  const files = [
+    ...guidelineFiles.map((g) => [g.id, g.body] as const),
+    ...Object.entries(componentFiles),
+  ];
+  it.each(files)("keeps %s exactly as written", async (_id, file) => {
+    const { body } = splitFrontmatter(file);
+    const editor = await open(body);
+    expect(readMarkdown(editor)).toBe(body);
   });
 });

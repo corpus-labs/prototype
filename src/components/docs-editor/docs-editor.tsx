@@ -63,6 +63,7 @@ import {
   TextIcon,
 } from "./icons";
 import { BlockMenu, LinkForm, MenuList, type Block, type LinkTarget } from "./menus";
+import { MDX_INSERTS, MdxCard, mdxNodeView, type MdxCardInfo } from "./mdx-blocks";
 import { createDocsEditor } from "./milkdown";
 import { TableMenu, runTableAction, tableAid, type TableInfo } from "./table-menu";
 import { EMPTY_TOOLBAR, SelectionBar, type ToolbarAction, type ToolbarState } from "./toolbar";
@@ -315,11 +316,16 @@ function floating() {
 }
 
 /** Best matches first: the text starts with the query, then a word does, then it appears anywhere. */
+/** Lowercase, with apostrophes dropped, so "dont" and "don't" both find "Don’t example". */
+function fold(text: string) {
+  return text.toLowerCase().replace(/['’]/g, "");
+}
+
 function ranked<T>(items: T[], query: string, text: (item: T) => string): T[] {
-  const q = query.trim().toLowerCase();
+  const q = fold(query.trim());
   if (!q) return items;
   const score = (item: T) => {
-    const t = text(item).toLowerCase();
+    const t = fold(text(item));
     return t.startsWith(q)
       ? 0
       : t.split(/\s+/).some((w) => w.startsWith(q))
@@ -393,6 +399,7 @@ export function DocsEditor({
   pagePath,
   pages,
   autoFocus,
+  mdx = false,
 }: {
   value: string;
   onChange: (markdown: string) => void;
@@ -401,6 +408,8 @@ export function DocsEditor({
   /** Pages the `[[` picker and the link form can link to. */
   pages: LinkTarget[];
   autoFocus?: boolean;
+  /** An MDX page, like a guideline: its Do, Don't, and Callout blocks show as cards. */
+  mdx?: boolean;
 }) {
   const host = React.useRef<HTMLDivElement>(null);
   const editor = React.useRef<Editor | null>(null);
@@ -473,18 +482,31 @@ export function DocsEditor({
   }, []);
 
   const targets = pages.filter((p) => p.path !== pagePath);
-  const latest = useLatest({ onChange, targets, pagePath });
+  const blocks = React.useMemo(() => (mdx ? [...BLOCKS, ...MDX_INSERTS] : BLOCKS), [mdx]);
+  const latest = useLatest({ onChange, targets, pagePath, blocks });
 
   const itemsFor = React.useCallback(
     (m: Menu): (Block | LinkTarget)[] =>
       m?.kind === "slash"
-        ? ranked(BLOCKS, m.query.slice(1), (b) => b.label)
+        ? ranked(latest.current.blocks, m.query.slice(1), (b) => b.label)
         : m?.kind === "page"
           ? ranked(latest.current.targets, m.query.slice(2), (p) => `${p.title} ${p.folder}`)
           : [],
     [latest],
   );
   const items = itemsFor(menu);
+
+  // MDX blocks on the page, each rendered by React into the container its node view made.
+  const [cards, setCards] = React.useState<MdxCardInfo[]>([]);
+  const registry = React.useMemo(
+    () => ({
+      add: (card: MdxCardInfo) => setCards((list) => [...list, card]),
+      update: (id: number, value: string) =>
+        setCards((list) => list.map((c) => (c.id === id ? { ...c, value } : c))),
+      remove: (id: number) => setCards((list) => list.filter((c) => c.id !== id)),
+    }),
+    [],
+  );
 
   const run = React.useCallback((fn: (ctx: Ctx) => unknown) => editor.current?.action(fn), []);
 
@@ -619,7 +641,11 @@ export function DocsEditor({
         codeAid(els.code, setCode),
       ],
       configure: (ctx) => {
-        ctx.update(editorViewOptionsCtx, (prev) => ({ ...prev, handleKeyDown }));
+        ctx.update(editorViewOptionsCtx, (prev) => ({
+          ...prev,
+          handleKeyDown,
+          ...(mdx && { nodeViews: { ...prev.nodeViews, html: mdxNodeView(registry) } }),
+        }));
         ctx.update(blockConfig.key, (prev) => ({ ...prev, filterNodes: blockFilter }));
         // Pasted and dropped images embed as downscaled data URLs until Phase 5
         // writes them to the repository.
@@ -950,6 +976,34 @@ export function DocsEditor({
       />
 
       <LinkCard into={els.card} info={card} onEdit={editHoveredLink} />
+
+      {cards.map((c) =>
+        createPortal(
+          <MdxCard
+            card={c}
+            onSave={(value) =>
+              run((ctx) => {
+                const view = ctx.get(editorViewCtx);
+                const pos = c.getPos();
+                if (pos === undefined) return;
+                view.dispatch(view.state.tr.setNodeMarkup(pos, undefined, { value }));
+              })
+            }
+            onDelete={() =>
+              run((ctx) => {
+                const view = ctx.get(editorViewCtx);
+                const pos = c.getPos();
+                if (pos === undefined) return;
+                const $pos = view.state.doc.resolve(pos);
+                view.dispatch(view.state.tr.delete($pos.before(), $pos.after()));
+                view.focus();
+              })
+            }
+          />,
+          c.dom,
+          c.id,
+        ),
+      )}
 
       <ImageForm
         open={inserting}
