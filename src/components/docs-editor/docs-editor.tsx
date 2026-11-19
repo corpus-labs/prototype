@@ -43,7 +43,7 @@ import {
   BlockGutter,
   blockFilter,
   firstLineRect,
-  GRIP_DROP,
+  gutterOffset,
   runBlockAction,
   type BlockAction,
 } from "./block-handle";
@@ -664,8 +664,9 @@ export function DocsEditor({
               ctx,
               content: els.handle,
               getPlacement: () => "left",
-              // Down the stack so the plus rides on the line and the grip below it.
-              getOffset: () => ({ mainAxis: 14, crossAxis: GRIP_DROP }),
+              // Down the stack so the plus rides on the line, and out so the
+              // gutter centers between the editor area's edge and the text.
+              getOffset: ({ editorDom }) => gutterOffset(editorDom),
               getPosition: ({ active }) => firstLineRect(active.el),
             });
             blockProvider.current = provider;

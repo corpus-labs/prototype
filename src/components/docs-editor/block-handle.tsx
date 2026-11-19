@@ -56,6 +56,29 @@ export function firstLineRect(el: HTMLElement) {
 /** How far the gutter's vertical center sits below the plus button's center. */
 export const GRIP_DROP = 12.5;
 
+/** The gutter's width, kept beside the offset that centers it. */
+const GUTTER_WIDTH = 24;
+
+/**
+ * Places the gutter in the middle of the space between the editor area's left
+ * edge and the text, so it reads as belonging to neither the sidebar nor the
+ * page. Returned as the distance from the text to the gutter's right edge,
+ * which is what floating-ui's main axis moves.
+ */
+export function gutterOffset(editorDom: HTMLElement) {
+  const area = editorDom.closest("main") ?? editorDom.parentElement;
+  let left = area ? area.getBoundingClientRect().left : editorDom.getBoundingClientRect().left - 68;
+  // The eye measures from the visible panel beside the editor area, not from
+  // the content box inside it, so the shell's gutters count as open space.
+  const before = area?.previousElementSibling;
+  if (before) {
+    const panel = before.querySelector("[data-sidebar]");
+    left = (panel ?? before).getBoundingClientRect().right;
+  }
+  const gap = Math.max(editorDom.getBoundingClientRect().left - left, GUTTER_WIDTH + 8);
+  return { mainAxis: Math.round((gap - GUTTER_WIDTH) / 2), crossAxis: GRIP_DROP };
+}
+
 export type BlockAction = "duplicate" | "up" | "down" | "delete";
 
 /** Where the gutter's block sits in the document, for moving it around. */
