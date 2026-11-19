@@ -137,13 +137,36 @@ function MdxForm({
   const [title, setTitle] = React.useState(block && "title" in block ? block.title : "");
   const [text, setText] = React.useState(block && "text" in block ? block.text : "");
   const [source, setSource] = React.useState(value);
+  // An example's previews, as their Preview lines, and its code.
+  const [previews, setPreviews] = React.useState(
+    value
+      .split("\n")
+      .filter((l) => /^<Preview\b/.test(l.trim()))
+      .map((l) => l.trim())
+      .join("\n"),
+  );
+  const [code, setCode] = React.useState(block && "code" in block ? (block.code?.text ?? "") : "");
+  const lang = block && "code" in block ? (block.code?.lang ?? "") : "";
   const example = block?.t === "do" || block?.t === "dont";
   const callout = block?.t === "callout";
 
   const save = () => {
     if (example) {
       const tag = kind === "do" ? "Do" : "Dont";
-      onSave(`<${tag} title="${attr(title)}">\n${oneParagraph(text)}\n</${tag}>`);
+      const lines = [`<${tag} title="${attr(title)}">`, oneParagraph(text)];
+      lines.push(
+        ...previews
+          .split("\n")
+          .map((l) => l.trim())
+          .filter((l) => /^<Preview\b.*\/>$/.test(l)),
+      );
+      if (code.trim())
+        lines.push(
+          "```" + (lang || (code.trim().startsWith("{{") ? "twig" : "html")),
+          code.replace(/\n\s*\n+/g, "\n").trimEnd(),
+          "```",
+        );
+      onSave([...lines, `</${tag}>`].join("\n"));
     } else if (callout) {
       const tone = block.t === "callout" ? block.tone : "info";
       onSave(`<Callout tone="${tone}">\n${oneParagraph(text)}\n</Callout>`);
@@ -180,16 +203,45 @@ function MdxForm({
         </>
       )}
       {example || callout ? (
-        <Textarea
-          autoFocus={callout}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={
-            callout ? "What readers shouldn’t miss" : "One or two sentences on what happens"
-          }
-          aria-label="Text"
-          className="min-h-20"
-        />
+        <>
+          <Textarea
+            autoFocus={callout}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={
+              callout ? "What readers shouldn’t miss" : "One or two sentences on what happens"
+            }
+            aria-label="Text"
+            className="min-h-20"
+          />
+          {example && (
+            <>
+              <label className="grid gap-1.5">
+                <span className="text-xs text-muted-foreground">
+                  Preview, one line per rendering, like{" "}
+                  <code className="font-mono">{'<Preview component="button" label="Save" />'}</code>
+                </span>
+                <Textarea
+                  value={previews}
+                  onChange={(e) => setPreviews(e.target.value)}
+                  spellCheck={false}
+                  aria-label="Previews"
+                  className="min-h-14 font-mono text-[12.5px]"
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-xs text-muted-foreground">Code</span>
+                <Textarea
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  spellCheck={false}
+                  aria-label="Code"
+                  className="min-h-14 font-mono text-[12.5px]"
+                />
+              </label>
+            </>
+          )}
+        </>
       ) : (
         <Input
           autoFocus

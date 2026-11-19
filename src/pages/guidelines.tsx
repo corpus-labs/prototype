@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
-import { CButton, CuiScope } from "@/components/charged-ui";
+import { Previews } from "@/components/charged-ui";
 import {
   AgentPane,
   CodeBlock,
@@ -30,6 +30,73 @@ import {
 import { Inline, parseMdx, sectionize, type Block } from "@/lib/mdx-lite";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
+
+/**
+ * A Do or Don't. With previews it's a figure: the rendering on the system's canvas, a green
+ * or red bar, the caption, and the code behind a toggle. Without, it's a ruled note.
+ */
+function Example({ b, dark }: { b: Extract<Block, { t: "do" | "dont" }>; dark: boolean }) {
+  const good = b.t === "do";
+  const label = (
+    <span
+      className={cn(
+        "inline-flex items-baseline gap-1 font-medium",
+        good ? "text-good" : "text-bad",
+      )}
+    >
+      {good ? (
+        <CheckIcon className="size-4 self-center" />
+      ) : (
+        <XIcon className="size-4 self-center" />
+      )}
+      {good ? "Do" : "Don’t"}
+    </span>
+  );
+  const code = b.code && (
+    <details className="group/code mt-2">
+      <summary className="cursor-pointer list-none text-[13px] text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
+        <span className="group-open/code:hidden">Show code</span>
+        <span className="hidden group-open/code:inline">Hide code</span>
+      </summary>
+      <CodeBlock
+        code={b.code.text}
+        header={<span>{b.code.lang || "code"}</span>}
+        className="mt-2"
+      />
+    </details>
+  );
+  if (!b.previews.length)
+    return (
+      <div
+        className={cn("max-w-[68ch] border-l-2 py-0.5 pl-4", good ? "border-good" : "border-bad")}
+      >
+        <p className="flex items-center gap-1 text-sm">
+          {label}
+          {b.title && <span className="ml-0.5 font-medium text-foreground">{b.title}</span>}
+        </p>
+        <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
+          <Inline text={b.text} />
+        </p>
+        {code}
+      </div>
+    );
+  return (
+    <figure className="grid min-w-0 content-start gap-3">
+      <div className="overflow-hidden rounded-lg">
+        <Previews list={b.previews} dark={dark} />
+        <div className={cn("h-0.5", good ? "bg-good" : "bg-bad")} />
+      </div>
+      <figcaption className="text-sm leading-relaxed">
+        {label}
+        {b.title && <span className="ml-1.5 font-medium">{b.title}</span>}
+        <span className="mt-0.5 block text-muted-foreground">
+          <Inline text={b.text} />
+        </span>
+        {code}
+      </figcaption>
+    </figure>
+  );
+}
 
 function BlockView({ b, dark }: { b: Block; dark: boolean }) {
   switch (b.t) {
@@ -58,44 +125,9 @@ function BlockView({ b, dark }: { b: Block; dark: boolean }) {
       return <CodeBlock code={b.text} header={<span>{b.lang || "code"}</span>} />;
     case "do":
     case "dont":
-      return (
-        <div
-          className={cn(
-            "max-w-[68ch] border-l-2 py-0.5 pl-4",
-            b.t === "do" ? "border-good" : "border-bad",
-          )}
-        >
-          <p
-            className={cn(
-              "flex items-center gap-1 text-sm font-medium",
-              b.t === "do" ? "text-good" : "text-bad",
-            )}
-          >
-            {b.t === "do" ? <CheckIcon className="size-4" /> : <XIcon className="size-4" />}
-            {b.t === "do" ? "Do" : "Don’t"}
-            {b.title && <span className="ml-0.5 text-foreground">{b.title}</span>}
-          </p>
-          <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
-            <Inline text={b.text} />
-          </p>
-        </div>
-      );
+      return <Example b={b} dark={dark} />;
     case "preview":
-      return (
-        <CuiScope
-          dark={dark}
-          className="flex min-h-40 items-center justify-center rounded-xl bg-(--cui-subtle) p-8"
-        >
-          {b.attrs.component === "button" ? (
-            <CButton
-              variant={(b.attrs.variant as "primary") ?? "secondary"}
-              label={b.attrs.label}
-            />
-          ) : (
-            <span className="text-sm text-muted-foreground">Preview of {b.attrs.component}</span>
-          )}
-        </CuiScope>
-      );
+      return <Previews list={[b.attrs]} dark={dark} className="min-h-40 rounded-xl p-8" />;
     case "callout":
       return (
         <Alert className="max-w-[68ch]">
@@ -108,6 +140,20 @@ function BlockView({ b, dark }: { b: Block; dark: boolean }) {
     default:
       return null;
   }
+}
+
+/** Pairs a Do with the Don't after it when either shows a preview, so the two compare side by side. */
+function pairUp(blocks: Block[]) {
+  const out: Block[][] = [];
+  for (let i = 0; i < blocks.length; i++) {
+    const a = blocks[i];
+    const b = blocks[i + 1];
+    if (a.t === "do" && b?.t === "dont" && (a.previews.length || b.previews.length)) {
+      out.push([a, b]);
+      i++;
+    } else out.push([a]);
+  }
+  return out;
 }
 
 /** Renders a page’s MDX as people see it. Sections share keys with the agent view. */
@@ -130,9 +176,16 @@ export function MdxPeople({
       {sections.map((s, i) => (
         <DocSection key={s.key + i} k={s.key} hover={hover} onHover={onHover}>
           <div className="grid gap-5">
-            {s.blocks.map((b, j) => (
-              <BlockView key={j} b={b} dark={dark} />
-            ))}
+            {pairUp(s.blocks).map((group, j) =>
+              group.length === 2 ? (
+                <div key={j} className="grid gap-6 sm:grid-cols-2">
+                  <BlockView b={group[0]} dark={dark} />
+                  <BlockView b={group[1]} dark={dark} />
+                </div>
+              ) : (
+                <BlockView key={j} b={group[0]} dark={dark} />
+              ),
+            )}
           </div>
         </DocSection>
       ))}

@@ -160,12 +160,15 @@ export function CCard({
   nested,
   compact,
   small,
+  items,
 }: {
   title: string;
   body?: string;
   nested?: boolean;
   compact?: boolean;
   small?: boolean;
+  /** A plain list in the body slot. */
+  items?: string[];
 }) {
   return (
     <div className="w-full overflow-hidden rounded-[12px] bg-(--cui-surface) text-left ring-1 ring-(--cui-line)">
@@ -183,6 +186,13 @@ export function CCard({
         <p className={cn("font-semibold tracking-tight", small && "text-sm")}>{title}</p>
         {body && (
           <p className={cn("mt-1 text-(--cui-muted)", small ? "text-xs" : "text-sm")}>{body}</p>
+        )}
+        {!!items?.length && (
+          <ul className="mt-2 grid gap-1 text-sm text-(--cui-muted)">
+            {items.map((x) => (
+              <li key={x}>{x}</li>
+            ))}
+          </ul>
         )}
         {nested && (
           <div className="mt-3 rounded-[12px] p-3 ring-1 ring-(--cui-line)">
@@ -413,6 +423,117 @@ export function ComponentThumb({ id }: { id: string }) {
     default:
       return null;
   }
+}
+
+type Attrs = Record<string, string>;
+
+/**
+ * One `<Preview component="…" …props />` line from a page, as the component it names.
+ * The attributes are the component's props as text; a bare attribute is a true flag. In this
+ * prototype, Charged UI's components are drawn here; Phase 1 renders each platform's own.
+ */
+export function PreviewOf({ attrs }: { attrs: Attrs }) {
+  const flag = (k: string) => attrs[k] !== undefined && attrs[k] !== "false";
+  const list = (k: string) =>
+    (attrs[k] ?? "")
+      .split(",")
+      .map((x) => x.trim())
+      .filter(Boolean);
+  switch (attrs.component) {
+    case "button":
+      return (
+        <CButton
+          variant={attrs.variant as CButtonProps["variant"]}
+          size={attrs.size as CButtonProps["size"]}
+          label={attrs.label}
+          icon={flag("icon")}
+          // A button with href is a link, and shows the arrow links get.
+          iconEnd={!!attrs.href}
+          loading={flag("loading")}
+          disabled={flag("disabled")}
+        />
+      );
+    case "callout":
+      return (
+        <CCallout
+          tone={attrs.tone as "info"}
+          title={attrs.title ?? ""}
+          body={attrs.body}
+          className="w-60"
+        />
+      );
+    case "badge":
+      return <CBadge tone={attrs.tone as "info"} label={attrs.label ?? ""} />;
+    case "card":
+      return (
+        <div className="w-48">
+          <CCard
+            title={attrs.title ?? ""}
+            body={attrs.body}
+            nested={flag("nested")}
+            compact={flag("compact")}
+            small={flag("small")}
+            items={list("items")}
+          />
+        </div>
+      );
+    case "form-field":
+      // An empty label means the placeholder is doing the label's job.
+      return (
+        <CField
+          label={attrs.label || "Email"}
+          placeholderOnly={attrs.label === ""}
+          value={attrs.value}
+          error={attrs.error}
+        />
+      );
+    case "menu":
+      return <CMenu short doubleActive={list("active").length > 1} />;
+    case "tabs":
+      return <CTabs />;
+    case "accordion":
+      return <CAccordion />;
+    case "hero":
+      return <CHero />;
+    case "breadcrumb":
+      return <CBreadcrumb items={list("items").length ? list("items") : undefined} />;
+    case "pagination":
+      return <CPagination all={attrs.pages === "all"} short={attrs.pages !== "all"} />;
+    case "pager":
+      return <CPager />;
+    default:
+      return <span className="text-sm text-(--cui-muted)">No preview for “{attrs.component}”</span>;
+  }
+}
+
+/** Components that stack when an example shows several; the rest sit side by side. */
+const STACKED = new Set(["callout", "form-field", "card", "hero", "accordion"]);
+
+/** A row or stack of Preview lines on the system's own canvas. */
+export function Previews({
+  list,
+  dark,
+  className,
+}: {
+  list: Attrs[];
+  dark: boolean;
+  className?: string;
+}) {
+  const stacked = list.every((a) => STACKED.has(a.component));
+  return (
+    <CuiScope
+      dark={dark}
+      className={cn(
+        "pointer-events-none flex min-h-36 items-center justify-center gap-2 bg-(--cui-subtle) p-6",
+        stacked ? "flex-col" : "flex-wrap",
+        className,
+      )}
+    >
+      {list.map((a, i) => (
+        <PreviewOf key={i} attrs={a} />
+      ))}
+    </CuiScope>
+  );
 }
 
 /** Previews for do and don't examples. */

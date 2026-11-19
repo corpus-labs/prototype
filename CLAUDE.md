@@ -87,6 +87,8 @@ tokens/*.tokens.json                     DTCG
 
 Frontmatter, headings, paragraphs, lists, code fences, and these blocks: `<Do title="">`, `<Dont title="">`, `<Preview component="" ...props />`, `<Callout tone="">`. Unknown JSX is a validation error with file and line, never silently dropped.
 
+A Do or Dont holds its caption, then optionally one `<Preview />` line per rendering and one code fence, with no blank lines inside so it stays one block. A bare prop such as `loading` means true. A Do followed by a Dont in `## Do and don't` is one example pair. See `fixtures/charged-ui/docs/components/button.mdx`.
+
 ## Agent-facing output
 
 Agent payloads are product UI. Treat formatter changes like UI changes.

@@ -6,7 +6,17 @@ export type Block =
   | { t: "p"; text: string; key: string }
   | { t: "ul"; items: string[]; key: string }
   | { t: "code"; lang: string; text: string; key: string }
-  | { t: "do" | "dont"; title: string; text: string; key: string }
+  | {
+      t: "do" | "dont";
+      title: string;
+      /** The caption. */
+      text: string;
+      /** The component renderings the example shows, one per `<Preview />` line inside it. */
+      previews: Record<string, string>[];
+      /** The example's code, from a fence inside the block. */
+      code?: { lang: string; text: string };
+      key: string;
+    }
   | { t: "preview"; attrs: Record<string, string>; key: string }
   | { t: "callout"; tone: string; text: string; key: string };
 
@@ -18,11 +28,14 @@ export function slug(s: string) {
     .replace(/^-|-$/g, "");
 }
 
+/** Tag attributes. A bare attribute, like `loading`, is a true flag. */
 function attrs(s: string) {
   const out: Record<string, string> = {};
-  for (const m of s.matchAll(/([a-zA-Z_]+)="([^"]*)"/g)) out[m[1]] = m[2];
+  for (const m of s.matchAll(/([a-zA-Z_][\w-]*)(?:="([^"]*)")?/g)) out[m[1]] = m[2] ?? "true";
   return out;
 }
+
+const PREVIEW_LINE = /^<Preview\b([^>]*)\/>$/;
 
 /** Parses the small MDX dialect Corpus pages use. Unknown syntax falls back to paragraphs. */
 export function parseMdx(src: string): Block[] {
@@ -89,15 +102,34 @@ export function parseMdx(src: string): Block[] {
           i++;
         }
       }
-      const text = body
-        .map((x) => x.trim())
-        .filter(Boolean)
-        .join(" ");
+      // Inside Do and Don't: the caption's lines, then any Preview lines and one code fence.
+      const caption: string[] = [];
+      const previews: Record<string, string>[] = [];
+      let code: { lang: string; text: string } | undefined;
+      for (let j = 0; j < body.length; j++) {
+        const row = body[j].trim();
+        const preview = row.match(PREVIEW_LINE);
+        if (preview && name !== "Callout") previews.push(attrs(preview[1]));
+        else if (row.startsWith("```") && name !== "Callout") {
+          const fence: string[] = [];
+          for (j++; j < body.length && !body[j].trim().startsWith("```"); j++) fence.push(body[j]);
+          code = { lang: row.slice(3).trim(), text: fence.join("\n") };
+        } else if (row) caption.push(row);
+      }
+      const text = caption.join(" ");
       if (name === "Callout") blocks.push({ t: "callout", tone: a.tone ?? "info", text, key });
-      else blocks.push({ t: name === "Do" ? "do" : "dont", title: a.title ?? "", text, key });
+      else
+        blocks.push({
+          t: name === "Do" ? "do" : "dont",
+          title: a.title ?? "",
+          text,
+          previews,
+          ...(code && { code }),
+          key,
+        });
       continue;
     }
-    const preview = trimmed.match(/^<Preview\b([^>]*)\/>$/);
+    const preview = trimmed.match(PREVIEW_LINE);
     if (preview) {
       blocks.push({ t: "preview", attrs: attrs(preview[1]), key });
       i++;
