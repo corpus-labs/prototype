@@ -1,0 +1,40 @@
+---
+component: charged_ui:menu
+status: stable
+---
+
+Site navigation where each item is its own page.
+
+## When to use
+
+- For links between pages that each have their own URL.
+
+## When not to use
+
+- To switch views on one page. Use Tabs.
+
+## Rules
+
+- MUST NOT mark a parent and a child active at the same time.
+
+## Do and don’t
+
+<Do title="One active item">
+The current page is the only one marked.
+<Preview component="menu" active="Admissions" />
+```twig
+{{ include('charged_ui:menu', { items: menu }) }}
+```
+</Do>
+
+<Dont title="Two active items">
+Readers can’t tell where they are.
+<Preview component="menu" active="Programs, Admissions" />
+```html
+{# parent and child both active #}
+```
+</Dont>
+
+## Accessibility
+
+- The current page gets aria-current=page.

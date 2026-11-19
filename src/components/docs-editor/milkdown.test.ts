@@ -9,7 +9,7 @@ import { TextSelection } from "@milkdown/prose/state";
 import { callCommand } from "@milkdown/utils";
 import { afterEach, describe, expect, it } from "vite-plus/test";
 
-import { componentFiles, guidelineFiles } from "@/data/workspace";
+import { componentFiles, drafts, guidelineFiles } from "@/data/workspace";
 import { handbookFixtures } from "@core/markdown/fixtures";
 import { splitFrontmatter } from "@core/markdown/frontmatter";
 import { normalizeMarkdown } from "@core/markdown/normalize";
@@ -148,5 +148,10 @@ describe("MDX pages in the docs editor", () => {
     const { body } = splitFrontmatter(file);
     const editor = await open(body);
     expect(readMarkdown(editor)).toBe(body);
+  });
+
+  it.each(Object.entries(drafts))("keeps the %s draft exactly as written", async (_id, d) => {
+    const body = d.text.trim() + "\n";
+    expect(readMarkdown(await open(body))).toBe(body);
   });
 });

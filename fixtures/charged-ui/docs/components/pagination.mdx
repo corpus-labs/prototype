@@ -1,0 +1,32 @@
+---
+component: charged_ui:pagination
+status: stable
+---
+
+Moves between pages of a long list.
+
+## When to use
+
+- For lists longer than 24 items.
+
+## Rules
+
+- SHOULD show at most seven page numbers.
+
+## Do and don’t
+
+<Do title="Short range">
+Collapse long ranges with an ellipsis.
+<Preview component="pagination" />
+```twig
+{{ include('charged_ui:pagination', { current: 4, total: 12 }) }}
+```
+</Do>
+
+<Dont title="Every page">
+Twelve numbers wrap on phones.
+<Preview component="pagination" pages="all" />
+```html
+{# 1 2 3 4 5 6 7 8 9 10 11 12 #}
+```
+</Dont>

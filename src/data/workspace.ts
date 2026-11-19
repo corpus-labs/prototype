@@ -13,12 +13,20 @@ export type PropDef = {
   description: string;
 };
 
-export type ExamplePair = {
-  key: string;
-  do: { title: string; caption: string; preview: string; code: string };
-  dont: { title: string; caption: string; preview: string; code: string };
-  rule: string;
+/** One side of an example: its caption, the component renderings it shows, and its code. */
+export type Example = {
+  title: string;
+  caption: string;
+  previews: Record<string, string>[];
+  code: string;
+  lang: string;
 };
+
+/** A Do and the Don't after it, read from a component's MDX file. */
+export type ExamplePair = { key: string; do: Example; dont: Example };
+
+/** A section of a component's page beyond the usual ones, like an answer added from the inbox. */
+export type WrittenSection = { key: string; title: string; markdown: string };
 
 export type ComponentDoc = {
   id: string;
@@ -31,11 +39,15 @@ export type ComponentDoc = {
   summary: string;
   props: PropDef[];
   slots?: { name: string; description: string }[];
+  // The written page, read from the component's MDX file by withWritten() in
+  // src/lib/component-docs.ts. The data below carries only what the schema says.
   whenToUse?: string[];
   whenNotToUse?: string[];
-  agentRules?: { key: "usage" | "a11y"; text: string }[];
+  /** The items of the page's Rules section, in order. */
+  rules?: string[];
   examples?: ExamplePair[];
   a11y?: string[];
+  sections?: WrittenSection[];
   tokens?: string[];
   related?: string[];
   requests: number;
@@ -108,76 +120,6 @@ export const components: ComponentDoc[] = [
         description: "Shows a spinner and blocks repeat clicks.",
       },
     ],
-    whenToUse: [
-      "To start an action in place, like saving, sending, or deleting.",
-      "To move someone to the next step of a flow. Pass href and it renders a link.",
-    ],
-    whenNotToUse: [
-      "For navigation inside running text. Use a text link.",
-      "To switch a setting on or off. Use Switch.",
-    ],
-    agentRules: [
-      { key: "usage", text: "SHOULD use variant ghost inside toolbars and table rows." },
-      { key: "usage", text: "MUST NOT use Button to toggle a setting. Use Switch." },
-      { key: "a11y", text: "MUST give icon-only buttons an aria_label." },
-      { key: "a11y", text: "MUST NOT remove the focus ring." },
-    ],
-    examples: [
-      {
-        key: "primary",
-        rule: "MUST NOT place more than one variant primary in the same view.",
-        do: {
-          title: "One primary action",
-          caption: "Pair one primary button with a secondary one.",
-          preview: "pair-good",
-          code: "{{ include('charged_ui:button', { variant: 'primary', label: 'Save changes' }) }}\n{{ include('charged_ui:button', { label: 'Cancel' }) }}",
-        },
-        dont: {
-          title: "Competing primaries",
-          caption: "Two primary buttons fight for the same click.",
-          preview: "pair-bad",
-          code: "{{ include('charged_ui:button', { variant: 'primary', label: 'Save' }) }}\n{{ include('charged_ui:button', { variant: 'primary', label: 'Publish' }) }}",
-        },
-      },
-      {
-        key: "labels",
-        rule: "MUST write labels as a verb phrase in sentence case, three words or fewer.",
-        do: {
-          title: "Say what happens",
-          caption: "Start with a verb that names the result.",
-          preview: "label-good",
-          code: "{{ include('charged_ui:button', { variant: 'primary', label: 'Invite people' }) }}",
-        },
-        dont: {
-          title: "Vague labels",
-          caption: "“Click here” and “Submit” say nothing about the result.",
-          preview: "label-bad",
-          code: "{{ include('charged_ui:button', { variant: 'primary', label: 'Click here' }) }}",
-        },
-      },
-      {
-        key: "links",
-        rule: "MUST pass href to Button for links styled as buttons. NEVER style a raw <a> with button classes.",
-        do: {
-          title: "Use href",
-          caption: "Button renders the link and keeps focus and sizing.",
-          preview: "link-good",
-          code: "{{ include('charged_ui:button', { label: 'Read the guide', href: '/guide' }) }}",
-        },
-        dont: {
-          title: "Raw anchors",
-          caption: "Hand-styled anchors drift from the component.",
-          preview: "link-bad",
-          code: '<a class="btn btn-primary" href="/guide">Read the guide</a>',
-        },
-      },
-    ],
-    a11y: [
-      "Give icon-only buttons an aria_label. The icon alone isn’t announced.",
-      "Never remove the focus ring. It uses color.focus.",
-      "Use disabled sparingly, and say nearby why the action is unavailable.",
-      "Sizes md and lg meet the 40px touch target. Use sm only with a pointer.",
-    ],
     tokens: [
       "color.action.primary",
       "color.action.primary-hover",
@@ -219,18 +161,6 @@ export const components: ComponentDoc[] = [
       { name: "body", description: "Short description. Two or three lines." },
       { name: "footer", description: "Metadata or one secondary action." },
     ],
-    whenToUse: [
-      "To show a set of comparable items, like articles or programs, in a grid.",
-      "To link to a detail page with a short preview.",
-    ],
-    whenNotToUse: ["For a single block of text. Use a section with a heading."],
-    agentRules: [
-      { key: "usage", text: "SHOULD use Card only inside a grid of comparable items." },
-      { key: "a11y", text: "MUST NOT add a second link inside a card that has href." },
-    ],
-    a11y: [
-      "When href is set, the title is the link text. Don’t add a second link inside the card.",
-    ],
     tokens: ["radius.card", "color.line", "space.6"],
     related: ["hero", "badge"],
     requests: 148,
@@ -261,33 +191,6 @@ export const components: ComponentDoc[] = [
       },
     ],
     slots: [{ name: "body", description: "One or two sentences." }],
-    whenToUse: [
-      "To warn about a consequence before someone acts.",
-      "To confirm that something worked when the page doesn’t change.",
-    ],
-    whenNotToUse: ["For general page introductions. Use body text."],
-    agentRules: [
-      { key: "a11y", text: "MUST use role=alert only for callouts that appear after an action." },
-    ],
-    examples: [
-      {
-        key: "stacking",
-        rule: "MUST NOT stack more than one callout in a section.",
-        do: {
-          title: "One per section",
-          caption: "Put the consequence in the title.",
-          preview: "callout-good",
-          code: "{{ include('charged_ui:callout', { tone: 'warning', title: 'Deleting removes all versions' }) }}",
-        },
-        dont: {
-          title: "Stacked callouts",
-          caption: "Three in a row read as noise.",
-          preview: "callout-bad",
-          code: "{# three callouts in a row #}",
-        },
-      },
-    ],
-    a11y: ["Warning and danger callouts use role=alert only when they appear after an action."],
     tokens: ["color.status.warning", "color.action.soft", "radius.control"],
     related: ["badge"],
     requests: 96,
@@ -324,27 +227,6 @@ export const components: ComponentDoc[] = [
         description: "Marks the label, not the placeholder.",
       },
     ],
-    whenToUse: ["For every text input in a form."],
-    agentRules: [{ key: "usage", text: "MUST stack form fields with space.4." }],
-    examples: [
-      {
-        key: "labels",
-        rule: "MUST NOT use the placeholder as the only label.",
-        do: {
-          title: "Visible label",
-          caption: "The label stays put while typing.",
-          preview: "field-good",
-          code: "{{ include('charged_ui:form_field', { label: 'Email', type: 'email' }) }}",
-        },
-        dont: {
-          title: "Placeholder as label",
-          caption: "It disappears as soon as someone types.",
-          preview: "field-bad",
-          code: '<input placeholder="Email">',
-        },
-      },
-    ],
-    a11y: ["Errors are linked with aria-describedby and announced on submit."],
     tokens: ["space.4", "radius.control", "color.line"],
     requests: 88,
     updated: "2 weeks ago",
@@ -378,27 +260,6 @@ export const components: ComponentDoc[] = [
         description: "Marks the current page.",
       },
     ],
-    whenToUse: ["For links between pages that each have their own URL."],
-    whenNotToUse: ["To switch views on one page. Use Tabs."],
-    examples: [
-      {
-        key: "active",
-        rule: "MUST NOT mark a parent and a child active at the same time.",
-        do: {
-          title: "One active item",
-          caption: "The current page is the only one marked.",
-          preview: "menu-good",
-          code: "{{ include('charged_ui:menu', { items: menu }) }}",
-        },
-        dont: {
-          title: "Two active items",
-          caption: "Readers can’t tell where they are.",
-          preview: "menu-bad",
-          code: "{# parent and child both active #}",
-        },
-      },
-    ],
-    a11y: ["The current page gets aria-current=page."],
     tokens: ["font.label", "color.action.primary"],
     related: ["tabs", "breadcrumb"],
     requests: 74,
@@ -449,8 +310,6 @@ export const components: ComponentDoc[] = [
         description: "Use tone for status, not decoration.",
       },
     ],
-    whenToUse: ["To show status or category next to a title."],
-    agentRules: [{ key: "usage", text: "SHOULD keep badge labels to one or two words." }],
     requests: 41,
     updated: "1 month ago",
   },
@@ -527,25 +386,6 @@ export const components: ComponentDoc[] = [
         description: "Shows the current page as plain text.",
       },
     ],
-    whenToUse: ["On pages three or more levels deep."],
-    examples: [
-      {
-        key: "depth",
-        rule: "SHOULD NOT show Breadcrumb on top-level pages.",
-        do: {
-          title: "Deep pages",
-          caption: "Show the path on a third-level page.",
-          preview: "crumb-good",
-          code: "{{ include('charged_ui:breadcrumb', { items: trail }) }}",
-        },
-        dont: {
-          title: "Top-level pages",
-          caption: "A one-item trail adds nothing.",
-          preview: "crumb-bad",
-          code: "{# Home > About #}",
-        },
-      },
-    ],
     requests: 19,
     updated: "1 month ago",
   },
@@ -561,25 +401,6 @@ export const components: ComponentDoc[] = [
     props: [
       { name: "current", type: "integer", required: true, description: "The page being shown." },
       { name: "total", type: "integer", required: true, description: "Total number of pages." },
-    ],
-    whenToUse: ["For lists longer than 24 items."],
-    examples: [
-      {
-        key: "range",
-        rule: "SHOULD show at most seven page numbers.",
-        do: {
-          title: "Short range",
-          caption: "Collapse long ranges with an ellipsis.",
-          preview: "pages-good",
-          code: "{{ include('charged_ui:pagination', { current: 4, total: 12 }) }}",
-        },
-        dont: {
-          title: "Every page",
-          caption: "Twelve numbers wrap on phones.",
-          preview: "pages-bad",
-          code: "{# 1 2 3 4 5 6 7 8 9 10 11 12 #}",
-        },
-      },
     ],
     requests: 12,
     updated: "2 days ago",
@@ -1059,78 +880,7 @@ Media in Card and Hero needs alt text unless it’s purely decorative.
   },
 ];
 
-export const componentFiles: Record<string, string> = {
-  button: `---
-component: charged_ui:button
-status: stable
----
-
-Starts an action or moves someone to the next step of a flow. Use one primary button per view.
-
-## When to use
-
-- To start an action in place, like saving, sending, or deleting.
-- To move someone to the next step of a flow. Pass ${T}href${T} and it renders a link.
-
-## When not to use
-
-- For navigation inside running text. Use a text link.
-- To switch a setting on or off. Use Switch.
-
-<Do title="One primary action">
-Pair one primary button with a secondary one.
-</Do>
-
-<Dont title="Competing primaries">
-Two primary buttons fight for the same click.
-</Dont>
-
-## Accessibility
-
-- Give icon-only buttons an ${T}aria_label${T}. The icon alone isn’t announced.
-- Never remove the focus ring. It uses ${T}color.focus${T}.
-`,
-  card: `---
-component: charged_ui:card
-status: stable
----
-
-Groups content and actions about a single subject, like an article or a program.
-
-## When to use
-
-- To show a set of comparable items, like articles or programs, in a grid.
-- To link to a detail page with a short preview.
-
-## When not to use
-
-- For a single block of text. Use a section with a heading.
-
-## Accessibility
-
-- When ${T}href${T} is set, the title is the link text. Don’t add a second link inside the card.
-`,
-  callout: `---
-component: charged_ui:callout
-status: stable
----
-
-Draws attention to information that changes what someone does next.
-
-## When to use
-
-- To warn about a consequence before someone acts.
-- To confirm that something worked when the page doesn’t change.
-
-<Do title="One per section">
-Put the consequence in the title.
-</Do>
-
-<Dont title="Stacked callouts">
-Three in a row read as noise.
-</Dont>
-`,
-};
+export { componentFiles } from "@/data/component-files";
 
 /** AI drafts the prototype can produce for open agent questions. */
 export const drafts: Record<
@@ -1148,10 +898,18 @@ Set ${T}loading: true${T} while the request is in flight. Keep the label so the 
 
 <Do title="Keep the label">
 Show the spinner beside “Save changes”.
+<Preview component="button" size="sm" variant="primary" label="Save changes" loading />
+${T}${T}${T}twig
+{{ include('charged_ui:button', { variant: 'primary', label: 'Save changes', loading: true }) }}
+${T}${T}${T}
 </Do>
 
 <Dont title="Swap the label">
 Replace the label with “Loading…” or hide the button.
+<Preview component="button" size="sm" variant="primary" label="Loading…" disabled />
+${T}${T}${T}twig
+{{ include('charged_ui:button', { variant: 'primary', label: 'Loading…', disabled: true }) }}
+${T}${T}${T}
 </Dont>
 `,
   },
@@ -1166,10 +924,18 @@ Don’t put a Card inside another Card. Nested borders and shadows make the hier
 
 <Do title="List inside a card">
 Show related items as a simple list in the body slot.
+<Preview component="card" title="Design school" items="Industrial design, Interaction design" compact />
+${T}${T}${T}twig
+{{ include('charged_ui:card', { title: 'Design school', body: list }) }}
+${T}${T}${T}
 </Do>
 
 <Dont title="Card in a card">
 Place a second bordered card inside the first.
+<Preview component="card" title="Design school" nested compact />
+${T}${T}${T}twig
+{{ include('charged_ui:card', { title: 'Design school', body: include('charged_ui:card', { title: 'Related program' }) }) }}
+${T}${T}${T}
 </Dont>
 `,
   },

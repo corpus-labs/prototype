@@ -1,0 +1,32 @@
+---
+component: charged_ui:breadcrumb
+status: stable
+---
+
+Shows where a page sits in the site hierarchy.
+
+## When to use
+
+- On pages three or more levels deep.
+
+## Rules
+
+- SHOULD NOT show Breadcrumb on top-level pages.
+
+## Do and don’t
+
+<Do title="Deep pages">
+Show the path on a third-level page.
+<Preview component="breadcrumb" items="Home, Programs, Design" />
+```twig
+{{ include('charged_ui:breadcrumb', { items: trail }) }}
+```
+</Do>
+
+<Dont title="Top-level pages">
+A one-item trail adds nothing.
+<Preview component="breadcrumb" items="Home, About" />
+```html
+{# Home > About #}
+```
+</Dont>

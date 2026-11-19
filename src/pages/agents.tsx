@@ -16,6 +16,7 @@ import {
   tokenLines,
   type Line,
 } from "@/lib/agent-format";
+import { useComponentDocs } from "@/lib/component-docs";
 import { navigate } from "@/lib/router";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -81,6 +82,8 @@ const EXAMPLES: Record<string, { input: string; chips: string[] }> = {
  */
 function ToolConsole() {
   const { resolved, saved } = useStore();
+  // Components with their committed pages, which is what agents get.
+  const docs = useComponentDocs();
   const [current, setTool] = React.useState("get_component");
   const [input, setInput] = React.useState(EXAMPLES.get_component.input);
   const [running, setRunning] = React.useState(false);
@@ -111,7 +114,7 @@ function ToolConsole() {
           .replace(/^charged_ui:/, "")
           .replace(/_/g, "-");
         args = `{ "name": "${id}" }`;
-        const c = components.find((x) => x.id === id || x.name.toLowerCase() === id);
+        const c = docs.find((x) => x.id === id || x.name.toLowerCase() === id);
         lines = c
           ? componentLines(c, ctx)
           : [

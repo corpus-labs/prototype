@@ -1,12 +1,5 @@
 import * as React from "react";
-import {
-  CheckIcon,
-  CircleAlertIcon,
-  DownloadIcon,
-  PenLineIcon,
-  SearchIcon,
-  XIcon,
-} from "lucide-react";
+import { CircleAlertIcon, DownloadIcon, FileCodeIcon, SearchIcon } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -29,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -39,13 +33,7 @@ import {
 } from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { toast } from "@/components/ui/toast";
-import {
-  CButton,
-  ComponentThumb,
-  CuiScope,
-  ExamplePreview,
-  type CButtonProps,
-} from "@/components/charged-ui";
+import { CButton, ComponentThumb, CuiScope, type CButtonProps } from "@/components/charged-ui";
 import {
   AgentPane,
   CodeBlock,
@@ -61,17 +49,12 @@ import {
   proseClass,
   useEffectiveReader,
   useViewMode,
-  type Hover,
 } from "@/components/common";
 import { components, questions, tokens, type ComponentDoc } from "@/data/workspace";
-import {
-  componentJSON,
-  componentLines,
-  componentRules,
-  extraSections,
-  includeSnippet,
-} from "@/lib/agent-format";
-import { Inline } from "@/lib/mdx-lite";
+import { componentJSON, componentLines, includeSnippet } from "@/lib/agent-format";
+import { useComponentDocs, withWritten } from "@/lib/component-docs";
+import { parseMdx, slug } from "@/lib/mdx-lite";
+import { joinFrontmatter, splitFrontmatter } from "@core/markdown/frontmatter";
 import { navigate } from "@/lib/router";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -83,7 +66,8 @@ export function ComponentsIndex() {
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState("all");
   const [view, setView] = useViewMode("components");
-  const list = components.filter(
+  const docs = useComponentDocs();
+  const list = docs.filter(
     (c) =>
       (status === "all" || c.status === status) &&
       (c.name + c.machine + c.category).toLowerCase().includes(query.toLowerCase()),
@@ -97,8 +81,8 @@ export function ComponentsIndex() {
     else groups.push([c.category, [c]]);
   }
   for (const [, items] of groups) items.sort((x, y) => y.requests - x.requests);
-  const thin = components.filter(
-    (c) => c.status !== "deprecated" && !c.whenToUse?.length && !c.agentRules?.length,
+  const thin = docs.filter(
+    (c) => c.status !== "deprecated" && !c.whenToUse?.length && !c.rules?.length,
   ).length;
 
   return (
@@ -173,7 +157,7 @@ export function ComponentsIndex() {
       {view === "grid" ? (
         <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-5 sm:grid-cols-2 xl:grid-cols-3">
           {list.map((c) => {
-            const noUsage = !c.whenToUse?.length && !c.agentRules?.length;
+            const noUsage = !c.whenToUse?.length && !c.rules?.length;
             return (
               <a
                 key={c.id}
@@ -237,7 +221,7 @@ export function ComponentsIndex() {
                 </h2>
                 <ul className="divide-y">
                   {items.map((c) => {
-                    const noUsage = !c.whenToUse?.length && !c.agentRules?.length;
+                    const noUsage = !c.whenToUse?.length && !c.rules?.length;
                     const retired = c.status === "deprecated";
                     return (
                       <li key={c.id}>
@@ -562,26 +546,30 @@ function StaticPreview({ c }: { c: ComponentDoc }) {
 
 /* ---------------------------------------------------------------- People */
 
-/** Which sections a component’s page shows. The page and its “On this page” list both read this. */
-function outline(c: ComponentDoc, resolved: string[]) {
-  const deprecated = c.status === "deprecated";
-  const rules = componentRules(c, { resolved });
-  const extras = extraSections(c, { resolved });
-  // Empty sections show as gaps to fill, except on deprecated components, where they’re left out.
-  const show = (has: boolean) => has || !deprecated;
-  const usage = show(!!(c.whenToUse?.length || c.whenNotToUse?.length));
-  const hasRules = show(rules.length > 0);
-  const examples = show(!!c.examples?.length);
-  const a11y = show(!!c.a11y?.length);
-  const toc: [string, string][] = [["preview", "Preview"]];
-  if (usage) toc.push(["usage", "Usage"]);
-  if (hasRules) toc.push(["rules", "Rules"]);
-  if (examples) toc.push(["dodont", "Do and don’t"]);
-  extras.forEach((x) => toc.push([x.key, x.title]));
-  toc.push(["props", "Props"]);
-  if (a11y) toc.push(["a11y", "Accessibility"]);
+/**
+ * The page's sections for “On this page”: the preview, then the written page's own headings,
+ * then what comes from the schema.
+ */
+type PageDoc = ComponentDoc & { writtenBody?: string };
+
+function outline(c: PageDoc): [string, string][] {
+  const written = parseMdx(c.writtenBody ?? "")
+    .filter((b) => b.t === "h2")
+    .map((b) => [slug(b.t === "h2" ? b.text : ""), b.t === "h2" ? b.text : ""] as [string, string]);
+  const toc: [string, string][] = [["preview", "Preview"], ...written, ["props", "Props"]];
   if (c.tokens?.length) toc.push(["tokens", "Tokens"]);
-  return { rules, extras, usage, hasRules, examples, a11y, toc };
+  return toc;
+}
+
+/** A section's element: one of the page's own, or a heading in the written page by its slug. */
+function sectionEl(id: string): HTMLElement | null {
+  return (
+    document.getElementById(`sec-${id}`) ??
+    [...document.querySelectorAll<HTMLElement>(".docs-prose h2")].find(
+      (h) => slug(h.textContent ?? "") === id,
+    ) ??
+    null
+  );
 }
 
 function MetaRow({ c }: { c: ComponentDoc }) {
@@ -594,131 +582,6 @@ function MetaRow({ c }: { c: ComponentDoc }) {
         ["Updated", c.updated.toLowerCase()],
       ]}
     />
-  );
-}
-
-const PROSE = proseClass;
-const BULLETS = cn(PROSE, "grid list-disc gap-2 pl-5 marker:text-muted-foreground/60");
-
-function UsageList({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div>
-      <h3 className="text-sm font-semibold">{title}</h3>
-      <ul className={cn(BULLETS, "mt-3")}>
-        {items.map((x) => (
-          <li key={x}>
-            <Inline text={x} />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-const KEYWORD = /^(MUST NOT|MUST|SHOULD NOT|SHOULD)\s+([\s\S]*)$/;
-
-/** Rules as agents get them. The keyword is literal text, so it’s set in mono and given its own column. */
-function RuleList({ rules }: { rules: string[] }) {
-  return (
-    <ul className="divide-y border-y">
-      {rules.map((rule) => {
-        const m = rule.match(KEYWORD);
-        return (
-          <li
-            key={rule}
-            className="grid grid-cols-[5.25rem_minmax(0,1fr)] items-baseline gap-x-4 py-3 sm:grid-cols-[6rem_minmax(0,1fr)]"
-          >
-            <span
-              className={cn(
-                "font-mono text-xs font-medium",
-                m?.[1].startsWith("MUST") ? "text-foreground" : "text-muted-foreground",
-              )}
-            >
-              {m?.[1]}
-            </span>
-            <span className="text-[15px] leading-relaxed">
-              <Inline text={m ? m[2] : rule} />
-            </span>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
-function DoDont({
-  kind,
-  title,
-  caption,
-  preview,
-  dark,
-}: {
-  kind: "do" | "dont";
-  title: string;
-  caption: string;
-  preview?: string;
-  dark: boolean;
-}) {
-  const good = kind === "do";
-  return (
-    <figure className="grid content-start gap-3">
-      {preview && (
-        <div className="overflow-hidden rounded-lg">
-          <CuiScope
-            dark={dark}
-            className="pointer-events-none flex min-h-36 items-center justify-center bg-(--cui-subtle) p-6"
-          >
-            <ExamplePreview name={preview} />
-          </CuiScope>
-          <div className={cn("h-0.5", good ? "bg-good" : "bg-bad")} />
-        </div>
-      )}
-      <figcaption
-        className={cn(
-          "text-sm leading-relaxed",
-          !preview && cn("border-l-2 pl-3", good ? "border-good" : "border-bad"),
-        )}
-      >
-        <span
-          className={cn(
-            // The word sets the baseline, so "Do" lines up with the title after it.
-            "inline-flex items-baseline gap-1 font-medium",
-            good ? "text-good" : "text-bad",
-          )}
-        >
-          {good ? (
-            <CheckIcon className="size-4 self-center" />
-          ) : (
-            <XIcon className="size-4 self-center" />
-          )}
-          {good ? "Do" : "Don’t"}
-        </span>
-        <span className="ml-1.5 font-medium">{title}</span>
-        <span className="mt-0.5 block text-muted-foreground">{caption}</span>
-      </figcaption>
-    </figure>
-  );
-}
-
-function MissingHint({ c, what }: { c: ComponentDoc; what: string }) {
-  return (
-    <div className="flex flex-col gap-3 rounded-lg bg-muted/60 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm">
-        <span className="font-medium">No {what} yet.</span>{" "}
-        <span className="text-muted-foreground">
-          Agents requested {c.name} {c.requests} times this week. Without {what}, they guess.
-        </span>
-      </p>
-      <Button
-        size="sm"
-        variant="outline"
-        className="shrink-0 self-start bg-background sm:self-auto"
-        onClick={() => navigate(`edit-${c.id}`)}
-      >
-        <PenLineIcon />
-        Write {what}
-      </Button>
-    </div>
   );
 }
 
@@ -735,7 +598,7 @@ function RelatedLinks({ ids }: { ids: string[] }) {
       ? `${missing.slice(0, -1).join(", ")} and ${missing[missing.length - 1]}`
       : missing[0];
   return (
-    <p className={PROSE}>
+    <p className={proseClass}>
       {documented.map((r, i) => (
         <React.Fragment key={r.id}>
           {i > 0 && ", "}
@@ -754,108 +617,24 @@ function RelatedLinks({ ids }: { ids: string[] }) {
   );
 }
 
-function ComponentPeople({
-  c,
-  hover,
-  onHover,
-}: {
-  c: ComponentDoc;
-  hover?: Hover;
-  onHover?: (h: Hover) => void;
-}) {
-  const { dark, resolved } = useStore();
-  const page = outline(c, resolved);
-  const link = { hover, onHover };
-
+/**
+ * A component's page. The preview, props, tokens, and related components come from its
+ * schema; between them, the written page is its MDX file in the shared editor, always
+ * editable, with its examples as cards.
+ */
+function ComponentPeople({ c, written }: { c: ComponentDoc; written: React.ReactNode }) {
   return (
     <div>
-      <DocSection k="summary" {...link}>
-        <MetaRow c={c} />
-      </DocSection>
+      <MetaRow c={c} />
 
       <div className="mt-8 grid gap-16">
-        <DocSection k="preview" id="sec-preview" {...link}>
+        <section id="sec-preview" className="scroll-mt-20">
           {c.id === "button" ? <ButtonPlayground /> : <StaticPreview c={c} />}
-        </DocSection>
+        </section>
 
-        {page.usage && (
-          <DocSection k="usage" id="sec-usage" title="Usage" {...link}>
-            {c.whenToUse?.length || c.whenNotToUse?.length ? (
-              <div className="grid gap-8 sm:grid-cols-2">
-                {c.whenToUse?.length ? <UsageList title="When to use" items={c.whenToUse} /> : null}
-                {c.whenNotToUse?.length ? (
-                  <UsageList title="When not to use" items={c.whenNotToUse} />
-                ) : null}
-              </div>
-            ) : (
-              <MissingHint c={c} what="usage guidance" />
-            )}
-          </DocSection>
-        )}
-
-        {page.hasRules && (
-          <DocSection
-            k="rules"
-            id="sec-rules"
-            title="Rules"
-            description="Agents receive these word for word."
-            {...link}
-          >
-            {page.rules.length ? (
-              <RuleList rules={page.rules} />
-            ) : (
-              <MissingHint c={c} what="rules" />
-            )}
-          </DocSection>
-        )}
-
-        {page.examples && (
-          <DocSection k="dodont" id="sec-dodont" title="Do and don’t" {...link}>
-            {c.examples?.length ? (
-              <div className="grid gap-10">
-                {c.examples.map((e) => (
-                  <div key={e.key} className="grid gap-x-6 gap-y-8 sm:grid-cols-2">
-                    <DoDont kind="do" dark={dark} {...e.do} />
-                    <DoDont kind="dont" dark={dark} {...e.dont} />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <MissingHint c={c} what="examples" />
-            )}
-          </DocSection>
-        )}
-
-        {page.extras.map((x) => (
-          <DocSection
-            key={x.key}
-            k={x.key}
-            id={`sec-${x.key}`}
-            title={x.title}
-            description="Written to answer an agent question."
-            {...link}
-          >
-            <p className={PROSE}>
-              <Inline text={x.body} />
-            </p>
-            <div className="mt-6 grid gap-x-6 gap-y-8 sm:grid-cols-2">
-              <DoDont
-                kind="do"
-                dark={dark}
-                title={x.key === "loading" ? "Keep the label" : "List inside a card"}
-                caption={x.do}
-                preview={x.key === "loading" ? "loading-good" : "nesting-good"}
-              />
-              <DoDont
-                kind="dont"
-                dark={dark}
-                title={x.key === "loading" ? "Swap the label" : "Card in a card"}
-                caption={x.dont}
-                preview={x.key === "loading" ? "loading-bad" : "nesting-bad"}
-              />
-            </div>
-          </DocSection>
-        ))}
+        <section aria-label="Written page" className="min-w-0">
+          {written}
+        </section>
 
         <DocSection
           k="props"
@@ -866,7 +645,6 @@ function ComponentPeople({
               From <code className="font-mono text-[13px]">{c.file}</code>
             </>
           }
-          {...link}
         >
           <Table>
             <TableHeader>
@@ -933,24 +711,8 @@ function ComponentPeople({
           )}
         </DocSection>
 
-        {page.a11y && (
-          <DocSection k="a11y" id="sec-a11y" title="Accessibility" {...link}>
-            {c.a11y?.length ? (
-              <ul className={BULLETS}>
-                {c.a11y.map((x) => (
-                  <li key={x}>
-                    <Inline text={x} />
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <MissingHint c={c} what="accessibility notes" />
-            )}
-          </DocSection>
-        )}
-
         {c.tokens?.length ? (
-          <DocSection k="tokens" id="sec-tokens" title="Tokens" {...link}>
+          <DocSection k="tokens" id="sec-tokens" title="Tokens">
             <ul className="grid gap-x-10 sm:grid-cols-2">
               {c.tokens.map((id) => {
                 const t = tokens.find((x) => x.id === id);
@@ -981,7 +743,7 @@ function ComponentPeople({
         ) : null}
 
         {c.related?.length ? (
-          <DocSection k="related" title="Related" {...link}>
+          <DocSection k="related" title="Related">
             <RelatedLinks ids={c.related} />
           </DocSection>
         ) : null}
@@ -1005,7 +767,7 @@ function useScrollSpy(ids: string[]) {
       if (pinned.current) return;
       let current = list[0];
       for (const id of list) {
-        const top = document.getElementById(`sec-${id}`)?.getBoundingClientRect().top;
+        const top = sectionEl(id)?.getBoundingClientRect().top;
         if (top !== undefined && top <= 112) current = id;
       }
       // Short sections at the end never reach the top, so the end of the page selects the last one.
@@ -1046,18 +808,18 @@ function useScrollSpy(ids: string[]) {
   const jump = React.useCallback((id: string) => {
     pinned.current = id;
     setActive(id);
-    document.getElementById(`sec-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    sectionEl(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
   return [active, jump] as const;
 }
 
-function Rail({ c }: { c: ComponentDoc }) {
+function Rail({ c }: { c: PageDoc }) {
   const { resolved, setPendingDraft } = useStore();
   const asked = questions.filter(
     (q) => q.source?.route === `component-${c.id}` || q.fileId === c.id,
   );
-  const sections = outline(c, resolved).toc;
+  const sections = outline(c);
   const [active, jump] = useScrollSpy(sections.map(([k]) => k));
   return (
     <aside className="sticky top-20 hidden h-fit w-52 shrink-0 xl:block">
@@ -1124,14 +886,30 @@ function Rail({ c }: { c: ComponentDoc }) {
 
 /* ---------------------------------------------------------------- Detail */
 
+const DocsEditor = React.lazy(() =>
+  import("@/components/docs-editor/docs-editor").then((m) => ({ default: m.DocsEditor })),
+);
+
+/** The page's opening paragraph is its summary, edited as the description under the title. */
+function splitSummary(body: string) {
+  const m = body.match(/^(?![#<`>|-])(\S[^\n]*(?:\n(?!\n)[^\n]+)*)\n\n/);
+  return m ? { summary: m[1], rest: body.slice(m[0].length) } : { summary: "", rest: body };
+}
+
+function joinSummary(summary: string, rest: string) {
+  return summary.trim() ? `${summary.trim()}\n\n${rest}` : rest;
+}
+
 export function ComponentDetail({ id }: { id: string }) {
-  const { reader, setReader, resolved } = useStore();
+  const { reader, setReader, resolved, files, saved, setFile, commit } = useStore();
   const mode = useEffectiveReader(reader);
   const [format, setFormat] = React.useState("Markdown");
-  const [hover, setHover] = React.useState<Hover>({ key: null, from: null });
-  const c = components.find((x) => x.id === id);
+  const [source, setSource] = React.useState(false);
+  // The rich editor loads its text once. Discard and Undo replace it from outside, so they remount it.
+  const [revision, setRevision] = React.useState(0);
+  const schema = components.find((x) => x.id === id);
 
-  if (!c) {
+  if (!schema) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16 text-center">
         <p className="text-sm text-muted-foreground">There’s no component called “{id}”.</p>
@@ -1142,6 +920,41 @@ export function ComponentDetail({ id }: { id: string }) {
     );
   }
 
+  const original = saved[id] ?? "";
+  const text = files[id] ?? original;
+  const changed = text !== original;
+  const { lines: front, body } = splitFrontmatter(text);
+  const { summary, rest } = splitSummary(body);
+  // What people see and agents get, read from the text as it is now.
+  const c = { ...withWritten(schema, text), writtenBody: rest };
+  const write = (nextSummary: string, nextRest: string) =>
+    setFile(id, joinFrontmatter({ lines: front, body: joinSummary(nextSummary, nextRest) }));
+
+  const discard = () => {
+    const kept = text;
+    setFile(id, original);
+    setRevision((r) => r + 1);
+    const toastId = toast.add({
+      title: "Changes discarded",
+      description: `${schema.name}’s page matches the last commit again.`,
+      actionProps: {
+        children: "Undo",
+        onClick: () => {
+          setFile(id, kept);
+          setRevision((r) => r + 1);
+          toast.close(toastId);
+        },
+      },
+    });
+  };
+  const commitNow = () => {
+    const done = commit({ fileId: id, message: `Update ${schema.name}`, mode: "main" });
+    toast.add({
+      title: "Committed to main",
+      description: `${done.sha}: Update ${schema.name}. Agents get it on their next request.`,
+    });
+  };
+
   const lines =
     format === "JSON" ? componentJSON(c, { resolved }) : componentLines(c, { resolved });
   const request = (
@@ -1151,6 +964,31 @@ export function ComponentDetail({ id }: { id: string }) {
     </>
   );
 
+  const written = source ? (
+    <Textarea
+      value={rest}
+      onChange={(e) => write(summary, e.target.value)}
+      spellCheck={false}
+      aria-label={`${schema.name} page source`}
+      className="min-h-[50svh] w-full max-w-[72ch] resize-y rounded-none border-0 bg-transparent p-0 font-mono text-[13px] leading-6 shadow-none focus-visible:ring-0 dark:bg-transparent"
+    />
+  ) : (
+    <React.Suspense fallback={<p className="text-sm text-muted-foreground">Loading the page…</p>}>
+      <DocsEditor
+        key={`${id}-${revision}`}
+        value={rest}
+        onChange={(next) => write(summary, next)}
+        pagePath={`docs/components/${id}.mdx`}
+        pages={[]}
+        mdx
+      />
+    </React.Suspense>
+  );
+
+  // The same quiet hover as a sidebar row, so the summary reads as a field.
+  const field =
+    "-mx-2 w-[calc(100%+1rem)] rounded-md bg-transparent px-2 outline-none transition-colors hover:bg-muted/60 focus:bg-transparent";
+
   return (
     <div
       className={cn(
@@ -1158,19 +996,53 @@ export function ComponentDetail({ id }: { id: string }) {
         mode === "split" ? "max-w-[1480px]" : "max-w-[1180px]",
       )}
     >
-      <PageHeader
-        title={c.name}
-        description={c.summary}
-        actions={
-          <>
-            <ReaderSwitch value={reader} onChange={setReader} />
-            <Button variant="outline" size="sm" onClick={() => navigate(`edit-${c.id}`)}>
-              <PenLineIcon />
-              Edit
+      <header className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between md:gap-10">
+        <div className="max-w-[72ch] min-w-0 flex-1">
+          <h1 className="text-[28px] leading-tight font-semibold tracking-[-0.03em] md:text-[32px]">
+            {schema.name}
+          </h1>
+          <textarea
+            value={summary}
+            onChange={(e) => write(e.target.value.replace(/\n+/g, " "), rest)}
+            aria-label="Summary"
+            placeholder="Add a one-line summary"
+            rows={2}
+            className={cn(
+              field,
+              "mt-1 field-sizing-content resize-none py-0.5 text-base leading-relaxed text-foreground/75 placeholder:text-muted-foreground/60 md:text-[17px]",
+            )}
+          />
+        </div>
+        <div className="flex shrink-0 flex-wrap items-center gap-2 md:pt-1.5">
+          <ReaderSwitch value={reader} onChange={setReader} />
+          {mode !== "agents" && (
+            <Button
+              variant="outline"
+              size="sm"
+              aria-pressed={source}
+              className="aria-pressed:bg-muted"
+              onClick={() => setSource((s) => !s)}
+            >
+              <FileCodeIcon />
+              Markdown
             </Button>
-          </>
-        }
-      />
+          )}
+        </div>
+      </header>
+
+      {changed && (
+        <p className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
+          <Dot tone="warn" className="text-warn">
+            Not committed
+          </Dot>
+          <button type="button" onClick={commitNow} className={cn(linkClass, "font-normal")}>
+            Commit
+          </button>
+          <button type="button" onClick={discard} className={cn(linkClass, "font-normal")}>
+            Discard
+          </button>
+        </p>
+      )}
 
       {c.replacedBy && (
         <Alert className="mt-6">
@@ -1193,7 +1065,7 @@ export function ComponentDetail({ id }: { id: string }) {
         {mode === "people" && (
           <div className="flex gap-14">
             <div className="min-w-0 flex-1">
-              <ComponentPeople c={c} />
+              <ComponentPeople c={c} written={written} />
             </div>
             <Rail c={c} />
           </div>
@@ -1201,7 +1073,7 @@ export function ComponentDetail({ id }: { id: string }) {
         {mode === "agents" && (
           <div className="grid gap-3">
             <p className="max-w-[68ch] text-sm text-muted-foreground">
-              What a coding agent receives when it asks for {c.name}, built from the same source as
+              What a coding agent receives when it asks for {c.name}, built from the same file as
               this page.
             </p>
             <AgentPane
@@ -1214,24 +1086,20 @@ export function ComponentDetail({ id }: { id: string }) {
           </div>
         )}
         {mode === "split" && (
+          // Type on the left and the agent's copy updates on the right.
           <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] gap-8">
             <div className="min-w-0">
-              <ComponentPeople c={c} hover={hover} onHover={setHover} />
+              <ComponentPeople c={c} written={written} />
             </div>
             <div className="min-w-0">
               <AgentPane
                 className="sticky top-16 max-h-[calc(100svh-5.5rem)]"
                 request={request}
                 lines={lines}
-                hover={hover}
-                onHover={setHover}
                 formats={["Markdown", "JSON"]}
                 format={format}
                 onFormat={setFormat}
               />
-              <p className="mt-2 px-1 text-xs text-muted-foreground">
-                Hover a section on either side to see its counterpart.
-              </p>
             </div>
           </div>
         )}

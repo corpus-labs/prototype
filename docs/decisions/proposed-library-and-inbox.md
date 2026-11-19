@@ -38,15 +38,21 @@ The prototype read like an analytics product wrapped around a library: it opened
 
 ## 6. One editor for docs pages, guidelines, and component files
 
-**Decision.** Guidelines are always editable in the docs editor, like docs pages. Component files open in the same editor from their Edit screen, with Markdown for the source. On these MDX pages, `<Do>`, `<Dont>`, `<Callout>`, and `<Preview>` blocks show as cards that read like the page, each with a small form; the slash menu adds Do, Don't, and Callout blocks. The file keeps each block's exact source: a test reads every guideline and component file through the editor and expects the same text back. Guideline and component edits wait as "not committed" until Commit, through the prototype's simulated commit.
+**Decision.** Guidelines are always editable in the docs editor, like docs pages. Component files open in the same editor, on their own page (see 7) and on the Edit screen the inbox opens to adjust a draft, with Markdown for the source. On these MDX pages, `<Do>`, `<Dont>`, `<Callout>`, and `<Preview>` blocks show as cards that read like the page, each with a small form; the slash menu adds Do, Don't, and Callout blocks. The file keeps each block's exact source: a test reads every guideline and component file through the editor and expects the same text back. Guideline and component edits wait as "not committed" until Commit, through the prototype's simulated commit.
 
 **Why.** Three ways to write (a rich editor for docs, a source textarea with a preview for MDX, and a separate screen per file) made the design system feel like a different product from the docs.
 
 **Revisit if** writing the block forms by hand costs more than a general MDX block editor.
 
+## 7. A component page is its MDX file
+
+**Decision.** Approved by the owner on November 19, 2026. Do and Dont blocks may carry `<Preview />` lines and one code fence after their caption, so an example keeps its rendering and code in the file (the dialect in `CLAUDE.md`). Each Charged UI component's written page now lives in `fixtures/charged-ui/docs/components/<id>.mdx`: summary, When to use, When not to use, Rules, Do and don't, Accessibility, and any section added later. The usage, rules, examples, and accessibility fields left `src/data/workspace.ts`; `src/lib/component-docs.ts` reads them back from the file. The component page edits that file in place, like a docs page: the summary is a field, the rest is the shared editor, and Commit or Discard sits in the facts line. Props, tokens, and the live preview still come from the schema. The agent payload is built from the committed file, so Split shows it change as you type, and an answer added from the inbox reaches agents as its own section. Payloads match the old ones except Button's rule about raw anchors, which now writes `<a>` as code.
+
+**Why.** Component pages were the last place that read and edited differently from every other page, and the payload couldn't follow an edit. One file per page is also what Phase 1 loads.
+
+**Revisit if** Phase 1's loader needs the sections in a different shape. The parser in `component-docs.ts` is small and moves to `core/` with it.
+
 ## Not in this exploration
 
-- Component pages still render from the structured sample data (props, examples with rendered previews and code, rules), and editing stays on their own screen. Making a component page a plain MDX page needs Do and Don't blocks that carry a rendered preview and code, which the MDX dialect in `CLAUDE.md` doesn't have. That's a dialect change to decide first.
-- The component agent payload is still built from that structured data, so editing a component file doesn't change it until Phase 1 builds payloads from the files.
 - The Projects dashboard still exists at `#projects`, reachable from the workspace menu.
 - Publishing, history, and who changed what wait for Phase 5.

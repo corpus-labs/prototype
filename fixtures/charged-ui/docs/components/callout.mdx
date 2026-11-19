@@ -1,0 +1,44 @@
+---
+component: charged_ui:callout
+status: stable
+---
+
+Draws attention to information that changes what someone does next.
+
+## When to use
+
+- To warn about a consequence before someone acts.
+- To confirm that something worked when the page doesn’t change.
+
+## When not to use
+
+- For general page introductions. Use body text.
+
+## Rules
+
+- MUST NOT stack more than one callout in a section.
+- MUST use role=alert only for callouts that appear after an action.
+
+## Do and don’t
+
+<Do title="One per section">
+Put the consequence in the title.
+<Preview component="callout" tone="warning" title="Deleting removes all versions" />
+```twig
+{{ include('charged_ui:callout', { tone: 'warning', title: 'Deleting removes all versions' }) }}
+```
+</Do>
+
+<Dont title="Stacked callouts">
+Three in a row read as noise.
+<Preview component="callout" tone="info" title="Heads up" />
+<Preview component="callout" tone="warning" title="Note" />
+<Preview component="callout" tone="info" title="Tip" />
+```html
+{# three callouts in a row #}
+```
+</Dont>
+
+## Accessibility
+
+- Warning and danger callouts use role=alert only when they appear after an action.

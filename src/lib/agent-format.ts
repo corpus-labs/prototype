@@ -18,55 +18,17 @@ export function includeSnippet(machine: string, args: Record<string, string>) {
   return `{{ include('${machine}', { ${parts.join(", ")} }) }}`;
 }
 
-/** Sections added once an agent question has been answered and committed. */
-export function extraSections(c: ComponentDoc, ctx: Ctx) {
-  const out: {
-    key: string;
-    title: string;
-    rule: string;
-    body: string;
-    do: string;
-    dont: string;
-    preview?: string;
-  }[] = [];
-  if (c.id === "button" && ctx.resolved.includes("q-loading")) {
-    out.push({
-      key: "loading",
-      title: "Loading state",
-      rule: "MUST set loading: true while a request is in flight and keep the label unchanged.",
-      body: "Set `loading: true` while the request is in flight. Keep the label so the button keeps its width, and ignore repeat clicks until the request finishes.",
-      do: "Show the spinner beside “Save changes”.",
-      dont: "Replace the label with “Loading…” or hide the button.",
-      preview: "loading",
-    });
-  }
-  if (c.id === "card" && ctx.resolved.includes("q-nesting")) {
-    out.push({
-      key: "nesting",
-      title: "Nesting",
-      rule: "MUST NOT place a Card inside another Card. Use a list in the body slot.",
-      body: "Don’t put a Card inside another Card. Nested borders make the hierarchy hard to read. Use a list or a plain section inside the card body instead.",
-      do: "Show related items as a simple list in the body slot.",
-      dont: "Place a second bordered card inside the first.",
-    });
-  }
-  return out;
-}
-
-/** Every rule for a component, in the order agents receive them in Markdown. People see the same list. */
-export function componentRules(c: ComponentDoc, ctx: Ctx): string[] {
-  return [
-    ...(c.examples ?? []).map((e) => e.rule),
-    ...(c.agentRules ?? []).filter((r) => r.key === "usage").map((r) => r.text),
-    ...extraSections(c, ctx).map((x) => x.rule),
-    ...(c.agentRules ?? []).filter((r) => r.key === "a11y").map((r) => r.text),
-  ];
+/**
+ * Every rule for a component, in the order agents receive them in Markdown. People see the
+ * same list. They're the items of the Rules section in the component's MDX file.
+ */
+export function componentRules(c: ComponentDoc, _ctx: Ctx): string[] {
+  return c.rules ?? [];
 }
 
 export function componentLines(c: ComponentDoc, ctx: Ctx): Line[] {
   const L: Line[] = [];
   const add = (text: string, key?: string, kind?: Line["kind"]) => L.push({ text, key, kind });
-  const extras = extraSections(c, ctx);
 
   add(`# ${c.name}`, "summary", "h1");
   add("", "summary");
@@ -130,10 +92,9 @@ export function componentLines(c: ComponentDoc, ctx: Ctx): Line[] {
     add(`Don't: ${e.dont.title}. ${e.dont.caption}`, "dodont", "dont");
     e.dont.code.split("\n").forEach((x) => add(x, "dodont", "code"));
   });
-  extras.forEach((x) => {
-    add("");
-    add(`Do: ${x.do}`, x.key, "do");
-    add(`Don't: ${x.dont}`, x.key, "dont");
+  // Sections beyond the usual ones, like an answer added from the inbox, as written.
+  c.sections?.forEach((section) => {
+    guideLines(section.markdown).forEach((l) => L.push({ ...l, key: l.key ?? section.key }));
   });
 
   if (c.tokens?.length) {
@@ -150,7 +111,6 @@ export function componentLines(c: ComponentDoc, ctx: Ctx): Line[] {
 }
 
 export function componentJSON(c: ComponentDoc, ctx: Ctx): Line[] {
-  const extras = extraSections(c, ctx);
   const fields: [string, unknown, string][] = [
     ["id", c.machine, "summary"],
     ["name", c.name, "summary"],
@@ -159,11 +119,7 @@ export function componentJSON(c: ComponentDoc, ctx: Ctx): Line[] {
   ];
   if (c.whenToUse) fields.push(["use_when", c.whenToUse, "usage"]);
   if (c.whenNotToUse) fields.push(["avoid_when", c.whenNotToUse, "usage"]);
-  const rules = [
-    ...(c.examples ?? []).map((e) => e.rule),
-    ...(c.agentRules ?? []).map((r) => r.text),
-    ...extras.map((x) => x.rule),
-  ];
+  const rules = componentRules(c, ctx);
   if (rules.length) fields.push(["rules", rules, "rules"]);
   fields.push([
     "props",
@@ -235,6 +191,7 @@ export function guideLines(body: string): Line[] {
         break;
       case "do":
         L.push({ text: `Do: ${b.title ? b.title + ". " : ""}${b.text}`, key: b.key, kind: "do" });
+        b.code?.text.split("\n").forEach((x) => L.push({ text: x, key: b.key, kind: "code" }));
         break;
       case "dont":
         L.push({
@@ -242,6 +199,7 @@ export function guideLines(body: string): Line[] {
           key: b.key,
           kind: "dont",
         });
+        b.code?.text.split("\n").forEach((x) => L.push({ text: x, key: b.key, kind: "code" }));
         break;
       case "preview": {
         const { component, ...rest } = b.attrs;
@@ -394,7 +352,7 @@ export function checkUsage(code: string): Issue[] {
   return issues;
 }
 
-export function searchDocs(query: string, ctx: Ctx, files: Record<string, string>) {
+export function searchDocs(query: string, _ctx: Ctx, files: Record<string, string>) {
   const q = query.toLowerCase().trim();
   if (!q) return [];
   const words = q.split(/\s+/).filter((w) => w.length > 2);
@@ -418,12 +376,6 @@ export function searchDocs(query: string, ctx: Ctx, files: Record<string, string
   guidelineFiles.forEach((g) => scan(`guidelines/${g.id}.md`, files[g.id] ?? g.body));
   for (const c of components) {
     if (files[c.id]) scan(`components/${c.id}.md`, files[c.id]);
-    extraSections(c, ctx).forEach((x) => {
-      const hay = (x.title + " " + x.body).toLowerCase();
-      const score = words.reduce((s, w) => s + (hay.includes(w) ? 1 : 0), 0) + 1;
-      if (score > 1)
-        hits.push({ source: `components/${c.id}.md`, heading: x.title, text: x.body, score });
-    });
   }
   const seen = new Set<string>();
   return hits

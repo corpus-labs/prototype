@@ -11,7 +11,11 @@ export default defineConfig({
   staged: {
     "*": "vp check --fix",
   },
-  fmt: {},
+  fmt: {
+    // Content files keep the house Markdown style the editor writes (core/markdown/style.ts).
+    // A code formatter reads MDX as JSX and would reflow examples, so it leaves them alone.
+    ignorePatterns: ["fixtures/**/*.mdx"],
+  },
   plugins: lazyPlugins(() => [react(), tailwindcss(), ...(single ? [viteSingleFile()] : [])]),
   resolve: {
     alias: [

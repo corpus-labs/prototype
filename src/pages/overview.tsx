@@ -16,20 +16,21 @@ import {
 } from "@/components/common";
 import { components, guidelineFiles, tokens, workspace } from "@/data/workspace";
 import { navigate } from "@/lib/router";
+import { useComponentDocs } from "@/lib/component-docs";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { InboxNotice } from "@/pages/inbox";
 
 const PARTS = ["Props", "Rules", "Examples", "Accessibility"] as const;
 
+/** Each component's committed page against the four parts it should have. */
 function useCoverage() {
-  const { resolved } = useStore();
-  return components.map((c) => ({
+  return useComponentDocs().map((c) => ({
     c,
     has: [
       true,
-      Boolean(c.whenToUse?.length || c.agentRules?.length),
-      Boolean(c.examples?.length || (c.id === "button" && resolved.includes("q-loading"))),
+      Boolean(c.whenToUse?.length || c.rules?.length),
+      Boolean(c.examples?.length || c.sections?.some((x) => x.markdown.includes("<Do"))),
       Boolean(c.a11y?.length),
     ],
   }));

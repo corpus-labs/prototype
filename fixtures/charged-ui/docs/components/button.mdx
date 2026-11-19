@@ -1,0 +1,86 @@
+---
+component: charged_ui:button
+status: stable
+---
+
+Starts an action or moves someone to the next step of a flow. Use one primary button per view.
+
+## When to use
+
+- To start an action in place, like saving, sending, or deleting.
+- To move someone to the next step of a flow. Pass href and it renders a link.
+
+## When not to use
+
+- For navigation inside running text. Use a text link.
+- To switch a setting on or off. Use Switch.
+
+## Rules
+
+- MUST NOT place more than one variant primary in the same view.
+- MUST write labels as a verb phrase in sentence case, three words or fewer.
+- MUST pass href to Button for links styled as buttons. NEVER style a raw `<a>` with button classes.
+- SHOULD use variant ghost inside toolbars and table rows.
+- MUST NOT use Button to toggle a setting. Use Switch.
+- MUST give icon-only buttons an aria_label.
+- MUST NOT remove the focus ring.
+
+## Do and don’t
+
+<Do title="One primary action">
+Pair one primary button with a secondary one.
+<Preview component="button" size="sm" label="Cancel" />
+<Preview component="button" size="sm" variant="primary" label="Save changes" />
+```twig
+{{ include('charged_ui:button', { variant: 'primary', label: 'Save changes' }) }}
+{{ include('charged_ui:button', { label: 'Cancel' }) }}
+```
+</Do>
+
+<Dont title="Competing primaries">
+Two primary buttons fight for the same click.
+<Preview component="button" size="sm" variant="primary" label="Save" />
+<Preview component="button" size="sm" variant="primary" label="Publish" />
+```twig
+{{ include('charged_ui:button', { variant: 'primary', label: 'Save' }) }}
+{{ include('charged_ui:button', { variant: 'primary', label: 'Publish' }) }}
+```
+</Dont>
+
+<Do title="Say what happens">
+Start with a verb that names the result.
+<Preview component="button" size="sm" variant="primary" label="Invite people" />
+```twig
+{{ include('charged_ui:button', { variant: 'primary', label: 'Invite people' }) }}
+```
+</Do>
+
+<Dont title="Vague labels">
+“Click here” and “Submit” say nothing about the result.
+<Preview component="button" size="sm" variant="primary" label="Click here" />
+```twig
+{{ include('charged_ui:button', { variant: 'primary', label: 'Click here' }) }}
+```
+</Dont>
+
+<Do title="Use href">
+Button renders the link and keeps focus and sizing.
+<Preview component="button" size="sm" label="Read the guide" href="/guide" />
+```twig
+{{ include('charged_ui:button', { label: 'Read the guide', href: '/guide' }) }}
+```
+</Do>
+
+<Dont title="Raw anchors">
+Hand-styled anchors drift from the component.
+```html
+<a class="btn btn-primary" href="/guide">Read the guide</a>
+```
+</Dont>
+
+## Accessibility
+
+- Give icon-only buttons an aria_label. The icon alone isn’t announced.
+- Never remove the focus ring. It uses color.focus.
+- Use disabled sparingly, and say nearby why the action is unavailable.
+- Sizes md and lg meet the 40px touch target. Use sm only with a pointer.

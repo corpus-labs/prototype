@@ -1,0 +1,37 @@
+---
+component: charged_ui:form_field
+status: stable
+---
+
+A labeled input with help text and validation.
+
+## When to use
+
+- For every text input in a form.
+
+## Rules
+
+- MUST NOT use the placeholder as the only label.
+- MUST stack form fields with space.4.
+
+## Do and don’t
+
+<Do title="Visible label">
+The label stays put while typing.
+<Preview component="form-field" label="Email" />
+```twig
+{{ include('charged_ui:form_field', { label: 'Email', type: 'email' }) }}
+```
+</Do>
+
+<Dont title="Placeholder as label">
+It disappears as soon as someone types.
+<Preview component="form-field" label="" />
+```html
+<input placeholder="Email">
+```
+</Dont>
+
+## Accessibility
+
+- Errors are linked with aria-describedby and announced on submit.
